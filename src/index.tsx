@@ -17,7 +17,7 @@ const root = ReactDOM.createRoot(
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: "rpg-sys/",
     element: <App />,
     errorElement: <Login />,
     children: [
@@ -32,11 +32,11 @@ const router = createBrowserRouter([
     ]
   },
   {
-    path: "/login",
+    path: "rpg-sys/login",
     element: <Login />,
   },
   {
-    path: "/cadastro",
+    path: "rpg-sys/cadastro",
     element: <CreateAccount />
   },
 ])

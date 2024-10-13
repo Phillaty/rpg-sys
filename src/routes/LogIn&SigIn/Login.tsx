@@ -65,7 +65,7 @@ const Login = () => {
             toast.success("Logado!");
 
             setTimeout(() => {
-                navigate('/rpg-sys/home');
+                navigate('./home');
             }, 1000);
         }
     }
