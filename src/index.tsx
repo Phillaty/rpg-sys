@@ -4,7 +4,7 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
-import {createBrowserRouter, RouterProvider} from 'react-router-dom';
+import { HashRouter, Routes, Route } from 'react-router-dom';
 
 import Home from './routes/Home';
 import Login from './routes/LogIn&SigIn/Login';
@@ -15,34 +15,18 @@ const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 
-const router = createBrowserRouter([
-  {
-    path: "rpg-sys/",
-    element: <App />,
-    errorElement: <Login />,
-    children: [
-      {
-        path: "home",
-        element: <Home />
-      },
-      {
-        path: "myAccount",
-        element: <MyAccount />
-      }
-    ]
-  },
-  {
-    path: "rpg-sys/login",
-    element: <Login />,
-  },
-  {
-    path: "rpg-sys/cadastro",
-    element: <CreateAccount />
-  },
-])
 root.render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <HashRouter>
+      <Routes>
+        <Route path="/" element={<App />}>
+          <Route path="home" element={<Home />} />
+          <Route path="myAccount" element={<MyAccount />} />
+        </Route>
+        <Route path="/login" element={<Login />} />
+        <Route path="/cadastro" element={<CreateAccount />} />
+      </Routes>
+    </HashRouter>
   </React.StrictMode>
 );
 

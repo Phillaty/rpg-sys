@@ -97,7 +97,7 @@ type inviteType = {
                 name: formData.name,
                 rule: formData.rule,
             }));
-            navigate('/rpg-sys/home');
+            navigate('/home');
         });
     }
 
