@@ -18,11 +18,6 @@ const root = ReactDOM.createRoot(
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Login />,
-    errorElement: <Login />,
-  },
-  {
-    path: "/",
     element: <App />,
     errorElement: <Login />,
     children: [
