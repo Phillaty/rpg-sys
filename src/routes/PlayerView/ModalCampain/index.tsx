@@ -85,6 +85,11 @@ const ModalCampain = ({selectedCampain, setSelectedCampain}: prop) => {
                             </div>
                         </>}
                     </div>
+                    <div className='topMobile' style={{
+                            backgroundImage: `linear-gradient(#ff000000, #000000bf), url(${selectedCampain.data.img})`,
+                    }}>
+                        {selectedCampain.data.title.toUpperCase()}
+                    </div>
                 </Container>
             </Modal>
         }

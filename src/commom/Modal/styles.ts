@@ -52,4 +52,20 @@ export const ModalContainer = styled.div`
       right: 0;
       cursor: pointer;
     }
+
+    @media screen and (max-width: 800px){
+      
+      .close {
+        font-size: 28px;
+        top:-38px;
+      }
+      
+      > div {
+        margin-top: 16px;
+        height: 90vh;
+        display: flex;
+        flex-direction: column;
+        
+      }
+    }
 `

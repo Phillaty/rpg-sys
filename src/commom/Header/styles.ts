@@ -53,6 +53,14 @@ export const Container = styled.div`
         }
     }
 
+    .pc {
+        display: block;
+    }
+
+    .mobile {
+        display: none;
+    }
+
     @media screen and (max-width: 800px){
         max-height: 15vh;
 
@@ -60,5 +68,21 @@ export const Container = styled.div`
             flex-direction: column;     
         }
         
+        .pc {
+            display: none;
+        }
+
+        .mobile {
+            display: block;
+        }
+    }
+
+    @media screen and (max-width: 450px){
+        .logo {
+            p {
+                display: flex;
+                flex-direction: column;
+            }
+        }
     }
 `

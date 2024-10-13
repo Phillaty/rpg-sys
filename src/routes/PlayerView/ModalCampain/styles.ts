@@ -140,4 +140,38 @@ export const Container = styled.div`
             }
         }
     }
+
+    .topMobile {
+        display: none !important;
+    }
+
+
+    @media screen and (max-width: 800px){
+        flex-direction: column-reverse;
+        width: 90vw;
+        overflow: auto;
+        
+        .campain {
+            width: 100%;
+            overflow: initial;
+        }
+
+        .character {
+            width: 100%;
+            padding: 32px 16px;
+        }
+
+        .top {
+            display: none !important;
+        }
+
+        .topMobile {
+            display: flex !important;
+            height: 200px;
+            align-items: flex-end;
+            padding: 16px;
+            font-size: 26px;
+            background-size: 100%;
+        }
+    }
 `

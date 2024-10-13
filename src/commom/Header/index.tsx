@@ -15,9 +15,15 @@ const Header = () => {
                     <p>Bem-vindo(a) <b>{user.name}</b></p>
                 </div>
                 <div className='menu'>
-                    <p>Página principal</p>
+                    <p>
+                        <span className='pc'>Página principal</span>
+                        <span className='mobile'>Home</span>
+                    </p>
                     <p>Ajuda</p>
-                    <p>Minha conta</p>
+                    <p>
+                        <span className='pc'>Minha conta</span>
+                        <span className='mobile'>Conta</span>
+                    </p>
                     <p className='exit'>Sair</p>
                 </div>
             </div>
