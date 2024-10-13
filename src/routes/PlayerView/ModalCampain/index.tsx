@@ -14,7 +14,15 @@ const ModalCampain = ({selectedCampain, setSelectedCampain}: prop) => {
     const [openModal, setOpenModal] = useState<boolean>(false);
 
     useEffect(() => {
-        if(selectedCampain) setOpenModal(true);
+        if(selectedCampain) {
+            setOpenModal(true);
+            // setTimeout(() => {
+            //     const modalElement = document.querySelector('.campain');
+            //     if (modalElement) {
+            //         modalElement.scrollTop = 0;
+            //     }
+            // }, 0);
+        }
     }, [selectedCampain]);
 
     const handleClose = () => {
@@ -27,30 +35,11 @@ const ModalCampain = ({selectedCampain, setSelectedCampain}: prop) => {
         {selectedCampain && 
             <Modal isOpen={openModal} handleCloseModal={handleClose}>
                 <Container>
-                    <div className='campain'>
-                        <div className='top' style={{
+                    <div className='topMobile' style={{
                             backgroundImage: `linear-gradient(#ff000000, #000000bf), url(${selectedCampain.data.img})`,
-                        }}>
-                            <span className='players'><i className="fa-solid fa-user-group"></i> {selectedCampain.data.players.length}</span>
-                            {selectedCampain.data.title.toUpperCase()}
-                            
-                        </div>
-
-                        <div className='details'>
-                            <div className='detailItem'>
-                                <p>Estilo</p>
-                                <span>{selectedCampain.data.style}</span>
-                            </div>
-                            <div className='detailItem'>
-                                <p>Descrição</p>
-                                <span>{selectedCampain.data.description}</span>
-                            </div>
-                            <div className='detailItem'>
-                                <p>Lore</p>
-                                <span className='lore'>{selectedCampain.data.lore}</span>
-                                <button className='button-small button-blue'>Ver lore inteira</button>
-                            </div>
-                        </div>
+                    }}>
+                        <span className='players'><i className="fa-solid fa-user-group"></i> {selectedCampain.data.players.length}</span>
+                        {selectedCampain.data.title.toUpperCase()}
                     </div>
 
                     <div className='character'>
@@ -85,11 +74,33 @@ const ModalCampain = ({selectedCampain, setSelectedCampain}: prop) => {
                             </div>
                         </>}
                     </div>
-                    <div className='topMobile' style={{
+
+                    <div className='campain'>
+                        <div className='top' style={{
                             backgroundImage: `linear-gradient(#ff000000, #000000bf), url(${selectedCampain.data.img})`,
-                    }}>
-                        {selectedCampain.data.title.toUpperCase()}
+                        }}>
+                            <span className='players'><i className="fa-solid fa-user-group"></i> {selectedCampain.data.players.length}</span>
+                            {selectedCampain.data.title.toUpperCase()}
+                            
+                        </div>
+
+                        <div className='details'>
+                            <div className='detailItem'>
+                                <p>Estilo</p>
+                                <span>{selectedCampain.data.style}</span>
+                            </div>
+                            <div className='detailItem'>
+                                <p>Descrição</p>
+                                <span>{selectedCampain.data.description}</span>
+                            </div>
+                            <div className='detailItem'>
+                                <p>Lore</p>
+                                <span className='lore'>{selectedCampain.data.lore}</span>
+                                <button className='button-small button-blue'>Ver lore inteira</button>
+                            </div>
+                        </div>
                     </div>
+                    
                 </Container>
             </Modal>
         }

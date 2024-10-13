@@ -4,6 +4,7 @@ export const Container = styled.div`
     width: 800px;
     padding: 16px;
     display: flex;
+    flex-direction: row-reverse;
 
     background: #343493;
     border-radius: 4px;
@@ -143,13 +144,26 @@ export const Container = styled.div`
 
     .topMobile {
         display: none !important;
+        border-radius: 4px;
+        position: relative;
+
+        .players {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-size: 14px;
+            background-color: #8080807a;
+            padding: 4px 8px;
+            border-radius: 9999px;
+        }
     }
 
 
     @media screen and (max-width: 800px){
-        flex-direction: column-reverse;
+        flex-direction: column;
         width: 90vw;
-        overflow: auto;
+        overflow: scroll;
+        overflow-x: hidden;
         
         .campain {
             width: 100%;
@@ -167,7 +181,7 @@ export const Container = styled.div`
 
         .topMobile {
             display: flex !important;
-            height: 200px;
+            min-height: 100px;
             align-items: flex-end;
             padding: 16px;
             font-size: 26px;
