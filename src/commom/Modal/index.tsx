@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { ModalContainer } from './styles';
 
 type ModalProps = {
@@ -10,23 +10,12 @@ type ModalProps = {
 const Modal = ({ isOpen, handleCloseModal, children }: ModalProps) => {
 
     const handleClose = () => {
-        handleCloseModal();
-        const element = document.getElementById('body');
-        if(element)
-            element.style.overflow = "auto";
+        handleCloseModal();            
     };
 
     const handleContentClick = (e: React.MouseEvent<HTMLDivElement>) => {
         e.stopPropagation();
     };
-
-    useEffect(() => {
-        const element = document.getElementById('body');
-        if(isOpen) {
-            if(element)
-                element.style.overflow = "hidden";
-        }
-    }, [isOpen]);
 
     return (
         <>
