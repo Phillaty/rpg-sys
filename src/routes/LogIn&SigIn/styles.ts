@@ -36,7 +36,7 @@ export const Container = styled.div`
                 width: 100%;
                 border: 0;
                 border-radius: 4px;
-                height: 28px;
+                height: 32px;
                 margin-bottom: 4px;
                 outline: none;
 
@@ -84,5 +84,23 @@ export const Container = styled.div`
         top: -50%;
         left: -1%;
         pointer-events: none;
+    }
+
+    .logo {
+        width: 150px;
+        margin-left: -8px;
+        margin-bottom: -16px;
+    }
+
+    @media screen and (max-width: 800px) {
+        align-items: stretch;
+
+        > div {
+            overflow: auto;
+        }
+
+        .input input {
+            height: 40px !important;
+        }
     }
 `

@@ -57,11 +57,12 @@ export const ModalContainer = styled.div`
       
       .close {
         font-size: 28px;
-        top:-38px;
+        position: initial;
+        width: 100%;
+        text-align: right;
       }
       
       > div {
-        margin-top: 16px;
         height: 90vh;
         display: flex;
         flex-direction: column;

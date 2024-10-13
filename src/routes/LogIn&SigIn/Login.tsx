@@ -10,6 +10,8 @@ import { db } from '../../firebase/firebase';
 import { decrypt } from '../../crypt';
 import { useNavigate } from 'react-router-dom';
 
+import logo from '../../imgs/logo.png';
+
 type formDataLogin = {
     login: string,
     password: string,
@@ -74,6 +76,7 @@ const Login = () => {
         <>
         <Container>
             <div>
+                <img alt='' src={logo} className='logo' />
                 <h1>LOGIN</h1>
                 <p className='description'>Bem-vindo ao RPG sys!<br/> Plataforma de gerenciamente de RPG de mesa 🥰</p>
                 <div className='input'>
