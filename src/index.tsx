@@ -22,7 +22,7 @@ const router = createBrowserRouter([
     errorElement: <Login />,
   },
   {
-    path: "rpg-sys/",
+    path: "/",
     element: <App />,
     errorElement: <Login />,
     children: [
@@ -37,11 +37,11 @@ const router = createBrowserRouter([
     ]
   },
   {
-    path: "rpg-sys/login",
+    path: "/login",
     element: <Login />,
   },
   {
-    path: "rpg-sys/cadastro",
+    path: "/cadastro",
     element: <CreateAccount />
   },
 ])
