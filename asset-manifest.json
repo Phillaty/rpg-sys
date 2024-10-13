@@ -1,17 +1,17 @@
 {
   "files": {
     "main.css": "/rpg-sys/static/css/main.298a4bfe.css",
-    "main.js": "/rpg-sys/static/js/main.c3c6c720.js",
+    "main.js": "/rpg-sys/static/js/main.a95fe8fe.js",
     "static/js/453.d8fd9b3e.chunk.js": "/rpg-sys/static/js/453.d8fd9b3e.chunk.js",
     "static/media/profile-user-icon-2048x2048-m41rxkoe.png": "/rpg-sys/static/media/profile-user-icon-2048x2048-m41rxkoe.a4316a91398fae125514.png",
     "static/media/ssss.png": "/rpg-sys/static/media/ssss.c61adda2c63404a7595d.png",
     "index.html": "/rpg-sys/index.html",
     "main.298a4bfe.css.map": "/rpg-sys/static/css/main.298a4bfe.css.map",
-    "main.c3c6c720.js.map": "/rpg-sys/static/js/main.c3c6c720.js.map",
+    "main.a95fe8fe.js.map": "/rpg-sys/static/js/main.a95fe8fe.js.map",
     "453.d8fd9b3e.chunk.js.map": "/rpg-sys/static/js/453.d8fd9b3e.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.298a4bfe.css",
-    "static/js/main.c3c6c720.js"
+    "static/js/main.a95fe8fe.js"
   ]
 }
