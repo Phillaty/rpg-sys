@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Container } from './styles';
-import { campainDataType } from '../Home';
 import ModalCampain from './ModalCampain';
+import { campainDataType } from '../../types';
 
 type prop = {
     campains: campainDataType[];

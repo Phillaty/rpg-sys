@@ -1,6 +1,6 @@
 import React from 'react';
 import { Container } from './styles';
-import { campainDataType } from '../Home';
+import { campainDataType } from '../../types';
 
 type prop = {
     campains: campainDataType[];

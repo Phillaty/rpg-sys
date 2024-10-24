@@ -2,10 +2,21 @@ import React from 'react';
 import { Container } from './styles';
 
 import logo from '../../imgs/logo.png';
-import { userDataType } from '../../routes/Home';
+import { useNavigate } from 'react-router-dom';
+import { userDataType } from '../../types';
 
 const Header = () => {
+
+    const navigate = useNavigate();
+
     const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user') ?? ' ') as userDataType : {} as userDataType;
+
+    const logout = () => {
+
+        localStorage.clear();
+
+        navigate('/login');
+    }
     
     return (
         <Container>
@@ -24,7 +35,7 @@ const Header = () => {
                         <span className='pc'>Minha conta</span>
                         <span className='mobile'>Conta</span>
                     </p>
-                    <p className='exit'>Sair</p>
+                    <p className='exit' onClick={() => logout()}>Sair</p>
                 </div>
             </div>
         </Container>

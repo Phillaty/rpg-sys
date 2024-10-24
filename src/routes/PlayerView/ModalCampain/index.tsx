@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Container } from './styles';
-import { campainDataType } from '../../Home';
 import Modal from '../../../commom/Modal';
 import userProfile from '../../../imgs/profile-user-icon-2048x2048-m41rxkoe.png';
+import { useNavigate } from 'react-router-dom';
+import { campainDataType } from '../../../types';
 
 type prop = {
     selectedCampain: campainDataType | undefined;
@@ -11,17 +12,13 @@ type prop = {
 
 const ModalCampain = ({selectedCampain, setSelectedCampain}: prop) => {
 
+    const navigate = useNavigate();
+
     const [openModal, setOpenModal] = useState<boolean>(false);
 
     useEffect(() => {
         if(selectedCampain) {
             setOpenModal(true);
-            // setTimeout(() => {
-            //     const modalElement = document.querySelector('.campain');
-            //     if (modalElement) {
-            //         modalElement.scrollTop = 0;
-            //     }
-            // }, 0);
         }
     }, [selectedCampain]);
 
@@ -59,7 +56,7 @@ const ModalCampain = ({selectedCampain, setSelectedCampain}: prop) => {
                                 </div>
                             </div>
                             <div className='buttons'>
-                                <button className='button-mid button-white'>Iniciar ficha</button>
+                                <button className='button-mid button-white' onClick={() => navigate(`/campain?camp=${selectedCampain.id}`)}>Iniciar ficha</button>
                             </div>
                         </>}
 
@@ -70,7 +67,7 @@ const ModalCampain = ({selectedCampain, setSelectedCampain}: prop) => {
                                 <span>Você foi convidado a participar da campanha rpg "{selectedCampain.data.title}", vamos começar criando sua ficha <b>😎</b></span>
                             </div>
                             <div className='buttons'>
-                                <button className='button-mid button-green-blue'>Criar ficha</button>
+                                <button className='button-mid button-green-blue' onClick={() => navigate(`/campain/sheet/create?camp=${selectedCampain.id}`)}>Criar ficha</button>
                             </div>
                         </>}
                     </div>

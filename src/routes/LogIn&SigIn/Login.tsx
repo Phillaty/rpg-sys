@@ -7,7 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import snip from '../../imgs/ssss.png';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../../firebase/firebase';
-import { decrypt } from '../../crypt';
+import { decrypt, encrypt } from '../../crypt';
 import { useNavigate } from 'react-router-dom';
 
 import logo from '../../imgs/logo.png';
@@ -35,7 +35,7 @@ const Login = () => {
     });
 
     const login = async () => {
-        if(formData.login){
+        if (formData.login) {
             const docRef = collection(db, 'user');
 
             const q = query(docRef, where('login', '==', formData.login));
@@ -62,6 +62,7 @@ const Login = () => {
             localStorage.setItem('user', JSON.stringify({
                 name: dataLogin.name,
                 rule: dataLogin.rule,
+                id: encrypt(dataLogin.id),
             }));
             
             toast.success("Logado!");

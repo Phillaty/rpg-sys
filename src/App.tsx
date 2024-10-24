@@ -13,7 +13,15 @@ function App() {
   useEffect(() => {
     const isLogged = localStorage.getItem('user');
 
-    if(!isLogged) navigate('rpg-sys/login');
+    if(!isLogged) navigate('/login');
+
+    const hasId = JSON.parse(localStorage.getItem('user') ?? '');
+
+    if(!hasId.id) {
+      localStorage.clear();
+      navigate('/login');
+    }
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

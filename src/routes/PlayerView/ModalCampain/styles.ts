@@ -161,7 +161,8 @@ export const Container = styled.div`
 
     @media screen and (max-width: 800px){
         flex-direction: column;
-        width: 90vw;
+        width: 99vw;
+        height: 100%;
         overflow: scroll;
         overflow-x: hidden;
         

@@ -2,64 +2,22 @@ import React, { useEffect, useState } from 'react';
 import { Container } from './styles';
 import HomeMaster from './MasterView';
 import HomePlayer from './PlayerView';
-import { collection, onSnapshot, query } from 'firebase/firestore';
+import { collection, onSnapshot, query, where } from 'firebase/firestore';
 import { db } from '../firebase/firebase';
-
-export type userDataType = {
-    login: string,
-    password: string,
-    name: string,
-    rule: string,
-    id: string,
-};
-
-export type campainDataType = {
-    id: string,
-    data: {
-        description: string,
-        img: string,
-        lore: string,
-        style: string,
-        title: string,
-        players: string[],
-        stores: string[],
-        characters: string[]
-    },
-    playerChar?: avatarDataType,
-};
-
-export type avatarDataType = {
-    id: string,
-    data: {
-        class: string,
-        money: number,
-        name: string,
-        originId: string,
-        playerId: string,
-        level: number,
-        AGI: string,
-        FOR: string,
-        INT: string,
-        PRE: string,
-        VIT: string,
-        skill: {
-            expertise: number,
-            skillName: string,
-        }
-    };
-};
+import { decrypt } from '../crypt';
+import { avatarDataType, campainDataType, userDataType } from '../types';
 
 const Home = () => {
     const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user') ?? ' ') as userDataType : {} as userDataType;
+    const userId = decrypt(user.id);
 
     const [campains, setCampains] = useState<campainDataType[]>([]);
+    const [campainsWithChar, setCampainsWithChar] = useState<campainDataType[]>([]);
     const [characters, setCharacters] = useState<avatarDataType[]>([]);
 
-    const [trigger, setTrigger] = useState<boolean>(false);
-
     useEffect(() => {
-        const q = query(collection(db, "campains"));
-        const p = query(collection(db, "character"));
+        const q = query(collection(db, "campains"), where("players", "array-contains", userId));
+        const p = query(collection(db, "character"), where("playerId", "==", userId));
 
         onSnapshot(q, (querySnapshot) => {
             const docData = querySnapshot.docs.map(doc => ({
@@ -67,10 +25,6 @@ const Home = () => {
                 data: doc.data(),
             })) as campainDataType[];
             setCampains(docData);
-            setTrigger(true);
-            setTimeout(() => {
-                setTrigger(false);
-            }, 1000);
         });
 
         onSnapshot(p, (querySnapshot) => {
@@ -79,32 +33,29 @@ const Home = () => {
             data: doc.data(),
             })) as avatarDataType[];
             setCharacters(docData);
-            setTrigger(true);
-            setTimeout(() => {
-                setTrigger(false);
-            }, 1000);
         });
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     useEffect(() => {
-        if(trigger) {
+        if(characters && campains) {
             const newCampains = campains.map((i) => {
                 const player = characters.find((j) => i.data.characters.some((k) => j.id === k));
                 i.playerChar = player;
                 return i;
-            })
-            setCampains(newCampains);
+            });
+            setCampainsWithChar(newCampains);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [trigger]);
+    }, [characters, campains]);
 
     return (
         <Container>
             {user.rule === process.env.MASTER_RULE ? 
-                <><HomeMaster campains={campains} /></> 
+                <><HomeMaster campains={campainsWithChar} /></> 
                 : 
-                <><HomePlayer campains={campains} /></>
+                <><HomePlayer campains={campainsWithChar} /></>
             }
         </Container>
     )

@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 
 import {db} from '../../firebase/firebase';
 
-import { collection, addDoc, doc, getDoc, query, getDocs, where } from 'firebase/firestore';
-import { useNavigate } from 'react-router-dom';
+import { collection, addDoc, doc, getDoc, query, getDocs, where, updateDoc } from 'firebase/firestore';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Container } from './styles';
 import { toast, ToastContainer } from 'react-toastify';
 
@@ -19,13 +19,17 @@ type formData = {
 };
 
 type inviteType = {
+    id: string,
     name: string,
     rule: string,
+    redeemed: boolean,
 };
 
  const CreateAccount = () => {
 
-    const queryString = window.location.search;
+    const location = useLocation();
+
+    const queryString = location.search;
     const urlParams = new URLSearchParams(queryString);
 
     const inviteLocal = localStorage.getItem('invite');
@@ -72,7 +76,7 @@ type inviteType = {
                     name: data.name,
                     rule: data.rule,
                 });
-                localStorage.setItem('invite', JSON.stringify(data));
+                localStorage.setItem('invite', JSON.stringify({...data, id: docSnap.id}));
             }
         }
     }
@@ -92,19 +96,28 @@ type inviteType = {
             login: formData.login,
             rule: formData.rule,
             password: encryptedPassword
-        }).then(() => {
+        }).then(async (item) => {
             localStorage.setItem('user', JSON.stringify({
                 name: formData.name,
                 rule: formData.rule,
+                id: encrypt(item.id)
             }));
+
+            const userDocRef = doc(db, "invites", inviteData?.id ?? '');
+
+            await updateDoc(userDocRef, {
+                redeemed: true,
+            });
+
             navigate('/home');
         });
     }
 
 
     useEffect(() => {
-        if(!inviteData && !inviteLocal)
-        fetchData();
+        if(!inviteData && !inviteLocal){
+            fetchData();
+        }
 
         if(inviteLocal) {
             const data = JSON.parse(inviteLocal) as inviteType;
@@ -120,31 +133,43 @@ type inviteType = {
     
     return (
         <>
-        <Container>
-            <div>
-                <h1>CADASTRO</h1>
-                <p className='description'>Bem-vindo <b>{inviteData?.name ?? ''}</b>! <br/> Você foi convidado a participar da plataforma 😋</p>
-                <div className='input'>
-                    <p>Login de acesso</p>
-                    <input placeholder='Login...' onChange={(e) => setFormData({...formData, login: e.target.value})} />
+        {inviteData?.redeemed ? 
+        <>
+            <Container>
+                <div style={{maxWidth: '100%'}}>
+                    <h2>PARECE QUE SEU CONVITE JÁ FOI UTILIZADO</h2>
+                    <p className='description'>Fale com algum administrador caso tenha algum problema :D</p>
                 </div>
-                <div className='input'>
-                    <p>Crie uma senha</p>
-                    <input placeholder='Senha...' type='password' onChange={(e) => setFormData({...formData, password: e.target.value})} />
+            </Container>
+        </> 
+        : 
+        <>
+            <Container>
+                <div>
+                    <h1>CADASTRO</h1>
+                    <p className='description'>Bem-vindo <b>{inviteData?.name ?? ''}</b>! <br/> Você foi convidado a participar da plataforma 😋</p>
+                    <div className='input'>
+                        <p>Login de acesso</p>
+                        <input placeholder='Login...' onChange={(e) => setFormData({...formData, login: e.target.value})} />
+                    </div>
+                    <div className='input'>
+                        <p>Crie uma senha</p>
+                        <input placeholder='Senha...' type='password' onChange={(e) => setFormData({...formData, password: e.target.value})} />
+                    </div>
+                    <div className='input'>
+                        <p>Confirme sua senha</p>
+                        <input placeholder='Confirmar senha...' type='password' onChange={(e) => setFormData({...formData, password: e.target.value})} />
+                    </div>
+                    <button className='button' onClick={() => {
+                        if(formData.name && formData.login && formData.password)
+                        create()
+                    }}>Criar conta</button>
+                    <div className='info'>Seus dados sensiveis são criptografados 😎</div>
                 </div>
-                <div className='input'>
-                    <p>Confirme sua senha</p>
-                    <input placeholder='Confirmar senha...' type='password' onChange={(e) => setFormData({...formData, password: e.target.value})} />
-                </div>
-                <button className='button' onClick={() => {
-                    if(formData.name && formData.login && formData.password)
-                    create()
-                }}>Criar conta</button>
-                <div className='info'>Seus dados sensiveis são criptografados 😎</div>
-            </div>
-            <span className='bkgroundSnip1'><img src={snip} alt='' /></span>
-            <span className='bkgroundSnip2'><img src={snip} alt='' /></span>
-        </Container>
+                <span className='bkgroundSnip1'><img src={snip} alt='' /></span>
+                <span className='bkgroundSnip2'><img src={snip} alt='' /></span>
+            </Container>
+        </>}
         <ToastContainer />
         </>
     )
