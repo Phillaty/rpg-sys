@@ -207,11 +207,13 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                         <>
                             <div className='buttons'>
                                 <p>Adicionar modificações: </p>
-                                <button onClick={() => {setdicePersMod([...dicePersMod, 1])}}>+1</button>
-                                <button onClick={() => {setdicePersMod([...dicePersMod, 2])}}>+2</button>
-                                <button onClick={() => {setdicePersMod([...dicePersMod, 3])}}>+3</button>
-                                <button onClick={() => {setdicePersMod([...dicePersMod, 4])}}>+4</button>
-                                <button onClick={() => {setdicePersMod([...dicePersMod, 5])}}>+5</button>
+                                <div>
+                                    <button onClick={() => {setdicePersMod([...dicePersMod, 1])}}>+1</button>
+                                    <button onClick={() => {setdicePersMod([...dicePersMod, 2])}}>+2</button>
+                                    <button onClick={() => {setdicePersMod([...dicePersMod, 3])}}>+3</button>
+                                    <button onClick={() => {setdicePersMod([...dicePersMod, 4])}}>+4</button>
+                                    <button onClick={() => {setdicePersMod([...dicePersMod, 5])}}>+5</button>
+                                </div>
                             </div>
                     
                             <div className='preVisuTitle'><p>Dados para rolagem</p></div>
