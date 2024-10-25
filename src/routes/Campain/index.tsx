@@ -103,11 +103,7 @@ const Campain = () => {
         
         const notTreined = skills?.filter((i) => !charcater?.data.skill.some((j) => j.perk === i.id)) ?? [];
         const treined = charcater?.data.skill.map((i) => {
-            console.log(skills);
-            console.log(charcater.data);
             const name = skills?.find((j) => j.id === i.perk)?.name;
-
-            console.log(name);
             return {
                 name: name,
                 id: i.perk,

@@ -238,7 +238,6 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                                     ))}
                                 </div>
                                 <div><button onClick={() => {
-                                    console.log(dicePers);
                                     setdicePersToRoll(dicePers);
                                 }}>Rolar</button></div>
                             </div>
