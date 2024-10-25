@@ -20,6 +20,9 @@ code {
 * {
   scrollbar-width: thin;
   scrollbar-color: #969696 #181a1b;
+
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
 }
 
 /* Chrome, Edge, and Safari */
