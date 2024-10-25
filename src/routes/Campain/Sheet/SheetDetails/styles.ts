@@ -287,6 +287,7 @@ export const Container = styled.div<{isToCloseSheet: boolean}>`
         .mainDetails {
             overflow-y: auto;
             overflow-x: hidden;
+            padding-bottom: 100px;
         }
     }
 `;
@@ -433,7 +434,7 @@ export const ContainerModal = styled.div`
         .subclass .subclassItens {
             max-height: 60vh;
             overflow-y: auto;
-            min-width: 150px;
+            min-width: 120px;
         }
 
         .subclass .subclassItensDetails {
