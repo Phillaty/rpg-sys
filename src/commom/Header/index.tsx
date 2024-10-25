@@ -26,7 +26,7 @@ const Header = () => {
                     <p>Bem-vindo(a) <b>{user.name}</b></p>
                 </div>
                 <div className='menu'>
-                    <p>
+                    <p onClick={() => {navigate('/home');}}>
                         <span className='pc'>Página principal</span>
                         <span className='mobile'>Home</span>
                     </p>

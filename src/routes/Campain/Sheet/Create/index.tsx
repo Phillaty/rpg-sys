@@ -53,14 +53,14 @@ const SheetCreation = () => {
     const [originSelected, setOriginSelected] = useState<originDataType>();
     const [classeSelected, setClasseSelected] = useState<classeDataType>();
 
-    const [attributePoints, setAttributePoints] = useState<number>(5);
+    const [attributePoints, setAttributePoints] = useState<number>(6);
     const [perkPoints, setPerkPoints] = useState<number>(0);
     const [attributes, setAttributes] = useState<attributesType>({
-        AGI: 1,
-        INT: 1,
-        VIG: 1,
-        PRE: 1,
-        FOR: 1,
+        AGI: 0,
+        INT: 0,
+        VIG: 0,
+        PRE: 0,
+        FOR: 0,
     });
 
     const [persk, setPerks] = useState<perkSelectType[]>([]);
@@ -162,16 +162,16 @@ const SheetCreation = () => {
     useEffect(() => {
         if(classeSelected) {
             setAttributes({
-                AGI: 1,
-                INT: 1,
-                VIG: 1,
-                PRE: 1,
-                FOR: 1,
+                AGI: 0,
+                INT: 0,
+                VIG: 0,
+                PRE: 0,
+                FOR: 0,
             });
 
             setPerks([]);
             setPerkPoints(classeSelected.data.perk.beggining + attributes.INT);
-            setAttributePoints(5);
+            setAttributePoints(6);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [classeSelected]);
@@ -221,6 +221,11 @@ const SheetCreation = () => {
             VIG: attributes.VIG,
             PRE: attributes.PRE,
             FOR: attributes.FOR,
+            unlock: {
+                habilityPoints: 0,
+                perkPoints: 0,
+                maxPerkLevel: 1,
+            }
         });
 
         toast.success("Ficha criada!");
@@ -315,7 +320,8 @@ const SheetCreation = () => {
                                     <div className='classes'>
                                         {classes?.map((item, key) => (
                                             <div className={`classItem ${item === classeSelected && 'selected'}`} key={key} onClick={() => setClasseSelected(item)}>
-                                                {item.data.name} 
+                                                {item.data.name}
+                                                <p>{item.data.description}</p>
                                                 <span>{item.data.infos.map((i, index) => (<div key={index}>- {i}</div>))}</span>
                                             </div>
                                         ))}
@@ -345,14 +351,14 @@ const SheetCreation = () => {
                                             <p>AGI</p>
                                             <div className='att'>
                                                 <div className='plus' onClick={() => {
-                                                    if(attributes.AGI > 0){
+                                                    if(attributes.AGI > -1){
                                                         setAttributes({...attributes, AGI: attributes.AGI - 1}); 
                                                         setAttributePoints(attributePoints + 1);
                                                     }
                                                 }}><i className="fa-regular fa-square-minus"></i></div>
                                                 <div className='num'>{attributes.AGI}</div>
                                                 <div className='minus' onClick={() => {
-                                                    if(attributePoints > 0){
+                                                    if(attributePoints > 0 && attributes.AGI < 5) {
                                                         setAttributes({...attributes, AGI: attributes.AGI + 1}); 
                                                         setAttributePoints(attributePoints - 1);
                                                     }
@@ -363,7 +369,7 @@ const SheetCreation = () => {
                                             <p>INT</p>
                                             <div className='att'>
                                                 <div className='plus' onClick={() => {
-                                                    if(attributes.INT > 0){
+                                                    if(attributes.INT > -1){
                                                         const newINT = attributes.INT - 1;
                                                         setAttributes({...attributes, INT: newINT}); 
                                                         setAttributePoints(attributePoints + 1);
@@ -378,7 +384,7 @@ const SheetCreation = () => {
                                                 }}><i className="fa-regular fa-square-minus"></i></div>
                                                 <div className='num'>{attributes.INT}</div>
                                                 <div className='minus' onClick={() => {
-                                                    if(attributePoints > 0){
+                                                    if(attributePoints > 0 && attributes.INT < 5){
                                                         setAttributes({...attributes, INT: attributes.INT + 1}); 
                                                         setAttributePoints(attributePoints - 1);
 
@@ -391,14 +397,14 @@ const SheetCreation = () => {
                                             <p>VIG</p>
                                             <div className='att'>
                                                 <div className='plus' onClick={() => {
-                                                    if(attributes.VIG > 0){
+                                                    if(attributes.VIG > -1){
                                                         setAttributes({...attributes, VIG: attributes.VIG - 1}); 
                                                         setAttributePoints(attributePoints + 1);
                                                     }
                                                 }}><i className="fa-regular fa-square-minus"></i></div>
                                                 <div className='num'>{attributes.VIG}</div>
                                                 <div className='minus' onClick={() => {
-                                                    if(attributePoints > 0){
+                                                    if(attributePoints > 0 && attributes.VIG < 5){
                                                         setAttributes({...attributes, VIG: attributes.VIG + 1}); 
                                                         setAttributePoints(attributePoints - 1);
                                                     }
@@ -409,14 +415,14 @@ const SheetCreation = () => {
                                             <p>PRE</p>
                                             <div className='att'>
                                                 <div className='plus' onClick={() => {
-                                                    if(attributes.PRE > 0){
+                                                    if(attributes.PRE > -1){
                                                         setAttributes({...attributes, PRE: attributes.PRE - 1}); 
                                                         setAttributePoints(attributePoints + 1);
                                                     }
                                                 }}><i className="fa-regular fa-square-minus"></i></div>
                                                 <div className='num'>{attributes.PRE}</div>
                                                 <div className='minus' onClick={() => {
-                                                    if(attributePoints > 0){
+                                                    if(attributePoints > 0 && attributes.PRE < 5){
                                                         setAttributes({...attributes, PRE: attributes.PRE + 1}); 
                                                         setAttributePoints(attributePoints - 1);
                                                     }
@@ -427,14 +433,14 @@ const SheetCreation = () => {
                                             <p>FOR</p>
                                             <div className='att'>
                                                 <div className='plus' onClick={() => {
-                                                    if(attributes.FOR > 0){
+                                                    if(attributes.FOR > -1){
                                                         setAttributes({...attributes, FOR: attributes.FOR - 1}); 
                                                         setAttributePoints(attributePoints + 1);
                                                     }
                                                 }}><i className="fa-regular fa-square-minus"></i></div>
                                                 <div className='num'>{attributes.FOR}</div>
                                                 <div className='minus' onClick={() => {
-                                                    if(attributePoints > 0){
+                                                    if(attributePoints > 0 && attributes.FOR < 5){
                                                         setAttributes({...attributes, FOR: attributes.FOR + 1}); 
                                                         setAttributePoints(attributePoints - 1);
                                                     }

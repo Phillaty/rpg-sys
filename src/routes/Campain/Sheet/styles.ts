@@ -1,6 +1,5 @@
 import styled from "styled-components";
 
-
 export const Container = styled.div`
     background-color: #181a1b;
     min-height: 100vh;
@@ -43,7 +42,15 @@ export const Container = styled.div`
         .buttons {
             display: flex;
             align-items: center;
+            flex-wrap: wrap;
             margin-bottom: 8px;
+            gap: 4px;
+
+            > div {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 4px;
+            }
 
             p {
                 margin: 0;
@@ -52,7 +59,6 @@ export const Container = styled.div`
 
             button {
                 height: 32px;
-                margin-left: 4px;
                 padding: 0 16px;
                 background-color: #34a1c1;
                 color: white;
@@ -151,9 +157,11 @@ export const Container = styled.div`
                         display: block;
                     }
                 }
-            }
-
-            
+            } 
         }
+    }
+
+    @media screen and (max-width: 1000px) {
+        min-height: auto;
     }
 `

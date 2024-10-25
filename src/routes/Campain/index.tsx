@@ -8,10 +8,11 @@ import { decrypt } from '../../crypt';
 import Sheet from './Sheet';
 import { ColorRing } from 'react-loader-spinner';
 
-type skillTy = {
+export type skillTy = {
     name: string,
     id: string,
     expertise?: number,
+    base?: string,
 }
 
 export type skillFiltr = {
@@ -52,11 +53,14 @@ const Campain = () => {
             const data = doc.data() as perkType;
             perksArray.push({
                 id: doc.id,
-                name: data.name
+                name: data.name,
+                base: data.base,
             });
         });
 
-        setSkills(perksArray);
+        const sorted = perksArray.sort((a, b) => a.name.localeCompare(b.name));
+
+        setSkills(sorted);
     }
 
     useEffect(() => {
@@ -143,7 +147,7 @@ const Campain = () => {
                         </div>
                     </div>
                     <div className='right'>
-                        <Sheet charcater={charcater} campain={campain} skills={skillsFiltered} />
+                        <Sheet charcater={charcater} campain={campain} skills={skillsFiltered} skillsAll={skills} />
                     </div>
                 </div>
             </> : 

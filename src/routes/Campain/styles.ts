@@ -16,11 +16,11 @@ export const Container = styled.div`
     }
 
     .left {
-        width: 30%;
+        width: 410px;
     }
 
     .right {
-        width: 70%;
+        width: 956px;
 
         display: flex;
         flex-direction: column;
@@ -145,6 +145,8 @@ export const Container = styled.div`
 
     .health {
         display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
         gap: 16px;
 
         .label {
@@ -197,5 +199,32 @@ export const Container = styled.div`
 
     .pe span {
         background-color: #077f21;
+    }
+
+    @media screen and (max-width: 1000px) {
+        .main {
+            flex-wrap: wrap;
+            flex-direction: column-reverse;
+        }
+
+        .left {
+            width: 100%;
+            margin-top: 32px;
+        }
+
+        .right {
+            width: 100%;
+            padding: 16px;
+        }
+
+        .health {
+            .bar {
+                width: 150px;
+            }
+        }
+
+        .buttonsChar {
+            margin-bottom: 32px;
+        }
     }
 `

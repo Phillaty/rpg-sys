@@ -41,8 +41,15 @@ export type classCharType = {
     title: string;
 }
 
+export type unlockType = {
+    habilityPoints: number;
+    perkPoints: number;
+    maxPerkLevel: number;
+}
+
 export type avatarType = {
     class: classCharType;
+    subclass: classCharType;
     money: number;
     name: string;
     originId: string;
@@ -52,10 +59,13 @@ export type avatarType = {
     FOR: string;
     INT: string;
     PRE: string;
-    VIT: string;
+    VIG: string;
     skill: skillType[];
     basics: basicsCharType;
     lore: string;
+    age: number;
+    hability: string[];
+    unlock: unlockType;
 };
 
 export type avatarDataType = {
@@ -126,4 +136,46 @@ export type classeType = {
 export type classeDataType = {
     id: string;
     data: classeType;
+}
+
+export type habilityBuffType = {
+    perk: string;
+    value: number;
+}
+
+export type habilityType = {
+    classId: string;
+    description: string;
+    name: string;
+    require?: string[];
+    buff?: habilityBuffType[];
+    type: string;
+}
+
+export type habilityDataType = {
+    id: string;
+    data: habilityType;
+}
+
+export type subclassHabilitiesType = {
+    name: string;
+    description: string;
+    level: number;
+}
+
+export type subclassType = {
+    name: string;
+    classId: string;
+    description: string;
+    habilities: subclassHabilitiesType[];
+}
+
+export type subclassDataType = {
+    id: string;
+    data: subclassType;
+}
+
+export type uploadImageResponse = {
+    url?: string;
+    error?: string;
 }

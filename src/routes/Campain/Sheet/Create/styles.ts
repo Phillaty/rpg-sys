@@ -196,8 +196,16 @@ export const Container = styled.div`
                 border-radius: 4px;
                 cursor: pointer;
                 width: 32.9%;
+                font-weight: 600;
+
+                p {
+                    font-size: 14px;
+                    font-weight: 400;
+                    margin-bottom: 4px;
+                }
 
                 span {
+                    font-weight: 500;
                     font-size: 12px;
                     color: gray;
                 }
@@ -335,6 +343,31 @@ export const Container = styled.div`
             align-items: center;
             flex-direction: column;
             padding: 100px 0;
+        }
+    }
+
+    @media screen and (max-width: 1000px) {
+        .mainContainer {
+            align-items: flex-start;
+
+            > div {
+                min-width: 100%;
+                max-width: 100%;
+                margin-top: 0;
+                height: 100%;
+            }
+        }
+        
+        .stage-select-origin .origins .originItem {
+            width: 49%;
+        }
+
+        .stage-select-class .classes .classItem {
+            width: 49%;
+        }
+
+        .attributes .item {
+            width: 30%;
         }
     }
 `

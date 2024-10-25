@@ -50,7 +50,7 @@ const ModalCampain = ({selectedCampain, setSelectedCampain}: prop) => {
                                 <div className='attributes'>
                                     <span className='attribute'>AGI: <span className='attributeNum'>{selectedCampain.playerChar?.data.AGI}</span></span>
                                     <span className='attribute'>INT: <span className='attributeNum'>{selectedCampain.playerChar?.data.INT}</span></span>
-                                    <span className='attribute'>VIT: <span className='attributeNum'>{selectedCampain.playerChar?.data.VIT}</span></span>
+                                    <span className='attribute'>VIG: <span className='attributeNum'>{selectedCampain.playerChar?.data.VIG}</span></span>
                                     <span className='attribute'>PRE: <span className='attributeNum'>{selectedCampain.playerChar?.data.PRE}</span></span>
                                     <span className='attribute'>FOR: <span className='attributeNum'>{selectedCampain.playerChar?.data.FOR}</span></span>
                                 </div>

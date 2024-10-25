@@ -1,18 +1,30 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Container } from './styles';
-import { avatarDataType, campainType } from '../../../types';
+import { avatarDataType, campainType, habilityDataType, subclassDataType } from '../../../types';
 import logo from '../../../imgs/profile-user-icon-2048x2048-m41rxkoe.png';
-import { skillFiltr } from '..';
+import { skillFiltr, skillTy } from '..';
 import Roll from '../../../commom/ROLL';
 import { getPercentage } from '../../../utils';
+import SheetDetails from './SheetDetails';
+import { collection, onSnapshot, query, where } from 'firebase/firestore';
+import { db } from '../../../firebase/firebase';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 type prop = {
     charcater?: avatarDataType;
     campain?: campainType;
     skills: skillFiltr;
+    skillsAll: skillTy[];
 }
 
-const Sheet = ({ charcater, campain, skills }: prop) => {
+const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
+
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    const queryString = location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const [wentFromCreate, setWentFromCreate] = useState<boolean>(Boolean(urlParams.get('wentFromCreate')));
 
     const [dice, setdice] = useState<number[]>();
     const [diceMod, setdiceMod] = useState<number[]>();
@@ -20,6 +32,14 @@ const Sheet = ({ charcater, campain, skills }: prop) => {
     const [dicePers, setdicePers] = useState<number[]>([]);
     const [dicePersMod, setdicePersMod] = useState<number[]>([]);
     const [dicePersToRoll, setdicePersToRoll] = useState<number[]>();
+    
+    const [showSheetDetails, setShowSheetDetails] = useState<boolean>(false);
+    const [isToCloseSheet, setIsToCloseSheet] = useState<boolean>(false);
+
+    const [habilities, setHabilities] = useState<habilityDataType[]>([]);
+    const [subclasses, setSubclasses] = useState<subclassDataType[]>([]);
+
+    const [charSubclass, setCharSubclass] = useState<subclassDataType>();
 
     const handleCloseDicePer = () => {
         setdicePers([]);
@@ -27,12 +47,90 @@ const Sheet = ({ charcater, campain, skills }: prop) => {
         setdicePersToRoll([]);
     }
 
+    const handleCloseSheet = () => {
+        setIsToCloseSheet(true);
+
+        setTimeout(() => {
+            setShowSheetDetails(false);
+            setIsToCloseSheet(false);
+        }, 500);
+    }
+
+    const removeWentFromCreateParam = () => {
+        urlParams.delete('wentFromCreate');
+        navigate(`${location.pathname}?${urlParams.toString()}`, { replace: true });
+        setWentFromCreate(false);
+    };
+
+    useEffect(() => {
+        if (wentFromCreate) {
+            setShowSheetDetails(true);
+            removeWentFromCreateParam();
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    useEffect(() => {
+        if(campain) {
+            const q = query(
+                collection(db, 'hability'),
+                where('classId', 'in', campain?.classes)
+            );
+
+            onSnapshot(q, (querySnapshot) => {
+                const habilitiesData = querySnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    data: doc.data(),
+                })) as habilityDataType[];
+                
+                
+                setHabilities(habilitiesData);
+            });
+        }
+
+    }, [campain]);
+
+    useEffect(() => {
+        if(campain && charcater) {
+            const p = query(
+                collection(db, 'subclass'),
+                where('classId', 'in', campain?.classes)
+            );
+
+            onSnapshot(p, (querySnapshot) => {
+                const subclassData = querySnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    data: doc.data(),
+                })) as subclassDataType[];
+
+                if (charcater?.data.subclass) {
+                    const findCharSubclass = subclassData.find((i) => i.id === charcater?.data.subclass.id);
+
+                    findCharSubclass && setCharSubclass(findCharSubclass);
+                }
+                
+                setSubclasses(subclassData);
+            });
+        }
+    }, [campain, charcater]);
+
+    useEffect(() => {
+        const body = document.getElementById('body');
+        if (showSheetDetails && skills) {
+            if(body)
+                body.classList.add('modalOn');
+        } else {
+            if(body)
+                body.classList.remove('modalOn');
+        }
+    }, [showSheetDetails, skills]);
+
     return (
         <>
             <Container>
                 <div className='buttonsChar'>
                     <button className='backpack'><i className="fa-solid fa-list"></i> Mochila</button>
-                    <button className='sheet'><i className="fa-solid fa-address-book"></i> Ficha completa</button>
+                    <button className='sheet' onClick={() => {setShowSheetDetails(true)}}><i className="fa-solid fa-address-book"></i> Ficha completa</button>
                 </div>
                 <div className='charInfo'>
                     <div className='charimage'>
@@ -93,15 +191,17 @@ const Sheet = ({ charcater, campain, skills }: prop) => {
                     </div>
                     <div className='buttons'>
                         <p>Adicionar dado: </p>
-                        <button onClick={() => {setdicePers([...dicePers, 2])}}>D2</button>
-                        <button onClick={() => {setdicePers([...dicePers, 4])}}>D4</button>
-                        <button onClick={() => {setdicePers([...dicePers, 6])}}>D6</button>
-                        <button onClick={() => {setdicePers([...dicePers, 8])}}>D8</button>
-                        <button onClick={() => {setdicePers([...dicePers, 10])}}>D10</button>
-                        <button onClick={() => {setdicePers([...dicePers, 12])}}>D12</button>
-                        <button onClick={() => {setdicePers([...dicePers, 20])}}>D20</button>
-                        <button onClick={() => {setdicePers([...dicePers, 60])}}>D60</button>
-                        <button onClick={() => {setdicePers([...dicePers, 100])}}>D100</button>
+                        <div>
+                            <button onClick={() => {setdicePers([...dicePers, 2])}}>D2</button>
+                            <button onClick={() => {setdicePers([...dicePers, 4])}}>D4</button>
+                            <button onClick={() => {setdicePers([...dicePers, 6])}}>D6</button>
+                            <button onClick={() => {setdicePers([...dicePers, 8])}}>D8</button>
+                            <button onClick={() => {setdicePers([...dicePers, 10])}}>D10</button>
+                            <button onClick={() => {setdicePers([...dicePers, 12])}}>D12</button>
+                            <button onClick={() => {setdicePers([...dicePers, 20])}}>D20</button>
+                            <button onClick={() => {setdicePers([...dicePers, 60])}}>D60</button>
+                            <button onClick={() => {setdicePers([...dicePers, 100])}}>D100</button>
+                        </div>
                     </div>
                     {dicePers.length > 0 && 
                         <>
@@ -121,7 +221,7 @@ const Sheet = ({ charcater, campain, skills }: prop) => {
                                         <p>Modificações:</p>
                                         {dicePersMod.map((mod, keyMod) => (
                                             <div key={keyMod} onClick={(() => {
-                                                const newDices = dicePers.filter((i, index) => index !== keyMod);
+                                                const newDices = dicePersMod.filter((i, index) => index !== keyMod);
                                                 setdicePersMod(newDices);
                                             })}><span className='diceitem'>+{mod}</span><span className='error'><i className="fa-solid fa-xmark"></i></span></div>
                                         ))}
@@ -183,6 +283,21 @@ const Sheet = ({ charcater, campain, skills }: prop) => {
             {dicePersToRoll && dicePersToRoll.length > 0 &&
                 <Roll dice={dicePersToRoll} mod={dicePersMod} setdice={setdicePersToRoll} setdiceMod={setdicePersToRoll} onClose={() => {handleCloseDicePer()}} />
             }
+
+            {showSheetDetails && skills && 
+                <SheetDetails 
+                    isToCloseSheet={isToCloseSheet} 
+                    charcater={charcater} 
+                    campain={campain} 
+                    skills={skills} 
+                    skillsAll={skillsAll} 
+                    onClose={handleCloseSheet}
+                    habilities={habilities}
+                    subclasses={subclasses}
+                    charSubclass={charSubclass}
+                />
+            }
+            
         </>
     )
 }

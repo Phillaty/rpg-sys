@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Container } from './styles';
 
 import { ToastContainer, toast } from 'react-toastify';
@@ -34,6 +34,19 @@ const Login = () => {
         password: '',
     });
 
+    useEffect(() => {
+        const isLogged = localStorage.getItem('user');
+
+        if(!isLogged) return;
+
+        const hasId = JSON.parse(localStorage.getItem('user') ?? '');
+
+        if(hasId.id) {
+            navigate('/home');
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+
     const login = async () => {
         if (formData.login) {
             const docRef = collection(db, 'user');
@@ -47,14 +60,14 @@ const Login = () => {
                 ...doc.data(),
             }));
 
-            if(data.length === 0) {
+            if (data.length === 0) {
                 toast.error("Nenhum login encontrado!");
                 return;
             }
 
             const dataLogin = data[0] as userType;
 
-            if(formData.password !== decrypt(dataLogin.password)){
+            if (formData.password !== decrypt(dataLogin.password)) {
                 toast.error("Senha incorreta!");
                 return;
             }
