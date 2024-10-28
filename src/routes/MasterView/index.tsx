@@ -23,7 +23,7 @@ const HomeMaster = (props: prop) => {
         <Container>
             <div>
                 <div className='campains'>
-                    <h1>Minhas campanhas</h1>
+                    <h1>Minhas campanhas teste</h1>
                     <p>Clique na campanha para abrir os detalhes</p>
                     <div className='itens'>
                         <div className='add' onClick={() => {
