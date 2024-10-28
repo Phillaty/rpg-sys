@@ -84,7 +84,7 @@ const ModalCampain = ({selectedCampain, setSelectedCampain}: prop) => {
                         <div className='details'>
                             <div className='detailItem'>
                                 <p>Estilo</p>
-                                <span>{selectedCampain.data.style}</span>
+                                <span>{selectedCampain.data.style.join(", ")}</span>
                             </div>
                             <div className='detailItem'>
                                 <p>Descrição</p>

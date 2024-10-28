@@ -30,8 +30,9 @@ export const Container = styled.div`
     }
 
     .left {
-        background-color: #fff;
-        color: #181a1b
+        color: #ffffff;
+        border-right: 1px solid #2f2f2f;
+        border-left: 1px solid #2f2f2f;
     }
 
     .image {
@@ -107,6 +108,11 @@ export const Container = styled.div`
     .skill {
         width: 100%;
         margin-top: 16px;
+        padding: 16px;
+        background-color: #39393982;
+        color: white;
+        border-radius: 4px;
+
 
         .skillItems {
             display: flex;
@@ -149,6 +155,8 @@ export const Container = styled.div`
         justify-content: center;
         gap: 16px;
 
+        padding: 4px 16px 16px 16px;
+
         .label {
             margin-bottom: 8px;
             text-align: center;
@@ -181,6 +189,7 @@ export const Container = styled.div`
             margin: 0;
             font-size: 14px;
             position: relative;
+            color: white;
             z-index: 1;
         }
     }

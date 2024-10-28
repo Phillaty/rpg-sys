@@ -6,6 +6,14 @@ export const Container = styled.div`
     color: #d3d3d3;
     position: relative;
 
+    .topInfo {
+        background-color: #34349363;
+        color: white;
+        padding: 16px 16px 32px 16px;
+        border-radius: 4px;
+        margin-bottom: 16px;
+    }
+
     .buttonsChar {
         display: flex;
         justify-content: flex-end;
@@ -34,10 +42,11 @@ export const Container = styled.div`
     }
 
     .rollPers {
-        border: 1px solid #7b7b7b87;
-        padding: 0px 16px 16px 16px;
+        padding: 8px 16px 16px 16px;
         margin-top: 16px;
         border-radius: 4px;
+        border: 1px solid #7b7b7b87;
+
 
         .buttons {
             display: flex;

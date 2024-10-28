@@ -13,7 +13,7 @@ export type campainType = {
     description: string;
     img: string;
     lore: string;
-    style: string;
+    style: string[];
     title: string;
     state: string;
     players: string[];
@@ -55,17 +55,18 @@ export type avatarType = {
     originId: string;
     playerId: string;
     level: number;
-    AGI: string;
-    FOR: string;
-    INT: string;
-    PRE: string;
-    VIG: string;
+    AGI: number;
+    FOR: number;
+    INT: number;
+    PRE: number;
+    VIG: number;
     skill: skillType[];
     basics: basicsCharType;
     lore: string;
     age: number;
     hability: string[];
     unlock: unlockType;
+    img: string;
 };
 
 export type avatarDataType = {
@@ -76,6 +77,7 @@ export type avatarDataType = {
 export type perkType = {
     name: string;
     base: string;
+    verified?: boolean;
 };
 
 export type perkDataType = {
@@ -107,6 +109,8 @@ export type originType = {
         skill: string[];
     };
     title: string;
+    verified?: boolean;
+    description: string;
 }
 
 export type originDataType = {
@@ -130,7 +134,8 @@ export type classeType = {
         beggining: number;
         middle: number;
         end: number;
-    }
+    };
+    verified?: boolean;
 }
 
 export type classeDataType = {
@@ -138,9 +143,26 @@ export type classeDataType = {
     data: classeType;
 }
 
-export type habilityBuffType = {
-    perk: string;
+export type buffLifeType = {
     value: number;
+}
+
+export type buffPerkType = {
+    perkId: string;
+    perkName: string;
+    value: number;
+}
+
+export type buffPerkVantageType = {
+    perkId: string;
+    perkName: string;
+}
+
+export type habilityBuffType = {
+    lifePerLevel?: buffLifeType;
+    lifeTotal?: buffLifeType;
+    modifyRoll?: buffPerkType;
+    rollVantage?: buffPerkVantageType;
 }
 
 export type habilityType = {
@@ -148,7 +170,7 @@ export type habilityType = {
     description: string;
     name: string;
     require?: string[];
-    buff?: habilityBuffType[];
+    buff?: habilityBuffType;
     type: string;
 }
 
@@ -178,4 +200,9 @@ export type subclassDataType = {
 export type uploadImageResponse = {
     url?: string;
     error?: string;
+}
+
+export type alertType = {
+    message: string;
+    type: 'warning' | 'error';
 }

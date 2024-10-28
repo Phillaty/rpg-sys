@@ -4,6 +4,7 @@ import './App.css';
 import { Outlet, useNavigate } from 'react-router-dom';
 import Header from './commom/Header';
 import Foot from './commom/Foot';
+import { decrypt } from './crypt';
 
 
 function App() {
@@ -11,11 +12,11 @@ function App() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const isLogged = localStorage.getItem('user');
+    const isLogged = decrypt(localStorage.getItem('user') ?? '');
 
     if(!isLogged) navigate('/login');
 
-    const hasId = JSON.parse(localStorage.getItem('user') ?? '');
+    const hasId = JSON.parse(decrypt(localStorage.getItem('user') ?? '') ?? '');
 
     if(!hasId.id) {
       localStorage.clear();

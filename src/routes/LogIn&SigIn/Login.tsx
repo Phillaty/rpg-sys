@@ -39,7 +39,7 @@ const Login = () => {
 
         if(!isLogged) return;
 
-        const hasId = JSON.parse(localStorage.getItem('user') ?? '');
+        const hasId = JSON.parse(decrypt(localStorage.getItem('user') ?? '') ?? '');
 
         if(hasId.id) {
             navigate('/home');
@@ -67,16 +67,18 @@ const Login = () => {
 
             const dataLogin = data[0] as userType;
 
+            console.log(encrypt(formData.password));
+
             if (formData.password !== decrypt(dataLogin.password)) {
                 toast.error("Senha incorreta!");
                 return;
             }
 
-            localStorage.setItem('user', JSON.stringify({
+            localStorage.setItem('user', encrypt(JSON.stringify({
                 name: dataLogin.name,
                 rule: dataLogin.rule,
                 id: encrypt(dataLogin.id),
-            }));
+            })));
             
             toast.success("Logado!");
 

@@ -17,7 +17,7 @@ export type skillTy = {
 
 export type skillFiltr = {
     trained: skillTy[],
-    notTrained: string[]
+    notTrained: skillTy[]
 }
 
 const Campain = () => {
@@ -27,7 +27,7 @@ const Campain = () => {
     const urlParams = new URLSearchParams(queryString);
     const campainId = urlParams.get('camp') ?? '';
 
-    const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user') ?? ' ') as userDataType : {} as userDataType;
+    const user = localStorage.getItem('user') ? JSON.parse(decrypt(localStorage.getItem('user') ?? '')) as userDataType : {} as userDataType;
     const userId = decrypt(user.id);
 
     const [campain, setCampain] = useState<campainType>();
@@ -103,17 +103,18 @@ const Campain = () => {
         
         const notTreined = skills?.filter((i) => !charcater?.data.skill.some((j) => j.perk === i.id)) ?? [];
         const treined = charcater?.data.skill.map((i) => {
-            const name = skills?.find((j) => j.id === i.perk)?.name;
+            const skillData = skills?.find((j) => j.id === i.perk);
             return {
-                name: name,
+                name: skillData?.name,
                 id: i.perk,
                 expertise: i.expertise,
+                base: skillData?.base,
             }
         }) as skillTy[];
 
         setSkillsFiltered({
             trained: treined,
-            notTrained: notTreined.map((i) => i.name)
+            notTrained: notTreined,
         })
 
     }, [charcater, skills]);

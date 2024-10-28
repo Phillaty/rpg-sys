@@ -23,6 +23,7 @@ type inviteType = {
     name: string,
     rule: string,
     redeemed: boolean,
+    campainId?: string,
 };
 
  const CreateAccount = () => {

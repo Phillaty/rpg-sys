@@ -4,12 +4,13 @@ import { Container } from './styles';
 import logo from '../../imgs/logo.png';
 import { useNavigate } from 'react-router-dom';
 import { userDataType } from '../../types';
+import { decrypt } from '../../crypt';
 
 const Header = () => {
 
     const navigate = useNavigate();
 
-    const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user') ?? ' ') as userDataType : {} as userDataType;
+    const user = localStorage.getItem('user') ? JSON.parse(decrypt(localStorage.getItem('user') ?? '')) as userDataType : {} as userDataType;
 
     const logout = () => {
 

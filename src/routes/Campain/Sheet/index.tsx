@@ -4,7 +4,7 @@ import { avatarDataType, campainType, habilityDataType, subclassDataType } from 
 import logo from '../../../imgs/profile-user-icon-2048x2048-m41rxkoe.png';
 import { skillFiltr, skillTy } from '..';
 import Roll from '../../../commom/ROLL';
-import { getPercentage } from '../../../utils';
+import { getAttrubuteMod, getPercentage } from '../../../utils';
 import SheetDetails from './SheetDetails';
 import { collection, onSnapshot, query, where } from 'firebase/firestore';
 import { db } from '../../../firebase/firebase';
@@ -38,6 +38,8 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
 
     const [habilities, setHabilities] = useState<habilityDataType[]>([]);
     const [subclasses, setSubclasses] = useState<subclassDataType[]>([]);
+
+    const [habilitiesChar, setHabilitiesChar] = useState<habilityDataType[]>();
 
     const [charSubclass, setCharSubclass] = useState<subclassDataType>();
 
@@ -125,26 +127,37 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
         }
     }, [showSheetDetails, skills]);
 
+    useEffect(() => {
+        if (charcater && habilities) {
+            const habilitiesFind = habilities.filter((i) => charcater?.data?.hability?.some((j) => j === i.id));
+            const sorted = habilitiesFind.sort((a, b) => a.data.name.localeCompare(b.data.name));
+            setHabilitiesChar(sorted);
+        }
+    }, [charcater, habilities]);
+
     return (
         <>
             <Container>
-                <div className='buttonsChar'>
-                    <button className='backpack'><i className="fa-solid fa-list"></i> Mochila</button>
-                    <button className='sheet' onClick={() => {setShowSheetDetails(true)}}><i className="fa-solid fa-address-book"></i> Ficha completa</button>
-                </div>
-                <div className='charInfo'>
-                    <div className='charimage'>
-                        <span>
-                            <img src={logo} alt='' />
-                        </span>
+                <div className='topInfo'>
+                    <div className='buttonsChar'>
+                        <button className='backpack'><i className="fa-solid fa-list"></i> Mochila</button>
+                        <button className='sheet' onClick={() => {setShowSheetDetails(true)}}><i className="fa-solid fa-address-book"></i> Ficha completa</button>
                     </div>
-                    <div className='charInfos'>
-                        <p className='name'>{charcater?.data.name}</p>
-                        <div className='info'>
-                            <p>{charcater?.data.class.title} - nível {charcater?.data.level}</p>
+                    <div className='charInfo'>
+                        <div className='charimage'>
+                            <span>
+                                <img src={logo} alt='' />
+                            </span>
+                        </div>
+                        <div className='charInfos'>
+                            <p className='name'>{charcater?.data.name}</p>
+                            <div className='info'>
+                                <p>{charcater?.data.class.title} - nível {charcater?.data.level}</p>
+                            </div>
                         </div>
                     </div>
                 </div>
+
                 <div className='health'>
                     {campain?.basics.life &&
                         <div>
@@ -184,6 +197,7 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                             </div>
                         </div>
                     }
+                
                 </div>
                 <div className='rollPers'>
                     <div className='title'>
@@ -253,8 +267,24 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                             <div className='skillsgrid'>
                                 {skills.trained?.map((item, key) => (
                                     <div key={key} className='itemSkill' onClick={() => {
-                                        setdiceMod([item.expertise ?? 0]);
-                                        setdice([20]);
+                                        const totalModify = [item.expertise ?? 0];
+                                        const totalDice = [20];
+
+                                        const skillHasBuff = habilitiesChar?.find((i) => i.data.buff?.modifyRoll?.perkId === item.id);
+                                        const skillHasVantage = habilitiesChar?.find((i) => i.data.buff?.rollVantage?.perkId === item.id);
+
+                                        if(!!skillHasBuff) totalModify.push(skillHasBuff.data.buff?.modifyRoll?.value ?? 0);
+                                        if(!!skillHasVantage) totalDice.push(20);
+
+                                        if(charcater){
+                                            const attributeMod = getAttrubuteMod(item.base ?? '', charcater?.data);
+                                            if (attributeMod && attributeMod > 0) {
+                                                totalModify.push(attributeMod);
+                                            }
+                                        }
+
+                                        setdiceMod(totalModify);
+                                        setdice(totalDice);
                                     }}>
                                         {item.name}
                                     </div>
@@ -267,9 +297,27 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                             <div className='skillsgrid'>
                                 {skills.notTrained.map((item, key) => ( 
                                     <div key={key} className='itemSkill' onClick={() => {
-                                        setdice([20]);
+                                        const totalModify = [];
+                                        const totalDice = [20];
+
+                                        const skillHasBuff = habilitiesChar?.find((i) => i.data.buff?.modifyRoll?.perkId === item.id);
+                                        const skillHasVantage = habilitiesChar?.find((i) => i.data.buff?.rollVantage?.perkId === item.id);
+
+                                        if(!!skillHasBuff) totalModify.push(skillHasBuff.data.buff?.modifyRoll?.value ?? 0);
+                                        if(!!skillHasVantage) totalDice.push(20);
+
+                                        console.log(charcater)
+
+                                        if(charcater){
+                                            const attributeMod = getAttrubuteMod(item.base ?? '', charcater?.data);
+                                            if (attributeMod && attributeMod > 0) {
+                                                totalModify.push(attributeMod);
+                                            }
+                                        }
+                                        setdiceMod(totalModify);
+                                        setdice(totalDice);
                                     }}>
-                                        {item}
+                                        {item.name}
                                     </div>
                                 ))}
                             </div>

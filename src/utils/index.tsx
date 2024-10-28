@@ -1,5 +1,5 @@
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { uploadImageResponse } from "../types";
+import { alertType, avatarType, campainType, uploadImageResponse } from "../types";
 
 export const getPercentage = (total: number, actual: number) => {
 
@@ -39,3 +39,56 @@ export const uploadImage = async (file: File, path: string): Promise<uploadImage
       };
     }
   };
+
+  export const getAttrubuteMod = (perkTosearch: string, character: avatarType) => {
+    switch (perkTosearch) {
+        case 'AGI':
+            return character.AGI;
+        case 'INT':
+            return character.INT;
+        case 'VIG':
+            return character.VIG;
+        case 'PRE':
+            return character.PRE;
+        case 'FOR':
+            return character.FOR;
+        
+        default:
+            break;
+    }
+  }
+
+  export const getAlertsCampain = (campain: campainType): alertType[] => {
+    let errorList = [] as alertType[];
+
+    if (campain.classes.length <= 0) errorList.push({
+      message: "Nenhuma classe foi cadastrada nessa campanha!",
+      type: 'error'
+    });
+
+    if (campain.skills.length <= 0) errorList.push({
+      message: "Nenhuma perícia foi cadastrada nessa campanha!",
+      type: 'error'
+    });
+    if (campain.origins.length <= 0) errorList.push({
+      message: "Nenhuma origem foi cadastrada nessa campanha!",
+      type: 'error'
+    });
+
+    if (campain.lore.length <= 0) errorList.push({
+      message: "Campanha está sem uma lore! Uma breve história é bom pro contexto!",
+      type: 'warning'
+    });
+
+    if (campain.players.length <= 0) errorList.push({
+      message: "Nenhum player! Convide alguém!",
+      type: 'warning'
+    });
+
+    if (campain.stores.length <= 0) errorList.push({
+      message: "Nenhuma loja registrada!",
+      type: 'warning'
+    });
+
+    return errorList;
+  }

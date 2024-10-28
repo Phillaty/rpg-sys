@@ -12,6 +12,8 @@ import CreateAccount from './routes/LogIn&SigIn/CreateAccount';
 import MyAccount from './routes/MyAccount';
 import Campain from './routes/Campain';
 import SheetCreation from './routes/Campain/Sheet/Create';
+import CreateCampain from './routes/MasterView/CreateCampain';
+import CampainEdit from './routes/MasterView/CampainEdit';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -27,6 +29,9 @@ root.render(
           <Route path="myAccount" element={<MyAccount />} />
           <Route path="campain" element={<Campain />} />
           <Route path="campain/sheet/create" element={<SheetCreation />} />
+          <Route path="master/campain/create" element={<CreateCampain />} />
+          <Route path="master/campain/edit" element={<CampainEdit />} />
+          
         </Route>
         <Route path="/login" element={<Login />} />
         <Route path="/cadastro" element={<CreateAccount />} />

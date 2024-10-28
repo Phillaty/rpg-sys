@@ -309,6 +309,11 @@ export const ContainerModal = styled.div`
         padding: 16px;
         font-size: 18px;
         font-weight: 600;
+
+        span {
+            font-weight: 500;
+            font-size: 12px;
+        }
     }
 
     .itens {
@@ -425,6 +430,89 @@ export const ContainerModal = styled.div`
                     font-weight: 600;
                 }
             }
+        }
+    }
+
+    .perks {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        .perksItens {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-width: 350px;
+
+            border: 1px solid #bfbfbf;
+            padding: 8px;
+
+            height: 42px;
+
+            .name {
+                margin-right: 8px;
+
+                span {
+                    background-color: #279797;
+                    color: white;
+                    font-size: 12px;
+                    padding: 2px 4px;
+                    border-radius: 4px;
+                    margin-left: 4px;
+                }
+            } 
+
+
+            .button {
+                button {
+                    background-color: #737ad3;
+                    color: white;
+                    border: 0;
+                    border-radius: 4px;
+                    padding: 4px 8px;
+                    font-size: 12px;
+                    cursor: pointer;
+                }
+
+                button:hover {
+                    opacity: 0.8;
+                    transition: 0.2s;
+                }
+
+                .disabled {
+                    background-color: #a7a7a7;
+                    cursor: auto;
+                }
+
+                .disabled:hover {
+                    opacity: 1;
+                }
+
+                p {
+                    font-size: 12px;
+                }
+            }
+        }
+
+    }
+
+    .buttonsperk {
+        gap: 4px;
+
+        button {
+            width: 49%;
+        }
+
+        .cancel {
+            background-color: transparent !important;
+            border: 1px solid gray;
+            color: black;
         }
     }
 

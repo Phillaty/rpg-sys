@@ -53,7 +53,7 @@ const Roll = ({dice, mod, setdice, setdiceMod, onClose}: prop) => {
             <Container>
                 <p>Rolando D{dice.join(", D")}</p>
                 {mod && mod.length > 0 &&
-                    <p>Modificadores: {mod.join(", ")}</p>
+                    <p>Modificadores: +{mod.join(", +")}</p>
                 }
 
                 <div>
