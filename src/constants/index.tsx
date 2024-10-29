@@ -34,3 +34,5 @@ export const StylesGroup = [
     { title: 'Steampunk' },
     { title: 'Cyberpunk' },
 ]
+
+export const Dices = [100, 60, 20, 12, 10, 8, 6, 4, 2];

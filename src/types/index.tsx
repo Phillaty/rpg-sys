@@ -207,3 +207,73 @@ export type alertType = {
     message: string;
     type: 'warning' | 'error';
 }
+
+export type itemTypeRoll = {
+    base?: number[];
+    mod?: number[];
+}
+
+export type itemTypePosition = {
+    type: 'inventory' | 'store' | 'ground' | 'entity';
+    idGetter?: string;
+}
+
+export type itemTypeCrit = {
+    multiply?: number;
+    roll?: number;
+}
+
+export type itemBuffType = {
+    lifeTotal?: buffLifeType;
+    modifyRoll?: buffPerkType[];
+    rollVantage?: buffPerkVantageType[];
+}
+
+export type itemTypeModifications = {
+    name?: number;
+    description?: number;
+}
+
+export type itemType = {
+    name: string;
+    description: string;
+    type: 'weapon' | 'armadure' | 'addon' | 'ammo' | 'general' | '';
+    position: itemTypePosition;
+    weaponConfigs?: {
+        crit?: itemTypeCrit;
+        damage?: itemTypeRoll;
+        type?: 'range' | 'melee';
+    };
+    armadureConfigs?: {
+        protection?: number;
+        type?: 'heavy' | 'light';
+    };
+    roll?: itemTypeRoll;
+    reach?: string;
+    damagetype?: string;
+    weight: number;
+    category: number;
+    buff?: itemBuffType;
+    campainId?: string;
+    verified?: boolean;
+    cost: number;
+    modifications?: itemTypeModifications[];
+}
+
+export type itemDataType = {
+    id: string;
+    data: itemType;
+}
+
+export type storeType = {
+    title: string;
+    location: string;
+    description: string;
+    moneyHolding: number;
+    tax: number;
+}
+
+export type storeDataType = {
+    id: string;
+    data: storeType;
+}

@@ -3,7 +3,7 @@ import { Container } from './styles';
 import { useLocation } from 'react-router-dom';
 import { collection, doc, onSnapshot, query, where } from 'firebase/firestore';
 import { db } from '../../../firebase/firebase';
-import { alertType, avatarDataType, campainType, classeDataType, habilityDataType, originDataType, perkDataType, subclassDataType } from '../../../types';
+import { alertType, avatarDataType, campainType, classeDataType, habilityDataType, originDataType, perkDataType, storeDataType, subclassDataType } from '../../../types';
 import { ColorRing } from 'react-loader-spinner';
 import Stack from '@mui/material/Stack';
 import Alert from '@mui/material/Alert';
@@ -17,6 +17,18 @@ import Pericias from './Pericias';
 import Habilidades from './Habilidades';
 import { ToastContainer, toast } from 'react-toastify';
 import { getAlertsCampain } from '../../../utils';
+import { AppBar, Dialog, IconButton, Slide, Toolbar, Typography } from '@mui/material';
+import Itens from './Itens';
+import { TransitionProps } from '@mui/material/transitions';
+
+const Transition = React.forwardRef(function Transition(
+    props: TransitionProps & {
+      children: React.ReactElement<unknown>;
+    },
+    ref: React.Ref<unknown>,
+  ) {
+    return <Slide direction="up" ref={ref} {...props} />;
+  });
 
 const CampainEdit = () => {
 
@@ -45,7 +57,19 @@ const CampainEdit = () => {
 
     const [characters, setCharacters] = useState<avatarDataType[]>([]);
 
+    const [stores, setStores] = useState<storeDataType[]>([]);
+
     const [alertsList, setAlertsList] = useState<alertType[]>([]);
+
+    const [openItemModal, setOpenItemModal] = React.useState(false);
+
+    const handleClickItemOpen = () => {
+        setOpenItemModal(true);
+    };
+
+    const handleCloseItem = () => {
+        setOpenItemModal(false);
+    };
 
     const handleCloseModals = () => {
         setShowClassesModal(false);
@@ -170,6 +194,23 @@ const CampainEdit = () => {
         });
     }
 
+    const getStores = async () => {
+        const p = query(
+            collection(db, 'stores'),
+            where('__name__', 'in', campain?.stores && campain?.stores.length > 0 ? campain?.stores : ['non'])
+        );
+
+        onSnapshot(p, (querySnapshot) => {
+            const docData = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                data: doc.data(),
+            })) as storeDataType[];
+
+            const sorted = docData.sort((a, b) => a.data.title.localeCompare(b.data.title));
+            setStores(sorted);
+        });
+    }
+
     useEffect(() => {
         if (classes.length > 0) {
             getSubclasses();
@@ -177,6 +218,7 @@ const CampainEdit = () => {
             getOrigins();
             getPerks();
             getCharacters();
+            getStores();
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [classes]);
@@ -284,7 +326,7 @@ const CampainEdit = () => {
                                             <p className='quantity'><i className="fa-solid fa-cube"></i> -</p>
                                         </div>
                                         <div>
-                                            <button>Editar</button>
+                                            <button onClick={handleClickItemOpen}>Editar</button>
                                         </div>
                                     </div>
                                     <div className='box'>
@@ -352,6 +394,36 @@ const CampainEdit = () => {
         <Modal isOpen={showHabilidadesModal} handleCloseModal={handleCloseModals}>
             <Habilidades classes={classes} toast={toast} habilities={habilities} characters={characters} perks={perks} />
         </Modal>
+
+
+
+
+        <Dialog
+            fullScreen
+            open={openItemModal}
+            onClose={handleCloseItem}
+            TransitionComponent={Transition}
+        >
+            <AppBar sx={{ position: 'relative', backgroundColor: '#343493' }}>
+            <Toolbar>
+                <IconButton
+                edge="start"
+                color="inherit"
+                onClick={handleCloseItem}
+                aria-label="close"
+                >
+                    <i className="fa-solid fa-xmark"></i>
+                </IconButton>
+                <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
+                    Gerenciamento de itens
+                </Typography>
+            </Toolbar>
+            </AppBar>
+            <Itens toast={toast} stores={stores} />
+        </Dialog>
+        
+
+
         <ToastContainer style={{zIndex: '999999999999999999'}} />
         </>
     )
