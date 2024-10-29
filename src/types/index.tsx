@@ -22,6 +22,7 @@ export type campainType = {
     basics: basicsCampainType;
     classes: string[];
     origins: string[];
+    elements: string[];
     skills: string[];
 }
 
@@ -274,4 +275,15 @@ export type storeType = {
 export type storeDataType = {
     id: string;
     data: storeType;
+}
+
+export type elementType = {
+    name: string;
+    description: string;
+    verified?: boolean,
+}
+
+export type elementDataType = {
+    id: string;
+    data: elementType;
 }

@@ -3,7 +3,7 @@ import { Container } from './styles';
 import { useLocation } from 'react-router-dom';
 import { collection, doc, onSnapshot, query, where } from 'firebase/firestore';
 import { db } from '../../../firebase/firebase';
-import { alertType, avatarDataType, campainType, classeDataType, habilityDataType, originDataType, perkDataType, storeDataType, subclassDataType } from '../../../types';
+import { alertType, avatarDataType, campainType, classeDataType, elementDataType, habilityDataType, originDataType, perkDataType, storeDataType, subclassDataType } from '../../../types';
 import { ColorRing } from 'react-loader-spinner';
 import Stack from '@mui/material/Stack';
 import Alert from '@mui/material/Alert';
@@ -20,6 +20,7 @@ import { getAlertsCampain } from '../../../utils';
 import { AppBar, Dialog, IconButton, Slide, Toolbar, Typography } from '@mui/material';
 import Itens from './Itens';
 import { TransitionProps } from '@mui/material/transitions';
+import Elements from './Elements';
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
@@ -46,6 +47,7 @@ const CampainEdit = () => {
     const [showOrigensModal, setShowOrigensModal] = useState<boolean>(false);
     const [showPericiasModal, setShowPericiasModal] = useState<boolean>(false);
     const [showHabilidadesModal, setShowHabilidadesModal] = useState<boolean>(false);
+    const [showElementsModal, setShowElementsModal] = useState<boolean>(false);
 
     const [subclasses, setSubclasses] = useState<subclassDataType[]>([]);
 
@@ -58,6 +60,8 @@ const CampainEdit = () => {
     const [characters, setCharacters] = useState<avatarDataType[]>([]);
 
     const [stores, setStores] = useState<storeDataType[]>([]);
+
+    const [elements, setElements] = useState<elementDataType[]>([]);
 
     const [alertsList, setAlertsList] = useState<alertType[]>([]);
 
@@ -77,6 +81,7 @@ const CampainEdit = () => {
         setShowOrigensModal(false);
         setShowPericiasModal(false);
         setShowHabilidadesModal(false);
+        setShowElementsModal(false);
     }
 
     useEffect(() => {
@@ -211,6 +216,23 @@ const CampainEdit = () => {
         });
     }
 
+    const getElements = async () => {
+        const p = query(
+            collection(db, 'elements'),
+            where('__name__', 'in', campain?.elements && campain?.elements.length > 0 ? campain?.elements : ['non'])
+        );
+
+        onSnapshot(p, (querySnapshot) => {
+            const docData = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                data: doc.data(),
+            })) as elementDataType[];
+
+            const sorted = docData.sort((a, b) => a.data.name.localeCompare(b.data.name));
+            setElements(sorted);
+        });
+    }
+
     useEffect(() => {
         if (classes.length > 0) {
             getSubclasses();
@@ -219,6 +241,7 @@ const CampainEdit = () => {
             getPerks();
             getCharacters();
             getStores();
+            getElements();
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [classes]);
@@ -333,7 +356,7 @@ const CampainEdit = () => {
                                             <p className='name'>Elementos</p>
                                         </div>
                                         <div>
-                                            <button>Editar</button>
+                                            <button onClick={() => setShowElementsModal(true)}>Editar</button>
                                         </div>
                                     </div>
                                     <div className='box'>
@@ -399,6 +422,9 @@ const CampainEdit = () => {
         </Modal>
         <Modal isOpen={showHabilidadesModal} handleCloseModal={handleCloseModals}>
             <Habilidades classes={classes} toast={toast} habilities={habilities} characters={characters} perks={perks} />
+        </Modal>
+        <Modal isOpen={showElementsModal} handleCloseModal={handleCloseModals}>
+            <Elements toast={toast} elements={elements} />
         </Modal>
 
 
