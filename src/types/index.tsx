@@ -161,8 +161,8 @@ export type buffPerkVantageType = {
 export type habilityBuffType = {
     lifePerLevel?: buffLifeType;
     lifeTotal?: buffLifeType;
-    modifyRoll?: buffPerkType;
-    rollVantage?: buffPerkVantageType;
+    modifyRoll?: buffPerkType[];
+    rollVantage?: buffPerkVantageType[];
 }
 
 export type habilityType = {
@@ -172,6 +172,7 @@ export type habilityType = {
     require?: string[];
     buff?: habilityBuffType;
     type: string;
+    verified?: boolean;
 }
 
 export type habilityDataType = {

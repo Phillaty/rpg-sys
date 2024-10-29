@@ -267,7 +267,7 @@ const CampainEdit = () => {
                                             <p className='quantity'><i className="fa-solid fa-cube"></i> {habilities.length}</p>
                                         </div>
                                         <div>
-                                            <button>Editar</button>
+                                            <button onClick={() => setShowHabilidadesModal(true)}>Editar</button>
                                         </div>
                                     </div>
                                 </div>
@@ -350,9 +350,9 @@ const CampainEdit = () => {
             <Pericias toast={toast} campain={campain} characters={characters} perks={perks} />
         </Modal>
         <Modal isOpen={showHabilidadesModal} handleCloseModal={handleCloseModals}>
-            <Habilidades />
+            <Habilidades classes={classes} toast={toast} habilities={habilities} characters={characters} perks={perks} />
         </Modal>
-        <ToastContainer />
+        <ToastContainer style={{zIndex: '999999999999999999'}} />
         </>
     )
 }

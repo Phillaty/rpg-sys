@@ -270,11 +270,19 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                                         const totalModify = [item.expertise ?? 0];
                                         const totalDice = [20];
 
-                                        const skillHasBuff = habilitiesChar?.find((i) => i.data.buff?.modifyRoll?.perkId === item.id);
-                                        const skillHasVantage = habilitiesChar?.find((i) => i.data.buff?.rollVantage?.perkId === item.id);
+                                        if(!!habilitiesChar) {
+                                            habilitiesChar.forEach((i) => {
+                                                i.data.buff?.modifyRoll?.forEach((j) => {
+                                                    if(j.perkId === item.id) totalModify.push(j.value);
+                                                })
+                                            });
 
-                                        if(!!skillHasBuff) totalModify.push(skillHasBuff.data.buff?.modifyRoll?.value ?? 0);
-                                        if(!!skillHasVantage) totalDice.push(20);
+                                            habilitiesChar.forEach((i) => {
+                                                i.data.buff?.rollVantage?.forEach((j) => {
+                                                    if(j.perkId === item.id) totalModify.push(20);
+                                                })
+                                            });
+                                        }
 
                                         if(charcater){
                                             const attributeMod = getAttrubuteMod(item.base ?? '', charcater?.data);
@@ -300,13 +308,18 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                                         const totalModify = [];
                                         const totalDice = [20];
 
-                                        const skillHasBuff = habilitiesChar?.find((i) => i.data.buff?.modifyRoll?.perkId === item.id);
-                                        const skillHasVantage = habilitiesChar?.find((i) => i.data.buff?.rollVantage?.perkId === item.id);
-
-                                        if(!!skillHasBuff) totalModify.push(skillHasBuff.data.buff?.modifyRoll?.value ?? 0);
-                                        if(!!skillHasVantage) totalDice.push(20);
-
-                                        console.log(charcater)
+                                        if(!!habilitiesChar) {
+                                            habilitiesChar.forEach((i) => {
+                                                i.data.buff?.modifyRoll?.forEach((j) => {
+                                                    if(j.perkId === item.id) totalModify.push(j.value);
+                                                })
+                                            })
+                                            habilitiesChar.forEach((i) => {
+                                                i.data.buff?.rollVantage?.forEach((j) => {
+                                                    if(j.perkId === item.id) totalModify.push(20);
+                                                })
+                                            });
+                                        }
 
                                         if(charcater){
                                             const attributeMod = getAttrubuteMod(item.base ?? '', charcater?.data);
