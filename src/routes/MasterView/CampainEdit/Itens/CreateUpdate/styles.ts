@@ -65,6 +65,10 @@ export const Container = styled.div`
                     width: 50%;
                 }
             }
+
+            .buttons {
+
+            }
         }
 
         .buttons {
@@ -109,6 +113,34 @@ export const Container = styled.div`
                 display:flex;
                 flex-direction: column;
                 gap: 4px;
+            }
+        }
+
+        .listMod {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .itemMod {
+            display: flex;
+            width: 100%;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid lightgrey;
+
+            .itemModName {
+                width: 20%;
+            }
+            .itemModDescription {
+                width: 60%;
+                max-width: 500px;
+            }
+            .itemModButton {
+                display: flex;
+                width: 20%;
+                justify-content: flex-end;
+                align-items: center;
             }
         }
     }

@@ -224,14 +224,12 @@ export type itemTypeCrit = {
 }
 
 export type itemBuffType = {
-    lifeTotal?: buffLifeType;
     modifyRoll?: buffPerkType[];
-    rollVantage?: buffPerkVantageType[];
 }
 
 export type itemTypeModifications = {
-    name?: number;
-    description?: number;
+    name?: string;
+    description?: string;
 }
 
 export type itemType = {

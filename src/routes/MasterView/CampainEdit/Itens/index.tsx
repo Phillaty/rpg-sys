@@ -4,7 +4,7 @@ import { Chip, styled, Table, TableBody, TableCell, tableCellClasses, TableConta
 import Paper from '@mui/material/Paper';
 import { collection, onSnapshot, query, where } from 'firebase/firestore';
 import { db } from '../../../../firebase/firebase';
-import { itemDataType, storeDataType } from '../../../../types';
+import { itemDataType, perkDataType, storeDataType } from '../../../../types';
 import { useLocation } from 'react-router-dom';
 import ItemModal from './CreateUpdate';
 import Modal from '../../../../commom/Modal';
@@ -33,9 +33,10 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
 type prop = {
     toast: any;
     stores: storeDataType[];
+    perks: perkDataType[];
 }
 
-const Itens = ({toast, stores}: prop) => {
+const Itens = ({toast, stores, perks}: prop) => {
 
     const location = useLocation();
 
@@ -159,7 +160,7 @@ const Itens = ({toast, stores}: prop) => {
             </div>
         </Container>
         <Modal isOpen={openModalItem} handleCloseModal={handleCloseMode}>
-            <ItemModal toast={toast} stores={stores} itemSelected={selectIten} />
+            <ItemModal toast={toast} stores={stores} itemSelected={selectIten} perks={perks} />
         </Modal>
         </>
     )

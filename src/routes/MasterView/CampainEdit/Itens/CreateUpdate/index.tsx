@@ -8,7 +8,7 @@ import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
-import { itemDataType, itemType, storeDataType } from '../../../../../types';
+import { buffPerkType, itemDataType, itemType, itemTypeModifications, perkDataType, storeDataType } from '../../../../../types';
 import { db } from '../../../../../firebase/firebase';
 import { Box, Tab, Tabs } from '@mui/material';
 import { Dices } from '../../../../../constants';
@@ -17,6 +17,7 @@ type props = {
     toast: any;
     itemSelected?: itemDataType;
     stores: storeDataType[];
+    perks: perkDataType[];
 }
 
 type newListType = {
@@ -24,7 +25,7 @@ type newListType = {
     name: string;
 }
 
-const ItemModal = ({toast, itemSelected, stores}: props) => {
+const ItemModal = ({toast, itemSelected, stores, perks}: props) => {
 
     const location = useLocation();
 
@@ -37,6 +38,17 @@ const ItemModal = ({toast, itemSelected, stores}: props) => {
     const [loading, setLoading] = useState<boolean>(false);
 
     const [listGetter, setListGetter] = useState<newListType[]>([]);
+
+    const [modificationToAdd, setModificationToAdd] = useState<itemTypeModifications>({
+        name: "",
+        description: ""
+    });
+
+    const [buffToAdd, setBuffToAdd] = useState<buffPerkType>({
+        perkId: "",
+        perkName: "",
+        value: 0,
+    });
 
     const [value, setValue] = React.useState(0);
 
@@ -88,6 +100,9 @@ const ItemModal = ({toast, itemSelected, stores}: props) => {
         if(itemForm.roll && !['weapon', 'armadure'].includes(itemForm.type)) {
             itemFormToGo.roll = itemForm.roll;
         }
+
+        if(itemForm.modifications) itemFormToGo.modifications = itemForm.modifications;
+        if(itemForm.buff) itemFormToGo.buff = itemForm.buff;
 
         setLoading(true);
         if (isToAdd) {
@@ -172,6 +187,8 @@ const ItemModal = ({toast, itemSelected, stores}: props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [itemForm.position.type])
 
+    console.log(itemForm.modifications);
+
     return (
         <>
         <Container>
@@ -199,7 +216,8 @@ const ItemModal = ({toast, itemSelected, stores}: props) => {
                                 {itemForm.type && itemForm.type === 'weapon' && <Tab label="Configuração de arma" onClick={() => setValue(1)} />}
                                 {itemForm.type && itemForm.type === 'armadure' && <Tab label="Configuração de armadura" onClick={() => setValue(1)} />}
                                 {itemForm.type && !['weapon', 'armadure'].includes(itemForm.type) && <Tab label="Gerenciamento de rolagem" onClick={() => setValue(1)} />}
-                                <Tab label="Buffs" onClick={() => setValue(2)} />
+                                {itemForm.type && <Tab label="Buffs" onClick={() => setValue(2)} /> }
+                                <Tab label="Modificações" onClick={() => setValue(3)} />
                             </Tabs>
                         </Box>
                         {value === 0 && 
@@ -489,7 +507,7 @@ const ItemModal = ({toast, itemSelected, stores}: props) => {
                         {value === 1 && itemForm.type === 'armadure' && 
                             <div className='tabPainel'>
                                 <div className='duo'>
-                                    <TextField id="standard-basic" defaultValue={20} label="Defesa" type='number' variant="filled" value={itemForm.armadureConfigs?.protection} onChange={(e) => {
+                                    <TextField id="standard-basic" defaultValue={5} label="Defesa" type='number' variant="filled" value={itemForm.armadureConfigs?.protection} onChange={(e) => {
                                         setItemForm({
                                             ...itemForm,
                                             armadureConfigs: {
@@ -613,7 +631,122 @@ const ItemModal = ({toast, itemSelected, stores}: props) => {
 
                         {value === 2 && 
                             <div className='tabPainel'>
-                            adsadas
+                                <div className='duo'>
+                                    <FormControl variant="filled" sx={{ minWidth: 120 }}>
+                                        <InputLabel id="demo-simple-select-filled-label">Perícia</InputLabel>
+                                        <Select
+                                            labelId="demo-simple-select-label"
+                                            id="demo-simple-select"
+                                            value={buffToAdd.perkId ? JSON.stringify({id: buffToAdd.perkId, name: buffToAdd.perkName}) : ""}
+                                            label="perícia"
+                                            variant="filled"
+                                            onChange={(e) => {
+                                                setBuffToAdd({
+                                                    ...buffToAdd,
+                                                    perkId: JSON.parse(e.target.value).id ?? '',
+                                                    perkName: JSON.parse(e.target.value).name ?? ''
+                                                })
+                                            }}
+                                        >
+                                            {perks.map((i, key) => (
+                                                <MenuItem key={key} value={JSON.stringify({id: i.id, name: i.data.name})}>{i.data.name}</MenuItem>
+                                            ))}
+                                        </Select>
+                                    </FormControl>
+                                    <TextField id="standard-basic" defaultValue={1} label="Valor " type='number' variant="filled" value={itemForm.armadureConfigs?.protection} onChange={(e) => {
+                                        setBuffToAdd({
+                                            ...buffToAdd,
+                                            value: Number(e.target.value)
+                                        });
+                                    }} />
+                                </div>
+                                <div className='one buttons'>
+                                    <button className='button' onClick={() => {
+                                        const newMod = itemForm.buff?.modifyRoll ?? [];
+
+                                        newMod.push(buffToAdd);
+
+                                        setItemForm({
+                                            ...itemForm,
+                                            buff: {
+                                                ...itemForm.buff,
+                                                modifyRoll: newMod
+                                            }
+                                        });
+                                    }}>Adicionar</button>
+                                </div>
+                                <div className='listMod'>
+                                    {itemForm.buff?.modifyRoll?.map((i, key) => (
+                                        <div key={key} className='itemMod'>
+                                            <div className='itemModName'>{i.perkName}</div>
+                                            <div className='itemModDescription'>Adição no modificador: {i.value}</div>
+                                            <div className='itemModButton'><button className='button remove' onClick={() => {
+                                                const newMod = itemForm.buff?.modifyRoll?.filter((j, keyJ) => key !== keyJ);
+                                                setItemForm({
+                                                    ...itemForm,
+                                                    buff: {
+                                                        ...itemForm.buff,
+                                                        modifyRoll: newMod
+                                                    }
+                                                });
+                                            }}>Remover</button></div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        }
+
+                        {value === 3 && 
+                            <div className='tabPainel'>
+                                <div className='one'>
+                                    <TextField id="standard-basic" defaultValue={20} label="Nome da modificação" variant="filled" value={modificationToAdd.name} onChange={(e) => {
+                                        setModificationToAdd({
+                                            ...modificationToAdd,
+                                            name: e.target.value
+                                        });
+                                    }} />
+                                </div>
+                                <div className='one'>
+                                    <TextField
+                                        id="standard-multiline-static"
+                                        label="Descrição da modificação"
+                                        multiline
+                                        rows={2}
+                                        value={modificationToAdd.description}
+                                        onChange={(e) => {  
+                                            setModificationToAdd({
+                                                ...modificationToAdd,
+                                                description: e.target.value
+                                            });
+                                        }}
+                                        variant="filled"
+                                    />
+                                </div>
+                                <div className='one buttons'>
+                                    <button className='button' onClick={() => {
+                                        const newMod = itemForm.modifications ?? [];
+                                        newMod?.push(modificationToAdd);
+                                        setItemForm({
+                                            ...itemForm,
+                                            modifications: newMod
+                                        })
+                                    }}>Adicionar</button>
+                                </div>
+                                <div className='listMod'>
+                                    {itemForm.modifications?.map((i, key) => (
+                                        <div key={key} className='itemMod'>
+                                            <div className='itemModName'>{i.name}</div>
+                                            <div className='itemModDescription'>{i.description}</div>
+                                            <div className='itemModButton'><button className='button remove' onClick={() => {
+                                                const newMod = itemForm.modifications?.filter((j, keyJ) => key !== keyJ);
+                                                setItemForm({
+                                                    ...itemForm,
+                                                    modifications: newMod
+                                                })
+                                            }}>Remover</button></div>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         }
                     </Box>

@@ -317,13 +317,12 @@ const CampainEdit = () => {
 
                             <div className='options'>
                                 <div className='titleConfig'>
-                                    <p>Configuração de itens</p>
+                                    <p>Configuração de itens e magias</p>
                                 </div>
                                 <div className='listConfig'>
                                     <div className='box'>
                                         <div>
                                             <p className='name'>Itens</p>
-                                            <p className='quantity'><i className="fa-solid fa-cube"></i> -</p>
                                         </div>
                                         <div>
                                             <button onClick={handleClickItemOpen}>Editar</button>
@@ -331,8 +330,15 @@ const CampainEdit = () => {
                                     </div>
                                     <div className='box'>
                                         <div>
+                                            <p className='name'>Elementos</p>
+                                        </div>
+                                        <div>
+                                            <button>Editar</button>
+                                        </div>
+                                    </div>
+                                    <div className='box'>
+                                        <div>
                                             <p className='name'>Magias</p>
-                                            <p className='quantity'><i className="fa-solid fa-cube"></i> -</p>
                                         </div>
                                         <div>
                                             <button>Editar</button>
@@ -419,7 +425,7 @@ const CampainEdit = () => {
                 </Typography>
             </Toolbar>
             </AppBar>
-            <Itens toast={toast} stores={stores} />
+            <Itens toast={toast} stores={stores} perks={perks} />
         </Dialog>
         
 
