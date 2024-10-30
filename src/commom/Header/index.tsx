@@ -29,9 +29,9 @@ const Header = () => {
                 <div className='menu'>
                     <p onClick={() => {navigate('/home');}}>
                         <span className='pc'>Página principal</span>
-                        <span className='mobile'>Home</span>
+                        <span className='mobile' >Home</span>
                     </p>
-                    <p>Ajuda</p>
+                    <p onClick={() => {navigate('/help')}}>Ajuda</p>
                     <p>
                         <span className='pc'>Minha conta</span>
                         <span className='mobile'>Conta</span>
