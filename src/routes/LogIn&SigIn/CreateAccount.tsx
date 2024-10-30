@@ -133,12 +133,19 @@ type inviteType = {
 
         if(inviteLocal) {
             const data = JSON.parse(inviteLocal) as inviteType;
-            setInviteData(data)
+            
+            if (data.redeemed) {
+                localStorage.removeItem('invite');
+
+                return;
+            } 
+            
+            setInviteData(data);
             setFormData({
                 ...formData,
                 name: data.name,
                 rule: data.rule,
-            });
+            });            
         };
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [invite, inviteLocal]) 
