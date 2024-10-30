@@ -95,30 +95,12 @@ export const Container = styled.div`
         > div {
 
             .inputs {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
                 > div {
                     display: flex;
                     flex-direction: column;
-
-                    input, select{
-                        height: 32px;
-                        border-radius: 4px;
-                        border: 1px solid #ababab;
-                        outline: none;
-                        padding: 0 4px;
-                    }
-
-                    textarea {
-                        height: 150px;
-                        border-radius: 4px;
-                        border: 1px solid #ababab;
-                        outline: none;
-                        padding: 0 4px;
-                    }
-
-                    label {
-                        margin-top: 8px;
-                        margin-bottom: 4px;
-                    }
                 }
             }
 
@@ -377,7 +359,7 @@ export const Container = styled.div`
                 max-width: 100%;
                 margin-top: 0;
                 height: 100%;
-                padding: 4px;
+                padding: 32px 16px;
             }
         }
         

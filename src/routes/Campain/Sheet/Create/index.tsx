@@ -7,6 +7,7 @@ import { db } from '../../../../firebase/firebase';
 import { ColorRing, Hearts } from 'react-loader-spinner';
 import { decrypt } from '../../../../crypt';
 import { toast, ToastContainer } from 'react-toastify';
+import { FormControl, InputLabel, MenuItem, Select, TextField } from '@mui/material';
 
 type simpleData = {
     name: string;
@@ -272,25 +273,39 @@ const SheetCreation = () => {
                                     </div>
                                     <div className='inputs'>
                                         <div>
-                                            <label>Nome do personagem*</label>
-                                            <input value={simpleData.name} placeholder='Nome...' onChange={(e) => setSimpleData({...simpleData, name: e.target.value})} />
+                                            <TextField id="standard-basic" label="Nome do personagem*" variant="filled" value={simpleData.name} onChange={(e) => setSimpleData({...simpleData, name: e.target.value})} />
                                         </div>
                                         <div>
-                                            <label>Idade</label>
-                                            <input value={simpleData.age} placeholder='Idade...' type='number' onChange={(e) => setSimpleData({...simpleData, age: Number(e.target.value)})} />
+                                            <TextField id="standard-basic" label="Idade" variant="filled" type='number' value={simpleData.age} onChange={(e) => setSimpleData({...simpleData, age: Number(e.target.value)})} />
                                         </div>
                                         <div>
-                                            <label>Gênero</label>
-                                            <select value={simpleData.gender} onChange={(e) => setSimpleData({...simpleData, gender: e.target.value})}>
-                                                <option value="M">Masculino</option>
-                                                <option value="F">Feminino</option>
-                                                <option value="NB">Não binário</option>
-                                                <option value="None">Prefiro não dizer</option>
-                                            </select>
+                                            <FormControl variant="filled" sx={{ minWidth: 120 }}>
+                                                <InputLabel id="demo-simple-select-filled-label">Gênero</InputLabel>
+                                                <Select
+                                                    labelId="demo-simple-select-label"
+                                                    id="demo-simple-select"
+                                                    value={simpleData.gender ?? ""}
+                                                    label="Gênero"
+                                                    variant="filled"
+                                                    onChange={(e) => setSimpleData({...simpleData, gender: e.target.value})}
+                                                >
+                                                    <MenuItem value={"M"}>Masculino</MenuItem>
+                                                    <MenuItem value={"F"}>Feminino</MenuItem>
+                                                    <MenuItem value={"NB"}>Não binário</MenuItem>
+                                                    <MenuItem value={"None"}>Prefiro não dizer</MenuItem>
+                                                </Select>
+                                            </FormControl>
                                         </div>
                                         <div>
-                                            <label>História</label>
-                                            <textarea value={simpleData.lore} placeholder='História...' onChange={(e) => setSimpleData({...simpleData, lore: e.target.value})}></textarea>
+                                            <TextField
+                                                id="standard-multiline-static"
+                                                label="História"
+                                                multiline
+                                                rows={4}
+                                                value={simpleData.lore}
+                                                onChange={(e) => setSimpleData({...simpleData, lore: e.target.value})}
+                                                variant="filled"
+                                            />
                                         </div>
                                     </div>
                                     <div className='buttons'>
