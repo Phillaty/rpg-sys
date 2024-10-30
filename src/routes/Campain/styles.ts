@@ -247,4 +247,12 @@ export const Container = styled.div`
             margin-bottom: 32px;
         }
     }
+
+    @media screen and (max-width: 390px) {
+        .health {
+            .bar {
+                width: 90px;
+            }
+        }
+    }
 `
