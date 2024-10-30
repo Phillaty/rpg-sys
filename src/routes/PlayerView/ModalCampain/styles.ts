@@ -6,7 +6,7 @@ export const Container = styled.div`
     display: flex;
     flex-direction: row-reverse;
 
-    background: #343493;
+    background: #1a1a1a;
     border-radius: 4px;
 
     gap: 8px;
