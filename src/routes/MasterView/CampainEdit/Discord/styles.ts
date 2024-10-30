@@ -46,9 +46,6 @@ export const Container = styled.div`
             display: flex;
             flex-direction: column;
             gap: 8px;
-
-            max-height: 90vh;
-            min-height: 50vh;
             overflow: auto;
 
             .isLoading {
@@ -57,14 +54,6 @@ export const Container = styled.div`
                 display: flex;
                 align-items: center;
                 justify-content: center;
-            }
-
-            .duo {
-                display: flex;
-                gap: 4px;
-                > div {
-                    width: 50%;
-                }
             }
 
             > div {

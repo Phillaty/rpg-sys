@@ -8,7 +8,7 @@ import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
-import { buffPerkType, itemDataType, itemType, itemTypeModifications, perkDataType, storeDataType } from '../../../../../types';
+import { avatarDataType, buffPerkType, itemDataType, itemType, itemTypeModifications, perkDataType, storeDataType } from '../../../../../types';
 import { db } from '../../../../../firebase/firebase';
 import { Box, Tab, Tabs } from '@mui/material';
 import { Dices } from '../../../../../constants';
@@ -18,6 +18,7 @@ type props = {
     itemSelected?: itemDataType;
     stores: storeDataType[];
     perks: perkDataType[];
+    characters: avatarDataType[];
 }
 
 type newListType = {
@@ -25,7 +26,7 @@ type newListType = {
     name: string;
 }
 
-const ItemModal = ({toast, itemSelected, stores, perks}: props) => {
+const ItemModal = ({toast, itemSelected, stores, perks, characters}: props) => {
 
     const location = useLocation();
 
@@ -157,16 +158,16 @@ const ItemModal = ({toast, itemSelected, stores, perks}: props) => {
                 stores.forEach((i) => {
                     newList.push({
                         id: i.id,
-                        name: i.data.title
+                        name: `Loja - ${i.data.title}`
                     } as newListType)
                 })
             }
 
             if (itemForm.position.type === 'inventory') {
-                stores.forEach((i) => {
+                characters.forEach((i) => {
                     newList.push({
                         id: i.id,
-                        name: i.data.title
+                        name: i.data.name
                     } as newListType)
                 })
                 
@@ -284,7 +285,7 @@ const ItemModal = ({toast, itemSelected, stores, perks}: props) => {
                                                     ...itemForm,
                                                     position: {
                                                         ...itemForm.position,
-                                                        type: e.target.value as "ground" | "inventory" | "store" | "entity"
+                                                        type: e.target.value as "ground" | "inventory" | "store" | "entity" | "masterHold"
                                                     }
 
                                                 });
@@ -294,9 +295,10 @@ const ItemModal = ({toast, itemSelected, stores, perks}: props) => {
                                             <MenuItem value={"inventory"}>Inventário jogador</MenuItem>
                                             <MenuItem value={"store"}>Loja</MenuItem>
                                             <MenuItem value={"entity"}>Inventárop entidade</MenuItem>
+                                            <MenuItem value={"masterHold"}>Apenas mestre</MenuItem>
                                         </Select>
                                     </FormControl>
-                                    {itemForm.position.type !== 'ground' && 
+                                    {itemForm.position.type !== 'ground' && itemForm.position.type !== 'masterHold' && 
                                         <FormControl variant="filled" sx={{ minWidth: 120 }}>
                                             <InputLabel id="demo-simple-select-filled-label">Quem segura?</InputLabel>
                                             <Select
@@ -317,7 +319,7 @@ const ItemModal = ({toast, itemSelected, stores, perks}: props) => {
                                                 }}
                                             >
                                                 {listGetter.map((i, key) => (
-                                                    <MenuItem key={key} value={i.id}>Loja - {i.name}</MenuItem>
+                                                    <MenuItem key={key} value={i.id}>{i.name}</MenuItem>
                                                 ))}
                                             </Select>
                                         </FormControl>

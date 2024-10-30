@@ -340,10 +340,10 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
             </Container>
 
             {dice && 
-                <Roll dice={dice} mod={diceMod} setdice={setdice} setdiceMod={setdiceMod} />
+                <Roll dice={dice} mod={diceMod} setdice={setdice} setdiceMod={setdiceMod} discord={campain?.discord} char={charcater?.data} />
             }
             {dicePersToRoll && dicePersToRoll.length > 0 &&
-                <Roll dice={dicePersToRoll} mod={dicePersMod} setdice={setdicePersToRoll} setdiceMod={setdicePersToRoll} onClose={() => {handleCloseDicePer()}} />
+                <Roll dice={dicePersToRoll} mod={dicePersMod} setdice={setdicePersToRoll} setdiceMod={setdicePersToRoll} onClose={() => {handleCloseDicePer()}} discord={campain?.discord} char={charcater?.data} />
             }
 
             {showSheetDetails && skills && 

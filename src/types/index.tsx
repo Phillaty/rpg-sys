@@ -9,6 +9,11 @@ export type userDataType = {
     id: string;
 };
 
+export type discordType = {
+    webhook?: string;
+    sendDices?: boolean;
+}
+
 export type campainType = {
     description: string;
     img: string;
@@ -24,6 +29,7 @@ export type campainType = {
     origins: string[];
     elements: string[];
     skills: string[];
+    discord?: discordType;
 }
 
 export type campainDataType = {
@@ -215,7 +221,7 @@ export type itemTypeRoll = {
 }
 
 export type itemTypePosition = {
-    type: 'inventory' | 'store' | 'ground' | 'entity';
+    type: 'inventory' | 'store' | 'ground' | 'entity' | 'masterHold';
     idGetter?: string;
 }
 
@@ -270,6 +276,7 @@ export type storeType = {
     description: string;
     moneyHolding: number;
     tax: number;
+    verified?: boolean;
 }
 
 export type storeDataType = {
@@ -280,10 +287,49 @@ export type storeDataType = {
 export type elementType = {
     name: string;
     description: string;
+    colors?: {
+        background?: string;
+        color?: string;
+    };
     verified?: boolean,
 }
 
 export type elementDataType = {
     id: string;
     data: elementType;
+}
+
+export type elementMagicType = {
+    name: string;
+    id: string;
+    color?: string;
+    backgroundColor?: string;
+}
+
+export type magicTypeUpgrades = {
+    title: string;
+    description: string;
+    level: number;
+    peCost?: number;
+}
+
+export type magicType = {
+    name: string;
+    description: string;
+    upgrades: magicTypeUpgrades[];
+    element: elementMagicType,
+    circle: number,
+    verified?: boolean,
+    campainId: string,
+
+    duration: string,
+    reach: string,
+    target: string,
+    execution: string,
+    resistance?: string,
+}
+
+export type magicDataType = {
+    id: string;
+    data: magicType;
 }

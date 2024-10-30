@@ -4,11 +4,10 @@ import { Chip, styled, Table, TableBody, TableCell, tableCellClasses, TableConta
 import Paper from '@mui/material/Paper';
 import { collection, onSnapshot, query, where } from 'firebase/firestore';
 import { db } from '../../../../firebase/firebase';
-import { avatarDataType, itemDataType, perkDataType, storeDataType } from '../../../../types';
+import { elementDataType, magicDataType } from '../../../../types';
 import { useLocation } from 'react-router-dom';
-import ItemModal from './CreateUpdate';
 import Modal from '../../../../commom/Modal';
-import { getTypePosition } from '../../../../utils';
+import MagicModal from './CreateUpdate';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -32,12 +31,10 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
 
 type prop = {
     toast: any;
-    stores: storeDataType[];
-    perks: perkDataType[];
-    characters: avatarDataType[];
+    elements: elementDataType[];
 }
 
-const Itens = ({toast, stores, perks, characters}: prop) => {
+const Magics = ({toast, elements}: prop) => {
 
     const location = useLocation();
 
@@ -45,19 +42,24 @@ const Itens = ({toast, stores, perks, characters}: prop) => {
     const urlParams = new URLSearchParams(queryString);
     const campainId = urlParams.get('camp') ?? '';
 
-    const [itens, setItens] = useState<itemDataType[]>([]);
-    const [itensFiltered, setItensFiltered] = useState<itemDataType[]>([]);
+    const [magicFiltered, setMagicFiltered] = useState<magicDataType[]>([]);
+    const [magics, setMagics] = useState<magicDataType[]>([]);
 
-    const [selectIten, setSelectIten] = useState<itemDataType>();
+    const [selectMagic, setSelectMagic] = useState<magicDataType>();
 
-    const [openModalItem, setOpenModalItem] = useState<boolean>(false);
+    const [openModalMagic, setOpenModalMagic] = useState<boolean>(false);
 
     const [search, setSearch] = useState<string>("");
+
+    const handleCloseMode = () => {
+        setOpenModalMagic(false);
+        setSelectMagic(undefined);
+    };
 
     const getClassesVerified = async () => {
         if (campainId) {
             const p = query(
-                collection(db, 'item'),
+                collection(db, 'magics'),
                 where('campainId', '==', campainId)
             );
     
@@ -65,11 +67,11 @@ const Itens = ({toast, stores, perks, characters}: prop) => {
                 const docData = querySnapshot.docs.map(doc => ({
                     id: doc.id,
                     data: doc.data(),
-                })) as itemDataType[];
+                })) as magicDataType[];
 
                 const sorted = docData.sort((a, b) => a.data.name.localeCompare(b.data.name));
-                setItens(sorted);
-                setItensFiltered(sorted);
+                setMagics(sorted);
+                setMagicFiltered(sorted);
     
                 
             });
@@ -84,22 +86,17 @@ const Itens = ({toast, stores, perks, characters}: prop) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const handleCloseMode = () => {
-        setOpenModalItem(false);
-        setSelectIten(undefined);
-    };
-
     useEffect(() => {
         if (search) {
-            const filtered = itens.filter(item => 
+            const filtered = magics.filter(item => 
                 item.data.name.toLowerCase().includes(search.toLowerCase()) ||
                 item.data.description.toLowerCase().includes(search.toLowerCase())
             );
             const sorted = filtered.sort((a, b) => a.data.name.localeCompare(b.data.name));
 
-            setItensFiltered(sorted);
+            setMagicFiltered(sorted);
         } else {
-            setItensFiltered(itens);
+            setMagicFiltered(magics);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [search])
@@ -115,8 +112,8 @@ const Itens = ({toast, stores, perks, characters}: prop) => {
                     </div>
                     <div className='buttons'>
                         <button onClick={() => {
-                            setSelectIten(undefined);
-                            setOpenModalItem(true);
+                            setSelectMagic(undefined);
+                            setOpenModalMagic(true);
                         }}>Criar item <i className="fa-solid fa-plus"></i></button>
                     </div>
                 </div>
@@ -126,31 +123,33 @@ const Itens = ({toast, stores, perks, characters}: prop) => {
                         <TableRow>
                             <StyledTableCell align="left">Nome</StyledTableCell>
                             <StyledTableCell>Descrição</StyledTableCell>
-                            <StyledTableCell align="right">Tipo</StyledTableCell>
-                            <StyledTableCell align="right">Posição</StyledTableCell>
-                            <StyledTableCell align="right">Categoria</StyledTableCell>
-                            <StyledTableCell align="right">Carga</StyledTableCell>
+                            <StyledTableCell align="right">Elemento</StyledTableCell>
+                            <StyledTableCell align="right">Circulo</StyledTableCell>
                             <StyledTableCell align="right">Ações</StyledTableCell>
                         </TableRow>
                         </TableHead>
                         <TableBody>
-                        {itensFiltered.map((row) => (
+                        {magicFiltered.map((row) => (
                             <StyledTableRow key={row.id}>
                                 <StyledTableCell component="th" scope="row">
-                                    {row.data.name}
+                                    {row.data.name ?? ''}
                                 </StyledTableCell>
                                 <StyledTableCell style={{width: '40%'}} component="th" scope="row" >
                                     {row.data.description}
                                 </StyledTableCell>
-                                <StyledTableCell align="right"><Chip className={`chip-${row.data.type}`} label={getTypePosition(row.data.type)} color="success" /></StyledTableCell>
-                                <StyledTableCell align="right"><Chip className={`chip-${row.data.position.type}`} label={getTypePosition(row.data.position.type)} color="success" /></StyledTableCell>
-                                <StyledTableCell align="right">{row.data.category}</StyledTableCell>
-                                <StyledTableCell align="right">{row.data.weight}</StyledTableCell>
+                                <StyledTableCell align="right">
+                                    <Chip 
+                                        className={`chip-${row?.data?.element?.name}`} 
+                                        style={{backgroundColor: row?.data?.element?.backgroundColor ?? '', color: row?.data?.element?.color}} 
+                                        label={row?.data?.element?.name} color="success" 
+                                    />
+                                </StyledTableCell>
+                                <StyledTableCell align="right"><Chip className={`chip-${row.data.circle}`} label={`${row.data.circle}º Circulo`} color="success" /></StyledTableCell>
                                 <StyledTableCell align="right" className='actions'>
                                     <button className='remove'>Excluir</button>
                                     <button onClick={() => {
-                                        setSelectIten(row);
-                                        setOpenModalItem(true);
+                                        setSelectMagic(row);
+                                        setOpenModalMagic(true);
                                     }}>Editar</button>
                                 </StyledTableCell>
                             </StyledTableRow>
@@ -160,11 +159,12 @@ const Itens = ({toast, stores, perks, characters}: prop) => {
                 </TableContainer>
             </div>
         </Container>
-        <Modal isOpen={openModalItem} handleCloseModal={handleCloseMode}>
-            <ItemModal toast={toast} stores={stores} itemSelected={selectIten} perks={perks} characters={characters} />
+        <Modal isOpen={openModalMagic} handleCloseModal={handleCloseMode}>
+            <MagicModal toast={toast} magicSelected={selectMagic} elements={elements} />
+            <></>
         </Modal>
         </>
     )
 }
 
-export default Itens;
+export default Magics;

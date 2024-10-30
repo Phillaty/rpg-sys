@@ -99,6 +99,7 @@ export const uploadImage = async (file: File, path: string): Promise<uploadImage
       case 'store': return "Loja";
       case 'ground': return "No chão";
       case 'entity': return "Inventário entidade";
+      case 'masterHold': return "Apenas mestre";
       case 'weapon': return "Armamento";
       case 'armadure': return "Armadura";
       case 'addon': return "Addon";

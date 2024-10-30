@@ -59,14 +59,6 @@ export const Container = styled.div`
                 justify-content: center;
             }
 
-            .duo {
-                display: flex;
-                gap: 4px;
-                > div {
-                    width: 50%;
-                }
-            }
-
             > div {
                 width: 100%;
             }

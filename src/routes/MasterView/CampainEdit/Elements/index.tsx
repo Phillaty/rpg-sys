@@ -148,7 +148,27 @@ const Elements = ({toast, elements}: props) => {
                                 });
                             }}
                         />
-                    </div>                    
+                    </div>
+                    <div className='duo'>
+                        <TextField id="standard-basic" type='color' label="Cor fundo" variant="filled" value={elementForm.colors?.background} onChange={(e) => {                            
+                            setElementForm({
+                                ...elementForm,
+                                colors: {
+                                    ...elementForm.colors,
+                                    background: e.target.value,
+                                }
+                            });
+                        }} />
+                        <TextField id="standard-basic" type='color' label="Cor fonte" variant="filled" value={elementForm.colors?.color} onChange={(e) => {
+                            setElementForm({
+                                ...elementForm,
+                                colors: {
+                                    ...elementForm.colors,
+                                    color: e.target.value,
+                                }
+                            });
+                        }} />
+                    </div>                 
                     <div className='buttons'>                        
                         <button className='remove' onClick={handleDeleteElement}>Remover Elemento</button>
                         <button onClick={handleOrigin}>Salvar</button>
