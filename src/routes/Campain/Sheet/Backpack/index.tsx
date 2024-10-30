@@ -33,7 +33,7 @@ const Backpack = ({itens, itensGeral, itensWeapon, itensArmadure}: prop) => {
             {value === 0 && 
                 <div className='TabContainer'>
                     {itensGeral.map((item, key) => (
-                        <div className='item'>
+                        <div className='item' key={key}>
                             <div className='name'>{item.data.name}</div>
                             <div className='data'>{item.data.description}</div>
                             {item.data.weaponConfigs &&
@@ -78,7 +78,7 @@ const Backpack = ({itens, itensGeral, itensWeapon, itensArmadure}: prop) => {
             {value === 1 && 
                 <div className='TabContainer'>
                     {itensWeapon.map((item, key) => (
-                        <div className='item'>
+                        <div className='item' key={key}>
                             <div className='name'>{item.data.name}</div>
                             <div className='data'>{item.data.description}</div>
                             {item.data.weaponConfigs &&
@@ -123,7 +123,7 @@ const Backpack = ({itens, itensGeral, itensWeapon, itensArmadure}: prop) => {
             {value === 2 && 
                 <div className='TabContainer'>
                     {itensArmadure.map((item, key) => (
-                        <div className='item'>
+                        <div className='item' key={key}>
                             <div className='name'>{item.data.name}</div>
                             <div className='data'>{item.data.description}</div>
                             {item.data.weaponConfigs &&

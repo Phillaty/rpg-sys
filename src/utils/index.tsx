@@ -143,16 +143,16 @@ export const uploadImage = async (file: File, path: string): Promise<uploadImage
     const beforeBasic = character.data.basics;
 
     const newLife = {
-      max: character.data.basics.life.max + classe.data.life.perLevel,
-      actual: character.data.basics.life.actual + classe.data.life.perLevel
+      max: character.data.basics.life.max + classe.data.life.perLevel + (character.data.VIG * 3),
+      actual: character.data.basics.life.actual + classe.data.life.perLevel + character.data.VIG + (character.data.VIG * 3)
     }
     const newSanity = {
       max: character.data.basics.sanity.max + classe.data.sanity.perLevel,
       actual: character.data.basics.sanity.actual + classe.data.sanity.perLevel
     }
     const newPE = {
-      max: character.data.basics.pe.max + classe.data.pe.perLevel,
-      actual: character.data.basics.pe.actual + classe.data.pe.perLevel
+      max: character.data.basics.pe.max + classe.data.pe.perLevel + (character.data.PRE * 3),
+      actual: character.data.basics.pe.actual + classe.data.pe.perLevel + (character.data.PRE * 3)
     }
 
     const basicsNew = {

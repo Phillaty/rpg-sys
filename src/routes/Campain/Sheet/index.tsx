@@ -6,7 +6,7 @@ import { skillFiltr, skillTy } from '..';
 import Roll from '../../../commom/ROLL';
 import { getAttrubuteMod, getPercentage } from '../../../utils';
 import SheetDetails from './SheetDetails';
-import { collection, deleteDoc, doc, onSnapshot, query, updateDoc, where } from 'firebase/firestore';
+import { collection, doc, onSnapshot, query, updateDoc, where } from 'firebase/firestore';
 import { db } from '../../../firebase/firebase';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Modal from '../../../commom/Modal';
@@ -95,6 +95,10 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
 
     const handleCloseHealth = () => {
         sethealthModal(false);
+        setlifeValue(undefined);
+        setsanityValue(undefined);
+        setPeValue(undefined);
+        setCyberValue(undefined);
     }
 
     useEffect(() => {
@@ -296,10 +300,27 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                 }
             }
         }).then(() => {
-            toast.success("Saúde editada!")
+            toast.success("Saúde editada!");
+            handleCloseHealth();
         });
         
     }
+
+    useEffect(() => {
+        if (!!itemsCharInventory.length && charcater) {
+            const weightTotalBackpack = itemsCharInventory.reduce((a, b) => a + b.data.weight, 0);
+
+            if(charcater?.data.slotManagement?.actual !== weightTotalBackpack) {
+                const userDocRef = doc(db, "character", charcater?.id ?? '');
+                updateDoc(userDocRef, {
+                    slotManagement: {
+                        ...charcater?.data.slotManagement,
+                        actual: weightTotalBackpack,
+                    }
+                });
+            }
+        }
+    }, [itemsCharInventory, charcater]);
 
     return (
         <>
@@ -478,7 +499,7 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                         <div className='habilityTitle'>Habilidades ativas <small>Clique para ver mais</small></div>
                         <div className='habilityList'>
                             {habilitiesChar?.map((item, key) => (
-                                <div className='habilityItem' onClick={() => setHabilitySelected(item)}>{item.data.name}</div>
+                                <div className='habilityItem' key={key} onClick={() => setHabilitySelected(item)}>{item.data.name}</div>
                             ))}
                         </div>
                     </div>

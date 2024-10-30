@@ -380,7 +380,7 @@ const Habilidades = ({toast, characters, habilities, classes, perks}: props) => 
 
                                             <div className='perkBuffList'>
                                                 {habilityForm.buff?.modifyRoll?.map((i, key) => (
-                                                    <div className='perkBuffListItem'>
+                                                    <div className='perkBuffListItem' key={key}>
                                                         <div>
                                                             <label>Nome da perícia</label>
                                                             <p>{i.perkName}</p>
@@ -456,7 +456,7 @@ const Habilidades = ({toast, characters, habilities, classes, perks}: props) => 
                                             </div>
                                             <div className='perkBuffList'>
                                                 {habilityForm.buff?.rollVantage?.map((i, key) => (
-                                                    <div className='perkBuffListItem'>
+                                                    <div className='perkBuffListItem' key={key}>
                                                         <div>
                                                             <label>Nome da perícia</label>
                                                             <p>{i.perkName}</p>

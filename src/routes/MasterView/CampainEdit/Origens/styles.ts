@@ -12,6 +12,9 @@ export const Container = styled.div`
             display: flex;
             flex-direction: column;
             gap: 4px;
+            max-height: 80vh;
+            overflow: auto;
+            padding-right: 4px;
 
             button {
                 width: 100%;

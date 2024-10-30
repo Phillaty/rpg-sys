@@ -56,6 +56,18 @@ export type unlockType = {
     levelPoint: number;
 }
 
+export type slotManagementType = {
+    max: number;
+    actual: number;
+}
+
+export type defenseType = {
+    normal: number;
+    buuffed: number;
+    itemBuffs: string[];
+    habilitysBuffs: string[];
+}
+
 export type avatarType = {
     class: classCharType;
     subclass: classCharType;
@@ -76,6 +88,8 @@ export type avatarType = {
     hability: string[];
     unlock: unlockType;
     img: string;
+    slotManagement: slotManagementType;
+    defense: defenseType;
 };
 
 export type avatarDataType = {
@@ -334,4 +348,40 @@ export type magicType = {
 export type magicDataType = {
     id: string;
     data: magicType;
+}
+
+export type entityType = {
+    name: string;
+    description: string;
+    senses: {
+        perseption: number;
+        iniciative: number;
+    };
+    defense: number;
+    life: number;
+    actualLife?: number;
+    attributes: {
+        AGI: number;
+        FOR: number;
+        INT: number;
+        PRE: number;
+        VIG: number;
+    };
+    perks: {
+        name: string;
+        mod: number;
+    }[];
+    walkDistance: number;
+    actions: {
+        title: string;
+        description: string;
+        testMod?: number;
+        mod?: number;
+        type: string;
+    }[];
+}
+
+export type entityDataType = {
+    id: string;
+    data: entityType;
 }

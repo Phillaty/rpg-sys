@@ -87,6 +87,7 @@ const ItemModal = ({toast, itemSelected, stores, perks, characters}: props) => {
             category: itemForm.category,
             campainId: campainId,
             verified: true,
+            cost: itemForm.cost ?? 0,
         } as itemType;
 
         if (itemForm.type === 'weapon') {

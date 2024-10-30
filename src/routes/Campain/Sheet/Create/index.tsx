@@ -207,6 +207,10 @@ const SheetCreation = () => {
                 id: classeSelected?.id,
                 title: classeSelected?.data.name
             },
+            slotManagement: {
+                max: 5 + (attributes.FOR >= 0 ? attributes.FOR * 5 : 0),
+                actual: 0,
+            },
             basics: {
                 cyberpsicosy: {
                     actual: 100,
@@ -356,11 +360,34 @@ const SheetCreation = () => {
                                 <div>
                                     <div className='top'>
                                         <p className='title'>Atributos e perícias!</p>
-                                        <p className='description'>Os atributos e as perícias são a base do seu personagem <br /> Atenção que cada perícia utiliza um atributo como base!</p>
+                                        <p className='description'>
+                                            Os atributos e as perícias são a base do seu personagem <br /> 
+                                            Atenção que cada perícia utiliza um atributo como base! <br/>
+                                            <u>Dicas</u> <br/> 
+                                            Minimo é -1 e o máximo é 5 de atributo<br/> 
+                                            INT aumenta pontos de perícia <br/> 
+                                            FOR aumenta carga máxima <br/>
+                                            AGI aumenta defesa <br/>
+                                            VIG aumenta vida máxima <br/>
+                                            PRE aumenta sanidade
+                                        </p>
                                     </div>
                                     <div className='attributesDetail'>
                                         <p>Pontos de atributos restantes: {attributePoints}</p>
                                         <p className='per'>Perícias ganhas pela origem: {originSelected?.data.bonus.skill.map((item) => (<div>{item}</div>))}</p>
+                                        <div className='data'>
+                                            <p className='info'>Carga máxima: {5 + (attributes.FOR > 0 ? (attributes.FOR) * 5 : 0)}</p>
+                                            <p className='info'>Defesa: {10 + (attributes.AGI > 0 ? attributes.AGI : 0)}</p>
+                                            <p className='info'>
+                                                Vida máxima: {(classeSelected?.data.life.default ?? 0) + (attributes.VIG > 0 ? attributes.VIG : 0)} | 
+                                                por nível: {(classeSelected?.data.life.perLevel ?? 0) + (attributes.VIG > 0 ? attributes.VIG : 0)}
+                                            </p>
+                                            <p className='info'>
+                                                Sanidade máxima: {(classeSelected?.data.sanity.default ?? 0) + (attributes.PRE > 0 ? attributes.PRE : 0)} | 
+                                                por nível: {(classeSelected?.data.sanity.perLevel ?? 0) + (attributes.PRE > 0 ? attributes.PRE : 0)}
+                                            </p>
+                                        </div>
+                                        
                                     </div>
                                     <div className='attributes'>
                                         <div className='item'>
@@ -465,7 +492,7 @@ const SheetCreation = () => {
                                         </div>
                                     </div>
                                     <div className='skillsDetail'>
-                                        <p>Pontos de perícia restantesssss: {perkPoints}</p>
+                                        <p>Pontos de perícia restantes: {perkPoints}</p>
                                     </div>
                                     <div className='skills'>
                                         {skills.map((item, key) => (
@@ -487,6 +514,7 @@ const SheetCreation = () => {
                                                 
                                             }}>{item.data.name} <span>{item.data.base}</span></div>
                                         ))}
+                                        
                                     </div>
                                     <div className='buttons'>
                                         <button onClick={() => setStage(stage - 1)} className='back'>Voltar</button>

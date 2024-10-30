@@ -12,9 +12,6 @@ export const Container = styled.div`
             display: flex;
             flex-direction: column;
             gap: 4px;
-            max-height: 80vh;
-            overflow: auto;
-            padding-right: 4px;
 
             button {
                 width: 100%;
@@ -44,14 +41,11 @@ export const Container = styled.div`
         }
 
         .right {
-            width: 40vw;
+            width: 30vw;
             padding: 0 16px;
             display: flex;
             flex-direction: column;
             gap: 8px;
-
-            max-height: 90vh;
-            min-height: 50vh;
             overflow: auto;
 
             .isLoading {
@@ -265,75 +259,31 @@ export const Container = styled.div`
             width: 0;
             padding: 0;
         }
+    }
 
-        .buffItem {
-            padding: 16px;
+    .link {
+        position: relative;
 
-            button {
-                background-color: #737ad3;
-                color: white;
-                border: 0;
-                border-radius: 4px;
-                padding: 8px 16px;
-                cursor: pointer;
-            }
+        span {
+            position: absolute;
+            top: -110%;
+            background: #1fc9ef;
+            color: white;
+            padding: 8px;
+        }
 
-            button:hover {
-                opacity: 0.8;
-                transition: 0.2s;
-            }
+        > div {
+            cursor: pointer;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            border: 1px solid lightgray;
+            padding: 8px;
+            white-space: nowrap;
+        }
 
-            .remove {
-                background-color: #d37373;
-            }
-
-            .itembuffContainer {
-                display: flex;
-                flex-direction: column;
-                gap: 8px;
-
-                > .remove {
-                    width: 200px;
-                    margin-top: 16px;
-                }
-
-                .inputs {
-                    display: flex;
-                    gap: 8px;
-
-                    > div {
-                        width: 50%;
-                    }
-                }
-
-                .inputsOne > div {
-                    width: 100%;
-                }
-
-                .perkBuffList {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 4px;
-                }
-
-                .perkBuffListItem {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    padding: 8px 16px;
-                    border-radius: 4px;
-                    border: 1px solid #d1d1d1;
-
-                    p {
-                        margin: 0;
-                        font-size: 14px;
-                    }
-
-                    label {
-                        font-weight: 600;
-                    }
-                }
-            }
+        > div:hover {
+            background-color: #dfdfdf;
+            transition: 0.2s;
         }
     }
 `

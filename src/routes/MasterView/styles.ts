@@ -120,7 +120,8 @@ export const Container = styled.div`
                 display: -webkit-box;
                 -webkit-line-clamp: 3; /* number of lines to show */
                         line-clamp: 3; 
-                -webkit-box-orient: vertical;
+                display: flex;
+                gap: 4px;
             }
         }
     }

@@ -67,13 +67,14 @@ export const Container = styled.div<{isToCloseSheet: boolean}>`
     }
 
     .mainDetails {
-        max-width: 1366px;
+        max-width: 1380px;
         display: flex;
         align-items: flex-start;
         flex-wrap: wrap;
         width: 100%;
         gap: 16px;
         margin-top: 24px;
+        overflow: auto;
     }
 
     .charInfo {

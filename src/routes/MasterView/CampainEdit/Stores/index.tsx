@@ -101,7 +101,7 @@ const Stores = ({toast, stores}: props) => {
                     {stores.map((i, key) => (
                         <button className={`${storeSelected === i ? 'selected' : ''}`} key={key} onClick={() => setStoreSelected(i)}>{i.data.title}</button>
                     ))}
-                    <button className='add' onClick={prepareToAdd}><i className="fa-solid fa-plus"></i> {stores.length <= 0 ? 'Adicionar classe' : ''}</button>
+                    <button className='add' onClick={prepareToAdd}><i className="fa-solid fa-plus"></i> {stores.length <= 0 ? 'Adicionar loja' : ''}</button>
                 </div>
                 <div className={`right ${stores.length <= 0 && !isToAdd ? 'noClasses' : ''}`}>
                     {loading ? <>

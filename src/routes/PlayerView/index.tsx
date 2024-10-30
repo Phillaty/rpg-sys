@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Container } from './styles';
 import ModalCampain from './ModalCampain';
 import { campainDataType } from '../../types';
+import { Chip } from '@mui/material';
 
 type prop = {
     campains: campainDataType[];
@@ -36,7 +37,10 @@ const HomePlayer = (props: prop) => {
                                     </div>
                                     <div className='details'>
                                         <div>
-                                            <span>{item.data.title}</span>
+                                            <span>
+                                                <Chip color="primary" label={`Jogadores: ${item.data.players.length + 1}`} />
+                                                <Chip color="secondary" label={`Personagens: ${item.data.characters.length}`} />
+                                            </span>
                                         </div>
                                     </div>
                                 </div>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Container } from './styles';
 import { useLocation } from 'react-router-dom';
-import { collection, doc, onSnapshot, query, where } from 'firebase/firestore';
+import { collection, doc, onSnapshot, query, updateDoc, where } from 'firebase/firestore';
 import { db } from '../../../firebase/firebase';
 import { alertType, avatarDataType, campainDataType, classeDataType, elementDataType, habilityDataType, originDataType, perkDataType, storeDataType, subclassDataType } from '../../../types';
 import { ColorRing } from 'react-loader-spinner';
@@ -24,6 +24,7 @@ import Elements from './Elements';
 import Magics from './Magics';
 import Stores from './Stores';
 import Discord from './Discord';
+import Invite from './Invite';
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
@@ -45,12 +46,15 @@ const CampainEdit = () => {
     const [campain, setCampain] = useState<campainDataType>();
     const [classes, setClasses] = useState<classeDataType[]>([]);
 
+    const [loading, setLoading] = useState<boolean>(false);
+
     const [showClassesModal, setShowClassesModal] = useState<boolean>(false);
     const [showSubclassesModal, setShowSubclassesModal] = useState<boolean>(false);
     const [showOrigensModal, setShowOrigensModal] = useState<boolean>(false);
     const [showPericiasModal, setShowPericiasModal] = useState<boolean>(false);
     const [showHabilidadesModal, setShowHabilidadesModal] = useState<boolean>(false);
     const [showElementsModal, setShowElementsModal] = useState<boolean>(false);
+    const [showInviteModal, setShowInviteModal] = useState<boolean>(false);
 
     const [subclasses, setSubclasses] = useState<subclassDataType[]>([]);
 
@@ -100,6 +104,7 @@ const CampainEdit = () => {
         setShowElementsModal(false);
         setOpenStoreModal(false);
         setOpenDiscordModal(false);
+        setShowInviteModal(false);
     }
 
     useEffect(() => {
@@ -267,9 +272,25 @@ const CampainEdit = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [classes]);
 
+    const promoteChar = async (char: avatarDataType) => {
+        if (char) {
+            setLoading(true);
+            const charDocRef = doc(db, "character", char.id);
+
+            await updateDoc(charDocRef, {
+                unlock: {
+                    ...char.data.unlock,
+                    levelPoint: char.data.unlock.levelPoint + 1
+                },
+            }).then(() => {
+                toast.success("Personagem promovido!");
+            });
+        }
+    }
+
     return (
         <>
-        {campain ? 
+        {campain || loading ? 
         <>
         <Container>
             <div>
@@ -281,7 +302,7 @@ const CampainEdit = () => {
                         <button>Editar informações</button>
                         <button onClick={() => setOpenStoreModal(true)}>Gerenciar Lojas</button>
                         <button>Gerenciar entidades</button>
-                        <button>Gerenciar convite</button>
+                        <button onClick={() => setShowInviteModal(true)}>Gerenciar convite</button>
                         <button onClick={() => setOpenDiscordModal(true)}>Configurar bot Discord</button>
                     </div>
                 </div>
@@ -306,7 +327,7 @@ const CampainEdit = () => {
                                     <div className='box'>
                                         <div>
                                             <p className='name'>Classes</p>
-                                            <p className='quantity'><i className="fa-solid fa-cube"></i> {campain.data.classes.length}</p>
+                                            <p className='quantity'><i className="fa-solid fa-cube"></i> {campain?.data.classes.length}</p>
                                         </div>
                                         <div>
                                             <button onClick={() => setShowClassesModal(true)}>Editar</button>
@@ -324,7 +345,7 @@ const CampainEdit = () => {
                                     <div className='box'>
                                         <div>
                                             <p className='name'>Origens</p>
-                                            <p className='quantity'><i className="fa-solid fa-cube"></i> {campain.data.origins.length}</p>
+                                            <p className='quantity'><i className="fa-solid fa-cube"></i> {campain?.data.origins.length}</p>
                                         </div>
                                         <div>
                                             <button onClick={() => setShowOrigensModal(true)}>Editar</button>
@@ -341,7 +362,7 @@ const CampainEdit = () => {
                                     <div className='box'>
                                         <div>
                                             <p className='name'>Perícias</p>
-                                            <p className='quantity'><i className="fa-solid fa-cube"></i> {campain.data.skills.length}</p>
+                                            <p className='quantity'><i className="fa-solid fa-cube"></i> {campain?.data.skills.length}</p>
                                         </div>
                                         <div>
                                             <button onClick={() => setShowPericiasModal(true)}>Editar</button>
@@ -399,13 +420,18 @@ const CampainEdit = () => {
                     </div>
                     <div className='charList'>
                         {characters.map((char, key) => (
-                            <div className='item'>
+                            <div className='item' key={key}>
                                 <div className='img'>
                                     <Avatar alt="Cindy Baker" src={char.data.img ?? avatarlogo} />
                                 </div>
                                 <div className='option'>
-                                    <p>{char.data.name}</p>
-                                    <button>Editar</button>
+                                    <p className='name'>{char.data.name}</p>
+                                    <p>Nível {char.data.level}</p>
+                                    <p>Pontos de nível: {char.data.unlock.levelPoint}</p>
+                                    <div className='buttons'>
+                                        <button><i className="fa-solid fa-pen-to-square"></i></button>
+                                        <button onClick={() => promoteChar(char)}><i className="fa-solid fa-angles-up"></i> Nível</button>
+                                    </div>
                                 </div>
                             </div>
                         ))}
@@ -505,6 +531,9 @@ const CampainEdit = () => {
         </Modal>
         <Modal isOpen={openDiscordModal} handleCloseModal={handleCloseModals}>
             <Discord toast={toast} campain={campain} />
+        </Modal>
+        <Modal isOpen={showInviteModal} handleCloseModal={handleCloseModals}>
+            <Invite toast={toast} campain={campain} />
         </Modal>
 
 

@@ -3,6 +3,7 @@ import { Container, ContainerModal } from './styles';
 import { campainDataType } from '../../types';
 import { useNavigate } from 'react-router-dom';
 import Modal from '../../commom/Modal';
+import { Chip } from '@mui/material';
 
 type prop = {
     campains: campainDataType[];
@@ -43,7 +44,10 @@ const HomeMaster = (props: prop) => {
                                 </div>
                                 <div className='details'>
                                     <div>
-                                        <span>{item.data.title}</span>
+                                        <span>
+                                            <Chip color="primary" label={`Jogadores: ${item.data.players.length + 1}`} />
+                                            <Chip color="secondary" label={`Personagens: ${item.data.characters.length}`} />
+                                        </span>
                                     </div>
                                     
                                 </div>

@@ -170,6 +170,16 @@ export const Container = styled.div`
                             font-size: 14px;
                         }
 
+                        .name {
+                            font-weight: 600;
+                            font-size: 16px;
+                        }
+
+                        .buttons {
+                            display: flex;
+                            gap: 4px;
+                        }
+
                         button {
                             background-color: #737ad3;
                             color: white;

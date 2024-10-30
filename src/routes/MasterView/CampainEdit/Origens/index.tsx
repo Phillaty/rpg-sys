@@ -102,27 +102,41 @@ const Origens = ({toast, campain, origins, perks, characters}: props) => {
     }
 
     const getOriginsVerified = async () => {
-         const p = query(
-             collection(db, 'origin'),
-             where('verified', '==', true),
-             where('__name__', 'not-in', campain?.origins && campain?.origins.length > 0 ? campain?.origins : ['non'])
-         );
-
-         const querySnapshot = await getDocs(p);
-
-         const classeArray = [] as originDataType[];
-         querySnapshot.forEach((doc) => {
-             const data = {
-                 id: doc.id,
-                 data: doc.data(),
-             } as originDataType;
-             classeArray.push(data);
-         });
-
-         const sorted = classeArray.sort((a, b) => a.data.title.localeCompare(b.data.title));
-
-         setOriginsVerified(sorted);
-    }
+        if (!campain?.origins || campain.origins.length === 0) {
+            return;
+        }
+    
+        const batches = [];
+        const originsChunks = [];
+    
+        // Divide `campain.origins` em lotes de até 10
+        for (let i = 0; i < campain.origins.length; i += 10) {
+            originsChunks.push(campain.origins.slice(i, i + 10));
+        }
+    
+        for (const chunk of originsChunks) {
+            const p = query(
+                collection(db, 'origin'),
+                where('verified', '==', true),
+                where('__name__', 'not-in', chunk)
+            );
+            batches.push(getDocs(p));
+        }
+    
+        // Aguarda todas as consultas e reúne os resultados
+        const results = await Promise.all(batches);
+    
+        const classeArray = results.flatMap((querySnapshot) => {
+            return querySnapshot.docs.map((doc) => ({
+                id: doc.id,
+                data: doc.data(),
+            })) as originDataType[];
+        });
+    
+        const sorted = classeArray.sort((a, b) => a.data.title.localeCompare(b.data.title));
+        setOriginsVerified(sorted);
+    };
+    
 
     useEffect(() => {
         getOriginsVerified();

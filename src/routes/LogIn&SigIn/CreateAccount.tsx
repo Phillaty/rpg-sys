@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import {db} from '../../firebase/firebase';
 
-import { collection, addDoc, doc, getDoc, query, getDocs, where, updateDoc } from 'firebase/firestore';
+import { collection, addDoc, doc, getDoc, query, getDocs, where, updateDoc, arrayUnion } from 'firebase/firestore';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Container } from './styles';
 import { toast, ToastContainer } from 'react-toastify';
@@ -98,11 +98,12 @@ type inviteType = {
             rule: formData.rule,
             password: encryptedPassword
         }).then(async (item) => {
-            localStorage.setItem('user', JSON.stringify({
+            toast.success("Conta criada! aguarde...")
+            localStorage.setItem('user', encrypt(JSON.stringify({
                 name: formData.name,
                 rule: formData.rule,
                 id: encrypt(item.id)
-            }));
+            })));
 
             const userDocRef = doc(db, "invites", inviteData?.id ?? '');
 
@@ -110,7 +111,17 @@ type inviteType = {
                 redeemed: true,
             });
 
-            navigate('/home');
+            if(inviteData?.campainId) {
+                const campainDocRef = doc(db, "campains", inviteData?.campainId ?? '');
+
+                await updateDoc(campainDocRef, {
+                    players: arrayUnion(item.id),
+                });
+            }
+
+            setTimeout(() => {
+                navigate('/home');
+            }, 1000);            
         });
     }
 
@@ -159,10 +170,10 @@ type inviteType = {
                     </div>
                     <div className='input'>
                         <p>Confirme sua senha</p>
-                        <input placeholder='Confirmar senha...' type='password' onChange={(e) => setFormData({...formData, password: e.target.value})} />
+                        <input placeholder='Confirmar senha...' type='password' onChange={(e) => setFormData({...formData, confirmpassword: e.target.value})} />
                     </div>
-                    <button className='button' onClick={() => {
-                        if(formData.name && formData.login && formData.password)
+                    <button className={`button ${formData.confirmpassword === formData.password && formData.login && formData.password ? '' : 'disable'}`} onClick={() => {
+                        if(formData.name && formData.login && formData.password && formData.confirmpassword === formData.password)
                         create()
                     }}>Criar conta</button>
                     <div className='info'>Seus dados sensiveis são criptografados 😎</div>

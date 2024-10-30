@@ -70,6 +70,16 @@ export const Container = styled.div`
             transition: 0.2s;
             background: #3f3f3f;
         }
+
+        .disable {
+            background-color: #80808087;
+        }
+
+        .disable:hover {
+            opacity: 1;
+            background-color: #80808087;
+            cursor: auto;
+        }
     }
 
     .bkgroundSnip1{

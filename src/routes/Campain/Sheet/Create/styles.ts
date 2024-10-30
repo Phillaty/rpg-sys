@@ -33,7 +33,7 @@ export const Container = styled.div`
             margin-top: -64px;
             border-radius: 4px;
             min-width: 500px;
-            max-width: 550px;
+            max-width: 570px;
 
             .top {
                 text-align: center;
@@ -138,6 +138,9 @@ export const Container = styled.div`
             display: flex;
             flex-wrap: wrap;
             gap: 4px;
+            max-height: 60vh;
+            overflow: auto;
+            padding-bottom: 32px;
 
             .originItem {
                 border: 1px solid gray;
@@ -148,11 +151,12 @@ export const Container = styled.div`
 
                 span {
                     display: flex;
-                    align-items: center;
                     font-size: 12px;
                     color: gray;
                     gap: 4px;
                     margin-left: 4px;
+                    flex-wrap: wrap;
+                    flex-direction: column;
                 }
             }
 
@@ -242,6 +246,20 @@ export const Container = styled.div`
         .attributesDetail {
             text-align: center;
             margin: 0 0 16px 0;
+
+            .data {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 4px;
+                margin-top: 8px;
+
+                .info {
+                    border: 1px solid lightgrey;
+                    border-radius: 4px;
+                    padding: 4px 8px;
+                }
+            }
 
             .per {
                 display: flex;
@@ -347,6 +365,10 @@ export const Container = styled.div`
     }
 
     @media screen and (max-width: 1000px) {
+        .stage-select-origin .top {
+            padding-top: 32px;
+        }
+
         .mainContainer {
             align-items: flex-start;
 
@@ -355,6 +377,7 @@ export const Container = styled.div`
                 max-width: 100%;
                 margin-top: 0;
                 height: 100%;
+                padding: 4px;
             }
         }
         
