@@ -53,6 +53,7 @@ export type unlockType = {
     habilityPoints: number;
     perkPoints: number;
     maxPerkLevel: number;
+    levelPoint: number;
 }
 
 export type avatarType = {

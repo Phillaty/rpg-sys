@@ -97,6 +97,31 @@ export const Container = styled.div<{isToCloseSheet: boolean}>`
             border-radius: 4px;
         }
 
+        .levelUp {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+
+            .levelUpP {
+                font-size: 24px;
+            }
+
+            button {
+                padding: 8px 16px;
+                background-color: #288aef;
+                color: white;
+                border: 0;
+                border-radius: 4px;
+                cursor: pointer;
+                margin-top: 8px;
+            }
+
+            button:hover {
+                opacity: 0.8;
+                transition: 0.2s;
+            }
+        }
+
         .infoMore {
             .attributesTitle {
                 text-align: center;
@@ -578,6 +603,45 @@ export const ContainerModal = styled.div`
         .subclass .subclassItensDetails {
             height: 60vh;
             max-height: 60vh;
+        }
+    }
+`
+
+export const ContainerLevel = styled.div`
+    background-color: white;
+    padding: 32px;
+    border-radius: 4px;
+    color: black;
+
+    p {
+        margin: 0;
+    }
+
+    > p {
+        font-size: 24px;
+        color: #ff7800;
+        font-weight: 600;
+        margin-bottom: 16px;
+    }
+
+    i {
+        font-size: 12px;
+    }
+
+    .data {
+        display: flex;
+        justify-content: space-between;
+        border-bottom: 1px solid gray;
+        padding: 4px 0;
+    }
+
+    .dataMessage {
+        max-width: 230px;
+        margin-top: 4px;
+        
+        p {
+            font-size: 18px;
+            font-weight: 600;
         }
     }
 `

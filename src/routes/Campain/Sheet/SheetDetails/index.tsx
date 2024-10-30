@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Container, ContainerModal } from './styles';
-import { avatarDataType, campainType, habilityDataType, skillType, subclassDataType } from '../../../../types';
+import { Container, ContainerLevel, ContainerModal } from './styles';
+import { avatarDataType, basicsCharType, campainType, classeDataType, habilityDataType, skillType, subclassDataType, unlockType } from '../../../../types';
 import { skillFiltr, skillTy } from '../..';
 import logo from '../../../../imgs/profile-user-icon-2048x2048-m41rxkoe.png';
 import Modal from '../../../../commom/Modal';
@@ -8,6 +8,7 @@ import { db } from '../../../../firebase/firebase';
 import { arrayUnion, doc, updateDoc } from 'firebase/firestore';
 import { toast, ToastContainer } from 'react-toastify';
 import { Vortex } from 'react-loader-spinner';
+import { levelUp } from '../../../../utils';
 
 type prop = {
     charcater?: avatarDataType;
@@ -19,9 +20,10 @@ type prop = {
     habilities: habilityDataType[];
     subclasses: subclassDataType[];
     charSubclass?: subclassDataType;
+    classChar?: classeDataType;
 }
 
-const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, skillsAll, habilities, subclasses, charSubclass }: prop) => {
+const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, skillsAll, habilities, subclasses, charSubclass, classChar }: prop) => {
 
     const [showHabilityModal, setShowHabilityModal] = useState<boolean>(false);
     const [showSubclassModal, setShowSubclassModal] = useState<boolean>(false);
@@ -34,6 +36,21 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
     const [habilitiesChar, setHabilitiesChar] = useState<habilityDataType[]>();
 
     const [perksToUpgrade, setPerksToUpgrade] = useState<skillTy[]>([]);
+
+    const [levelUpInfo, setLevelUpInfo] = useState<{
+        beforeBasic: basicsCharType,
+        unlock: unlockType;
+        basics: basicsCharType;
+        messages: {
+            title: string;
+            description: string;
+        }[];
+        state: boolean;
+    }>();
+
+    const handleCloseModalLevelUp = () => {
+        setLevelUpInfo(undefined);
+    }
 
     useEffect(() => {
         if(skillsAll && skills.trained?.length > 0) {
@@ -134,6 +151,7 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
                     habilityPoints: charcater?.data.unlock.habilityPoints,
                     maxPerkLevel: charcater?.data.unlock.maxPerkLevel,
                     perkPoints: (charcater?.data.unlock.perkPoints ?? 0) - perksToUpgrade.length,
+                    levelPoint: charcater?.data.unlock.levelPoint ?? 0,
                 }
             }).then(() => {
                 toast.success("Perícias atualizadas!");
@@ -171,9 +189,9 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
                 habilityPoints: charcater?.data.unlock.habilityPoints ?? 0,
                 maxPerkLevel: charcater?.data.unlock.maxPerkLevel ?? 0,
                 perkPoints: charcater?.data.unlock.perkPoints ?? 0,
+                levelPoint: charcater?.data.unlock.levelPoint ?? 0,
             }
         }
-        console.log(dataToUp);
 
         await updateDoc(userDocRef, dataToUp).then(() => {
             toast.success("Perícias atualizadas!");
@@ -192,6 +210,21 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
             </div>
             <div className='mainDetails'>
                 <div className='charInfo'>
+                    {(charcater?.data.unlock.levelPoint ?? 0) > 0 &&
+                        <div className='infoBasics levelUp'>
+                            <p className='levelUpP'>Você consegue upar!</p>
+                            <button onClick={async () => {
+                                if(charcater && classChar) {
+                                    const leveled = await levelUp(charcater, classChar, charSubclass);
+
+                                    setLevelUpInfo(leveled);
+
+                                    if (leveled.state) toast.success("Nível aumentado!");
+                                    else toast.error("Ocorreu alguma coisa errada...")
+                                }
+                            }}>Subir de nvível</button>
+                        </div>
+                    }
                     <div className='infoBasics'>
                         <div className='img'>
                             <img src={logo} alt='' />
@@ -200,6 +233,10 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
                             <div>
                                 <p className='label'>Nome</p>
                                 <p className='info'>{charcater?.data.name}</p>
+                            </div>
+                            <div>
+                                <p className='label'>Nível</p>
+                                <p className='info'>{charcater?.data.level}</p>
                             </div>
                             <div>
                                 <p className='label'>Idade</p>
@@ -372,10 +409,12 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
                             <p>Habilidades</p>
                         </div>
                         <div className='itens'>
-                            <div className='add' onClick={() => {setShowHabilityModal(true)}}>
-                                <i className="fa-regular fa-square-plus"></i>
-                                <p>Adicionar habilidade</p>
-                            </div>
+                            {(charcater?.data.unlock.habilityPoints ?? 0) > 0 && 
+                                <div className='add' onClick={() => {setShowHabilityModal(true)}}>
+                                    <i className="fa-regular fa-square-plus"></i>
+                                    <p>Adicionar habilidade</p>
+                                </div>
+                            }
                             {habilitiesChar?.map((item) => (
                                 <div className='item'>
                                     <p className='name'>{item.data.name}</p>
@@ -387,7 +426,7 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
                     {(charcater?.data.level ?? 0) >= 2 && <>
                         <div className='subclass'>
                             <div className='title'>
-                                <p>Subclasse</p>
+                                <p>Subclasse - <small>{charSubclass?.data.name}</small></p>
                             </div>
                             <div className='itens'>
                                 {!charSubclass ? 
@@ -399,7 +438,7 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
                                 </> : <>
                                 {charSubclass.data.habilities?.map((item) => {
                                     // eslint-disable-next-line array-callback-return
-                                    if(item.level < (charcater?.data.level ?? 0)) {
+                                    if(item.level <= (charcater?.data.level ?? 0)) {
                                         return (
                                             <div className='item'>
                                                 <p className='name'>{item.name}</p>
@@ -569,6 +608,23 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
                     }}>Salvar</button>
                 </div>
             </ContainerModal>
+        </Modal>
+        <Modal isOpen={!!levelUpInfo} handleCloseModal={handleCloseModalLevelUp}>
+            <ContainerLevel>
+                <p>Você subiu de nível!</p>
+                <div className='data'><div>Nivel</div> <div>{(charcater?.data.level ?? 0) - 1} <i className="fa-solid fa-arrow-right"></i> {charcater?.data.level ?? 0}</div></div>
+                {campain?.basics.life && <div className='data'><div>PV max</div> <div>{levelUpInfo?.beforeBasic.life.max ?? 0} <i className="fa-solid fa-arrow-right"></i> {levelUpInfo?.basics.life.max ?? 0}</div></div>}
+                {campain?.basics.pe && <div className='data'><div>PE max</div> <div>{levelUpInfo?.beforeBasic.pe.max ?? 0} <i className="fa-solid fa-arrow-right"></i> {levelUpInfo?.basics.pe.max ?? 0}</div></div>}
+                {campain?.basics.sanity && <div className='data'><div>Sanidade max</div> <div>{levelUpInfo?.beforeBasic.sanity.max ?? 0} <i className="fa-solid fa-arrow-right"></i> {levelUpInfo?.basics.sanity.max ?? 0}</div></div>}
+                
+                {levelUpInfo?.messages.map((item, key) => (
+                    <div className='dataMessage' key={key}>
+                        <p>{item.title}</p>
+                        <span>{item.description}</span>
+                    </div>
+                ))}
+                
+            </ContainerLevel>    
         </Modal>
         <ToastContainer />
         </>

@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Container, ContainerHability } from './styles';
-import { avatarDataType, campainType, habilityDataType, itemDataType, subclassDataType } from '../../../types';
+import { avatarDataType, campainType, classeDataType, habilityDataType, itemDataType, subclassDataType } from '../../../types';
 import logo from '../../../imgs/profile-user-icon-2048x2048-m41rxkoe.png';
 import { skillFiltr, skillTy } from '..';
 import Roll from '../../../commom/ROLL';
 import { getAttrubuteMod, getPercentage } from '../../../utils';
 import SheetDetails from './SheetDetails';
-import { collection, onSnapshot, query, where } from 'firebase/firestore';
+import { collection, doc, onSnapshot, query, where } from 'firebase/firestore';
 import { db } from '../../../firebase/firebase';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Modal from '../../../commom/Modal';
@@ -42,6 +42,7 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
 
     const [habilities, setHabilities] = useState<habilityDataType[]>([]);
     const [subclasses, setSubclasses] = useState<subclassDataType[]>([]);
+    const [classChar, setClassChar] = useState<classeDataType>();
 
     const [habilitiesChar, setHabilitiesChar] = useState<habilityDataType[]>();
 
@@ -185,12 +186,31 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
         });
     }
 
+    const getClass = async () => {
+        const docRef = doc(db, 'classes', charcater?.data.class.id ?? "");
+
+        onSnapshot(docRef, (querySnapshot) => {
+            const docData = {
+                id: querySnapshot.id,
+                data: querySnapshot.data(),
+            } as classeDataType;
+            setClassChar(docData);
+        });
+    }
+
     useEffect(() => {
         if(campainId) {
             getItems();
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [campainId]);
+
+    useEffect(() => {
+        if(charcater && charcater.data.class.id){
+            getClass();
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [charcater])
 
     useEffect(() => {
         if (itemsAll) {
@@ -303,8 +323,8 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                         <div>
                             <p className='label'>PE</p>
                             <div className='bar pe'>
-                                <span style={{ width: `${getPercentage(charcater?.data.basics.cyberpsicosy.max ?? 0, charcater?.data.basics.cyberpsicosy.actual ?? 0)}%` }}></span>
-                                <p>{charcater?.data.basics.cyberpsicosy.actual}/{charcater?.data.basics.cyberpsicosy.max}</p>
+                                <span style={{ width: `${getPercentage(charcater?.data.basics.pe.max ?? 0, charcater?.data.basics.pe.actual ?? 0)}%` }}></span>
+                                <p>{charcater?.data.basics.pe.actual}/{charcater?.data.basics.pe.max}</p>
                             </div>
                         </div>
                     }
@@ -472,6 +492,7 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                     habilities={habilities}
                     subclasses={subclasses}
                     charSubclass={charSubclass}
+                    classChar={classChar}
                 />
             }
             
