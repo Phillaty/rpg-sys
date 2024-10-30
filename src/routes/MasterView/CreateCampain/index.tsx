@@ -103,6 +103,10 @@ const CreateCampain = () => {
         }).then(async (item) => {
             
             toast.success("Campanha criada! Aguarde...");
+
+            setTimeout(() => {
+                navigate('')
+            }, 3000);
         });
         
     }

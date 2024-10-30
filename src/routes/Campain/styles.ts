@@ -211,6 +211,16 @@ export const Container = styled.div`
         background-color: #077f21;
     }
 
+    .descriptionNormal {
+        border-bottom: 1px solid #434343;
+        padding: 8px 0;
+
+        span {
+            font-weight: 600;
+            font-size: 18px !important;
+        }
+    }
+
     @media screen and (max-width: 1000px) {
         .main {
             flex-wrap: wrap;

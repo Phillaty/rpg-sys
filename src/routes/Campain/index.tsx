@@ -135,7 +135,7 @@ const Campain = () => {
                             </div>
                             <div className='descriptionNormal'>
                                 <span>Estilo</span>
-                                <p>{campain?.style}</p>
+                                <p>{campain?.style.join(', ')}</p>
                             </div>
                             <div className='descriptionNormal'>
                                 <span>Estado</span>

@@ -421,6 +421,7 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
                                     <p className='detail'>{item.data.description}</p>
                                 </div>
                             ))}
+                            {!habilitiesChar?.length && <small>Nenhuma habilidade ainda, jogue mais! :D</small>}
                         </div>
                     </div>
                     {(charcater?.data.level ?? 0) >= 2 && <>
@@ -505,7 +506,7 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
                 </div>
                 <div className='subclass'>
                     <div className='subclassItens'>
-                        {subclasses.map((item, key) => (
+                        {subclasses.filter(i => i.data.classId === charcater?.data.class.id).map((item, key) => (
                             <div key={key} className={`item ${subclassToAdd === item && 'selected'}`} onClick={() => {
                                 setSubclassToAdd(item);
                             }}>

@@ -58,7 +58,7 @@ const Pericias = ({toast, campain, characters, perks}: props) => {
                 const userDocRef = doc(db, "campains", campainId ?? '');
 
                 await updateDoc(userDocRef, {
-                    origins: arrayUnion(item.id ?? ''),
+                    skills: arrayUnion(item.id ?? ''),
                 });
                 setPerkForm({
                     base: "",
@@ -88,27 +88,40 @@ const Pericias = ({toast, campain, characters, perks}: props) => {
     }
 
     const getPerksVerified = async () => {
-         const p = query(
-             collection(db, 'skills'),
-             where('verified', '==', true),
-             where('__name__', 'not-in', campain?.skills && campain?.skills.length > 0 ? campain?.skills : ['non'])
-         );
-
-         const querySnapshot = await getDocs(p);
-
-         const classeArray = [] as perkDataType[];
-         querySnapshot.forEach((doc) => {
-             const data = {
-                 id: doc.id,
-                 data: doc.data(),
-             } as perkDataType;
-             classeArray.push(data);
-         });
-
-         const sorted = classeArray.sort((a, b) => a.data.name.localeCompare(b.data.name));
-
-         setPerksVerified(sorted);
-    }
+        if (!campain?.skills || campain.skills.length === 0) {
+            return;
+        }
+    
+        const batches = [];
+        const skillsChunks = [];
+    
+        // Divide `campain.skills` em lotes de até 10
+        for (let i = 0; i < campain.skills.length; i += 10) {
+            skillsChunks.push(campain.skills.slice(i, i + 10));
+        }
+    
+        for (const chunk of skillsChunks) {
+            const p = query(
+                collection(db, 'skills'),
+                where('verified', '==', true),
+                where('__name__', 'not-in', chunk)
+            );
+            batches.push(getDocs(p));
+        }
+    
+        // Aguarda todas as consultas e reúne os resultados
+        const results = await Promise.all(batches);
+    
+        const classeArray = results.flatMap((querySnapshot) => {
+            return querySnapshot.docs.map((doc) => ({
+                id: doc.id,
+                data: doc.data(),
+            })) as perkDataType[];
+        });
+    
+        const sorted = classeArray.sort((a, b) => a.data.name.localeCompare(b.data.name));
+        setPerksVerified(sorted);
+    };
 
     useEffect(() => {
         getPerksVerified();
@@ -154,7 +167,7 @@ const Pericias = ({toast, campain, characters, perks}: props) => {
                     {perks.map((i, key) => (
                         <button className={`${perkSelected === i ? 'selected' : ''}`} key={key} onClick={() => setPerkSelected(i)}>{i.data.name}</button>
                     ))}
-                    <button className='add' onClick={prepareToAdd}><i className="fa-solid fa-plus"></i> {perks.length <= 0 ? 'Adicionar classe' : ''}</button>
+                    <button className='add' onClick={prepareToAdd}><i className="fa-solid fa-plus"></i> {perks.length <= 0 ? 'Adicionar perícia' : ''}</button>
                 </div>
                 <div className={`right ${perks.length <= 0 && !isToAdd ? 'noClasses' : ''}`}>
                     {loading ? <>
@@ -176,7 +189,7 @@ const Pericias = ({toast, campain, characters, perks}: props) => {
                                 <button onClick={() => {
                                     setIsToAddType('import');
                                     getPerksVerified();
-                                }}>Importar classe verificada</button>
+                                }}>Importar perícia verificada</button>
                             }
                             <button onClick={() => {
                                 setIsToAddType('add');
@@ -243,7 +256,7 @@ const Pericias = ({toast, campain, characters, perks}: props) => {
                             {characters.some(i => i.data.skill.some(j => j.perk === perkSelected.id) ) ? <>
                                 <small className='warning'>Personagens utilizando perícia!</small>
                             </> : <>
-                                <button onClick={handleDeleteClass}>Excluir classe</button>
+                                <button onClick={handleDeleteClass}>Excluir perícia</button>
                             </>}
                             
                         </>

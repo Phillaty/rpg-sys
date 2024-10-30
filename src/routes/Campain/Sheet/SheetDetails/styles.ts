@@ -512,6 +512,9 @@ export const ContainerModal = styled.div`
         display: flex;
         flex-direction: column;
         gap: 4px;
+        max-height: 70vh;
+        overflow-y: auto;
+        overflow-x: hidden;
 
         .perksItens {
             display: flex;

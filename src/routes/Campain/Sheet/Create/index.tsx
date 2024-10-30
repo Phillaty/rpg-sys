@@ -179,6 +179,15 @@ const SheetCreation = () => {
     const createChar = async () => {
         setStage(4);
 
+        const perksOrigin = skills?.filter(i => originSelected?.data.bonus.skill.includes(i.data.name));
+
+        perksOrigin?.forEach((i) => {
+            persk.push({
+                expertise: 1,
+                perk: i.id,
+            });
+        })
+        
         const item = await addDoc(collection(db, "character"), {
             name: simpleData.name,
             age: simpleData.age ?? 0,
@@ -225,6 +234,8 @@ const SheetCreation = () => {
                 habilityPoints: 0,
                 perkPoints: 0,
                 maxPerkLevel: 1,
+                attributePoints: 0,
+                levelPoint: 0,
             }
         });
 
@@ -258,15 +269,15 @@ const SheetCreation = () => {
                                     <div className='inputs'>
                                         <div>
                                             <label>Nome do personagem*</label>
-                                            <input placeholder='Nome...' onChange={(e) => setSimpleData({...simpleData, name: e.target.value})} />
+                                            <input value={simpleData.name} placeholder='Nome...' onChange={(e) => setSimpleData({...simpleData, name: e.target.value})} />
                                         </div>
                                         <div>
                                             <label>Idade</label>
-                                            <input placeholder='Idade...' type='number' onChange={(e) => setSimpleData({...simpleData, age: Number(e.target.value)})} />
+                                            <input value={simpleData.age} placeholder='Idade...' type='number' onChange={(e) => setSimpleData({...simpleData, age: Number(e.target.value)})} />
                                         </div>
                                         <div>
                                             <label>Gênero</label>
-                                            <select onChange={(e) => setSimpleData({...simpleData, gender: e.target.value})}>
+                                            <select value={simpleData.gender} onChange={(e) => setSimpleData({...simpleData, gender: e.target.value})}>
                                                 <option value="M">Masculino</option>
                                                 <option value="F">Feminino</option>
                                                 <option value="NB">Não binário</option>
@@ -275,11 +286,16 @@ const SheetCreation = () => {
                                         </div>
                                         <div>
                                             <label>História</label>
-                                            <textarea placeholder='História...' onChange={(e) => setSimpleData({...simpleData, lore: e.target.value})}></textarea>
+                                            <textarea value={simpleData.lore} placeholder='História...' onChange={(e) => setSimpleData({...simpleData, lore: e.target.value})}></textarea>
                                         </div>
                                     </div>
                                     <div className='buttons'>
-                                        <button onClick={() => setStage(stage + 1)} className='go'>Continuar</button>
+                                        {!simpleData.name ? <>
+                                            <button className='go disable'>Continuar</button>
+                                        </> : <>
+                                            <button onClick={() => setStage(stage + 1)} className='go'>Continuar</button>
+                                        </>}
+                                        
                                     </div>
                                 </div>
                             </div>
@@ -295,14 +311,14 @@ const SheetCreation = () => {
                                     </div>
                                     <div className='origins'>
                                         {origins?.map((item, key) => (
-                                            <div className={`originItem ${item === originSelected && 'selected'}`} key={key} onClick={() => setOriginSelected(item)}>
+                                            <div className={`originItem ${item.id === originSelected?.id && 'selected'}`} key={key} onClick={() => setOriginSelected(item)}>
                                                 {item.data.title} 
                                                 <span>{item.data.bonus.skill.map((i, index) => (<div key={index}>+{i}</div>))}</span>
                                             </div>
                                         ))}
                                     </div>
                                     <div className='buttons'>
-                                        <button onClick={() => setStage(stage - 1)} className='back'>Voltar</button>
+                                        <button onClick={() => {setStage(stage - 1); setOriginSelected(undefined)}} className='back'>Voltar</button>
                                         <button onClick={() => originSelected && setStage(stage + 1)} className={`go ${!originSelected && 'disable'}`}>Continuar</button>
                                     </div>
                                 </div>
@@ -319,7 +335,7 @@ const SheetCreation = () => {
                                     </div>
                                     <div className='classes'>
                                         {classes?.map((item, key) => (
-                                            <div className={`classItem ${item === classeSelected && 'selected'}`} key={key} onClick={() => setClasseSelected(item)}>
+                                            <div className={`classItem ${item.id === classeSelected?.id && 'selected'}`} key={key} onClick={() => setClasseSelected(item)}>
                                                 {item.data.name}
                                                 <p>{item.data.description}</p>
                                                 <span>{item.data.infos.map((i, index) => (<div key={index}>- {i}</div>))}</span>
@@ -449,22 +465,24 @@ const SheetCreation = () => {
                                         </div>
                                     </div>
                                     <div className='skillsDetail'>
-                                        <p>Pontos de perícia restantes: {perkPoints}</p>
+                                        <p>Pontos de perícia restantesssss: {perkPoints}</p>
                                     </div>
                                     <div className='skills'>
                                         {skills.map((item, key) => (
-                                            <div key={key} className={`${persk.find(i => i.perk === item.id) && 'selected'}`} onClick={() => {
-                                                if(persk.find(i => i.perk === item.id)){
-                                                    const perkItens = persk.filter((j) => j.perk !== item.id);
-                                                    setPerks(perkItens);
-                                                    setPerkPoints(perkPoints + 1);
-                                                } else {
-                                                    if(perkPoints > 0) {
-                                                        const perkItem = {expertise: 1, perk: item.id}
-                                                        setPerks([...persk, perkItem]);
-                                                        setPerkPoints(perkPoints - 1);
+                                            <div key={key} className={`${(persk.find(i => i.perk === item.id) || originSelected?.data.bonus.skill.find((a) => a === item.data.name)) && 'selected'}`} onClick={() => {
+                                                if (!originSelected?.data.bonus.skill.find((a) => a === item.data.name)){
+                                                    if(persk.find(i => i.perk === item.id)){
+                                                        const perkItens = persk.filter((j) => j.perk !== item.id);
+                                                        setPerks(perkItens);
+                                                        setPerkPoints(perkPoints + 1);
+                                                    } else {
+                                                        if(perkPoints > 0) {
+                                                            const perkItem = {expertise: 1, perk: item.id}
+                                                            setPerks([...persk, perkItem]);
+                                                            setPerkPoints(perkPoints - 1);
+                                                        }
+                                                        
                                                     }
-                                                    
                                                 }
                                                 
                                             }}>{item.data.name} <span>{item.data.base}</span></div>
@@ -472,7 +490,12 @@ const SheetCreation = () => {
                                     </div>
                                     <div className='buttons'>
                                         <button onClick={() => setStage(stage - 1)} className='back'>Voltar</button>
-                                        <button onClick={() => createChar()} className={`go ${!classeSelected && 'disable'}`}>CONCLUIR</button>
+                                        {perkPoints > 0 || !classeSelected || attributePoints > 0 ? 
+                                         <button className={`go disable`}>CONCLUIR</button>
+                                         : 
+                                         <button onClick={() => {createChar()}} className={`go`}>CONCLUIR</button>
+                                         }
+                                        
                                     </div>
                                 </div>
                             </div>

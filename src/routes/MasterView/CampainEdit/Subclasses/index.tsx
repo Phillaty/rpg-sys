@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Container } from './styles';
 import { campainType, classeDataType, subclassDataType, subclassHabilitiesType, subclassType } from '../../../../types';
-import { addDoc, collection, doc, getDocs, query, updateDoc, where } from 'firebase/firestore';
+import { addDoc, collection, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../../../firebase/firebase';
 import { ColorRing } from 'react-loader-spinner';
 import TextField from '@mui/material/TextField';
@@ -22,8 +22,6 @@ const Subclasses = ({classes, subclasses, toast, campain}: props) => {
     const [isToAdd, setIsToAdd] = useState<boolean>(false);
     const [isToAddType, setIsToAddType] = useState<'import' | 'add'>();
 
-    const [classToImport, setClassToImport] = useState<subclassDataType>();
-
     const [loading, setLoading] = useState<boolean>(false);
 
     const [subclassForm, setSubClassForm] = useState<subclassType>({
@@ -39,44 +37,12 @@ const Subclasses = ({classes, subclasses, toast, campain}: props) => {
         level: 0,
     });
 
-    const [subclassesVerified, setSubclassesVerified] = useState<subclassDataType[]>([]);
-
     const [expanded, setExpanded] = React.useState<string | false>(false);
 
     const handleChange =
         (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => {
         setExpanded(isExpanded ? panel : false);
         };
-
-    const getClassesVerified = async () => {
-        const p = query(
-            collection(db, 'subclass'),
-            where('verified', '==', true),
-            where('classId', 'not-in', campain?.classes && campain?.classes.length > 0 ? campain?.classes : ['non']),
-        );
-
-        const querySnapshot = await getDocs(p);
-
-        const subclasseArray = [] as subclassDataType[];
-        querySnapshot.forEach((doc) => {
-            const data = {
-                id: doc.id,
-                data: doc.data(),
-            } as subclassDataType;
-            subclasseArray.push(data);
-        });
-
-        const sorted = subclasseArray.sort((a, b) => a.data.name.localeCompare(b.data.name));
-
-        setSubclassesVerified(sorted);
-    }
-
-    useEffect(() => {
-        if (classes.length > 0) {
-            getClassesVerified();
-        }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [classes]);
 
     useEffect(() => {
         if(subclassSelected){
@@ -101,10 +67,6 @@ const Subclasses = ({classes, subclasses, toast, campain}: props) => {
         setIsToAdd(true);
         setIsToAddType(undefined);
         setSubclassSelected(undefined);
-    }
-
-    const importSubclass = () => {
-
     }
 
     const handleSubclass = async () => {
@@ -159,7 +121,7 @@ const Subclasses = ({classes, subclasses, toast, campain}: props) => {
                     {subclasses.map((i, key) => (
                         <button className={`${subclassSelected === i ? 'selected' : ''}`} key={key} onClick={() => setSubclassSelected(i)}>{i.data.name}</button>
                     ))}
-                    <button className='add' onClick={prepareToAdd}><i className="fa-solid fa-plus"></i> {classes.length <= 0 ? 'Adicionar classe' : ''}</button>
+                    <button className='add' onClick={prepareToAdd}><i className="fa-solid fa-plus"></i> {classes.length <= 0 ? 'Adicionar subclasse' : ''}</button>
                 </div>
                 <div className={`right ${classes.length <= 0 && !isToAdd ? 'noClasses' : ''}`}>
                     {loading ? <>
@@ -177,44 +139,16 @@ const Subclasses = ({classes, subclasses, toast, campain}: props) => {
                     </> : <>
                     {isToAdd && !isToAddType && <>
                         <div className='isToAdd'>
-                            {subclassesVerified.length > 0 &&
-                                <button onClick={() => {
-                                    setIsToAddType('import');
-                                    getClassesVerified();
-                                }}>Importar classe verificada</button>
-                            }
                             <button onClick={() => {
                                 setIsToAddType('add');
                             }}>Adicionar novo</button>
                         </div>
                     </>}
-
-                    {isToAdd && isToAddType === 'import' ? <>
-                    
-                    <div className='import'>
-                        <div className='titleImport'>
-                            <p>Selecione a classe para importar</p>
-                            <span>Esse processo irá importar as subclasses junto!</span>
-                        </div>
-                        <div className='importList'>
-                            {subclassesVerified.map((item, key) => (
-                                <div className={`itemImport ${classToImport === item ? 'selected' : ''}`} key={key} onClick={() => setClassToImport(item)}>
-                                    <p>{item.data.name}</p>
-                                    <span>{item.data.description}</span>
-                                </div>
-                            ))}
-                        </div>
-                        <div className='buttons'>
-                            <button onClick={importSubclass}>Importar</button>
-                        </div>
-                    </div>
-                    
-                    </> : <>
                     {subclassSelected || (isToAdd && isToAddType === 'add') ? <>
                     <div className='name'>
                         <TextField 
                             id="standard-basic" 
-                            label="Nome da classe" 
+                            label="Nome da subclasse" 
                             variant="filled" 
                             value={subclassForm.name} 
                             onChange={(e) => {  
@@ -228,7 +162,7 @@ const Subclasses = ({classes, subclasses, toast, campain}: props) => {
                     <div className='description'>
                         <TextField
                             id="standard-multiline-static"
-                            label="Descrição da classe"
+                            label="Descrição da subclasse"
                             multiline
                             rows={2}
                             value={subclassForm.description}
@@ -448,7 +382,6 @@ const Subclasses = ({classes, subclasses, toast, campain}: props) => {
                         <button onClick={handleSubclass}>Salvar</button>
                     </div>
                     </> : <></>}
-                    </>}
                     </>}
                 </div>
             </div>

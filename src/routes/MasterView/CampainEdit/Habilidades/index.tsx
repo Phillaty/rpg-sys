@@ -178,7 +178,7 @@ const Habilidades = ({toast, characters, habilities, classes, perks}: props) => 
                     {habilities.map((i, key) => (
                         <button className={`${habilitySelected === i ? 'selected' : ''}`} key={key} onClick={() => setHabilitySelected(i)}>{i.data.name}</button>
                     ))}
-                    <button className='add' onClick={prepareToAdd}><i className="fa-solid fa-plus"></i> {habilities.length <= 0 ? 'Adicionar classe' : ''}</button>
+                    <button className='add' onClick={prepareToAdd}><i className="fa-solid fa-plus"></i> {habilities.length <= 0 ? 'Adicionar habilidade' : ''}</button>
                 </div>
                 <div className={`right ${habilities.length <= 0 && !isToAdd ? 'noClasses' : ''}`}>
                     {loading ? <>
@@ -203,7 +203,7 @@ const Habilidades = ({toast, characters, habilities, classes, perks}: props) => 
                     </>}
                     {habilitySelected || (isToAdd && isToAddType === 'add') ? <>
                     <div className='name'>
-                        <TextField id="standard-basic" label="Nome da origem" variant="filled" value={habilityForm.name} onChange={(e) => {
+                        <TextField id="standard-basic" label="Nome da habilidade" variant="filled" value={habilityForm.name} onChange={(e) => {
                             setHabilityForm({
                                 ...habilityForm,
                                 name: e.target.value
@@ -235,7 +235,7 @@ const Habilidades = ({toast, characters, habilities, classes, perks}: props) => 
                     <div className='description'>
                         <TextField
                             id="standard-multiline-static"
-                            label="Descrição da origem"
+                            label="Descrição da habilidade"
                             multiline
                             rows={4}
                             value={habilityForm.description}
@@ -490,7 +490,7 @@ const Habilidades = ({toast, characters, habilities, classes, perks}: props) => 
                     <div className='buttons'>
                         {habilitySelected && 
                         <>
-                            {characters.some(i => i.data.hability.some(j => j === habilitySelected.id) ) ? <>
+                            {characters?.some(i => i?.data?.hability?.some(j => j === habilitySelected.id) ) ? <>
                                 <small className='warning'>Personagens utilizando Habilidade!</small>
                             </> : <>
                                 <button onClick={handleDeleteClass}>Excluir Habilidade</button>

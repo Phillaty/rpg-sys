@@ -435,14 +435,16 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                         </div>
                     </div>
                 }
-                <div className='habilities'>
-                    <div className='habilityTitle'>Habilidades ativas <small>Clique para ver mais</small></div>
-                    <div className='habilityList'>
-                        {habilitiesChar?.map((item, key) => (
-                            <div className='habilityItem' onClick={() => setHabilitySelected(item)}>{item.data.name}</div>
-                        ))}
+                {!!habilitiesChar?.length && 
+                    <div className='habilities'>
+                        <div className='habilityTitle'>Habilidades ativas <small>Clique para ver mais</small></div>
+                        <div className='habilityList'>
+                            {habilitiesChar?.map((item, key) => (
+                                <div className='habilityItem' onClick={() => setHabilitySelected(item)}>{item.data.name}</div>
+                            ))}
+                        </div>
                     </div>
-                </div>
+                }
                 <div className='skill'>
                     <div className='skillItems'>
                         <div>
