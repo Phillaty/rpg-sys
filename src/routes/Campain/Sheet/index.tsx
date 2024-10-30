@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { Container, ContainerHability } from './styles';
+import { Container, ContainerHability, ContainerHealth } from './styles';
 import { avatarDataType, campainType, classeDataType, habilityDataType, itemDataType, subclassDataType } from '../../../types';
 import logo from '../../../imgs/profile-user-icon-2048x2048-m41rxkoe.png';
 import { skillFiltr, skillTy } from '..';
 import Roll from '../../../commom/ROLL';
 import { getAttrubuteMod, getPercentage } from '../../../utils';
 import SheetDetails from './SheetDetails';
-import { collection, doc, onSnapshot, query, where } from 'firebase/firestore';
+import { collection, deleteDoc, doc, onSnapshot, query, updateDoc, where } from 'firebase/firestore';
 import { db } from '../../../firebase/firebase';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Modal from '../../../commom/Modal';
 import Backpack from './Backpack';
+import { TextField } from '@mui/material';
+import { toast, ToastContainer } from 'react-toastify';
 
 type prop = {
     charcater?: avatarDataType;
@@ -50,6 +52,8 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
 
     const [backpackModal, setBackpackModal] = useState<boolean>(false);
 
+    const [healthModal, sethealthModal] = useState<boolean>(false);
+
     const [habilityModal, setHabilityModal] = useState<boolean>(false);
     const [habilitySelected, setHabilitySelected] = useState<habilityDataType>();
 
@@ -59,6 +63,11 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
     const [itensGeral, setItensGeral] = useState<itemDataType[]>([]);
     const [itensWeapon, setItensWeapon] = useState<itemDataType[]>([]);
     const [itensArmadure, setItensArmadure] = useState<itemDataType[]>([]);
+
+    const [lifeValue, setlifeValue] = useState<number>();
+    const [sanityValue, setsanityValue] = useState<number>();
+    const [peValue, setPeValue] = useState<number>();
+    const [cyberValue, setCyberValue] = useState<number>();
 
     const handleCloseDicePer = () => {
         setdicePers([]);
@@ -82,6 +91,10 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
     const handleCloseHability = () => {
         setHabilityModal(false);
         setHabilitySelected(undefined);
+    }
+
+    const handleCloseHealth = () => {
+        sethealthModal(false);
     }
 
     useEffect(() => {
@@ -266,6 +279,28 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
         setdice(totalDice);
     }
 
+    const handleHealth = async (type: 'life' | 'pe' | 'sanity' | 'cyberpsicosy', value: number, option: 'add' | 'remove' ) => {
+        const userDocRef = doc(db, "character", charcater?.id ?? '');
+
+        let total = option === 'add' ? (charcater?.data.basics[type].actual ?? 0) + value : (charcater?.data.basics[type].actual ?? 0) - value;
+
+        if (total > (charcater?.data.basics[type].max ?? 0)) total = (charcater?.data.basics[type].max ?? 0);
+        if (total < 0) total = 0;
+
+        await updateDoc(userDocRef, {
+            basics: {
+                ...charcater?.data.basics,
+                [type]: {
+                    max: charcater?.data.basics[type].max ?? 0,
+                    actual: total,
+                }
+            }
+        }).then(() => {
+            toast.success("Saúde editada!")
+        });
+        
+    }
+
     return (
         <>
             <Container>
@@ -329,6 +364,9 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                         </div>
                     }
                 
+                    <div className='editHealth'>
+                        <button onClick={() => sethealthModal(true)}>Editar saúde</button>
+                    </div>
                 </div>
                 <div className='rollPers'>
                     <div className='title'>
@@ -523,7 +561,6 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                                         <div key={key} className='perkItem' onClick={() => {
                                             const getPerkItem = skillsAll.find((j) => i.perkId === j.id);
                                             if (getPerkItem) {
-                                                console.log(i);
                                                 handleRoll(getPerkItem, Number(i.value));
                                             }
                                             handleCloseHability();
@@ -537,6 +574,52 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                     </>}
                 </ContainerHability>
             </Modal>
+            {/* const [lifeValue, setlifeValue] = useState<number>();
+    const [sanityValue, setsanityValue] = useState<number>();
+    const [peValue, setPeValue] = useState<number>();
+    const [cyberValue, setCyberValue] = useState<number>(); */}
+            <Modal isOpen={healthModal} handleCloseModal={handleCloseHealth} >
+                <ContainerHealth>
+                    <div className='label'>Editar saúde</div>
+                    <div className='life'>
+                        <div className='inputs'>
+                            <button onClick={() => handleHealth('life', lifeValue ?? 0 ,'remove')}>Remover</button>
+                            <TextField id="standard-basic" size='small' label="Pv" variant="filled" value={lifeValue} onChange={(e) => {
+                                setlifeValue(Number(e.target.value));
+                            }} />
+                            <button onClick={() => handleHealth('life', lifeValue ?? 0 ,'add')}>Adicionar</button>
+                        </div>
+                    </div>
+                    <div className='sanity'>
+                        <div className='inputs'>
+                            <button onClick={() => handleHealth('sanity', sanityValue ?? 0 ,'remove')}>Remover</button>
+                            <TextField id="standard-basic" size='small' label="Sanidade" variant="filled" value={sanityValue} onChange={(e) => {
+                                setsanityValue(Number(e.target.value));
+                            }} />
+                            <button onClick={() => handleHealth('sanity', sanityValue ?? 0 ,'add')}>Adicionar</button>
+                        </div>
+                    </div>
+                    <div className='pe'>
+                        <div className='inputs'>
+                            <button onClick={() => handleHealth('pe', peValue ?? 0 ,'remove')}>Remover</button>
+                            <TextField id="standard-basic" size='small' label="PE" variant="filled" value={peValue} onChange={(e) => {
+                                setPeValue(Number(e.target.value));
+                            }} />
+                            <button onClick={() => handleHealth('pe', peValue ?? 0 ,'add')}>Adicionar</button>
+                        </div>
+                    </div>
+                    <div className='cyber'>
+                        <div className='inputs'>
+                            <button onClick={() => handleHealth('cyberpsicosy', cyberValue ?? 0 ,'remove')}>Remover</button>
+                            <TextField id="standard-basic" size='small' label="Cyberpsicose" variant="filled" value={cyberValue} onChange={(e) => {
+                                setCyberValue(Number(e.target.value));
+                            }} />
+                            <button onClick={() => handleHealth('cyberpsicosy', cyberValue ?? 0 ,'add')}>Adicionar</button>
+                        </div>
+                    </div>
+                </ContainerHealth>
+            </Modal>
+            <ToastContainer style={{zIndex: 9999999999999999}} />
         </>
     )
 }

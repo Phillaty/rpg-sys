@@ -162,6 +162,26 @@ export const Container = styled.div`
             margin-bottom: 8px;
             text-align: center;
         }
+
+        .editHealth {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+
+            button {
+                background-color: #737ad3;
+                color: white;
+                border: 0;
+                border-radius: 4px;
+                padding: 8px 32px;
+                cursor: pointer;
+            }
+
+            button:hover {
+                opacity: 0.8;
+                transition: 0.2s;
+            }
+        }
     }
 
     .bar {
@@ -250,8 +270,31 @@ export const Container = styled.div`
 
     @media screen and (max-width: 390px) {
         .health {
+            gap: 8px;
+            padding: 8px 0;
+
+            .editHealth {
+                justify-content: flex-end
+            }
+
+            > div {
+                width: 100%;
+                display: flex;
+                align-items: center;
+
+                > p {
+                    width: 30%;
+                    display: flex;
+                    align-items: center;
+                    margin: 0 !important;
+                    height: 100%;
+                }
+            }
+
+            
+
             .bar {
-                width: 90px;
+                width: 70%;
             }
         }
     }

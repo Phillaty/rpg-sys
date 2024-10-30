@@ -320,3 +320,48 @@ export const ContainerHability = styled.div`
         }
     }
 `
+
+export const ContainerHealth = styled.div`
+    background-color: white;
+    padding: 32px 16px;
+    border-radius: 4px;
+    color: black;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    p {
+        margin: 0;
+    }
+
+    .label {
+        font-size: 18px;
+        text-align: center;
+        margin-bottom: 16px;
+    }
+
+    > div {
+        margin-bottom: 16px;
+
+        .inputs {
+            display: flex;
+            gap: 8px;
+
+            button {
+                background-color: #737ad3;
+                color: white;
+                border: 0;
+                border-radius: 4px;
+                padding: 8px 16px;
+                cursor: pointer;
+            }
+
+            button:hover {
+                opacity: 0.8;
+                transition: 0.2s;
+            }
+        }
+        
+    }
+`
