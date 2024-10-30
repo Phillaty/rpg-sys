@@ -574,17 +574,13 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                     </>}
                 </ContainerHability>
             </Modal>
-            {/* const [lifeValue, setlifeValue] = useState<number>();
-    const [sanityValue, setsanityValue] = useState<number>();
-    const [peValue, setPeValue] = useState<number>();
-    const [cyberValue, setCyberValue] = useState<number>(); */}
             <Modal isOpen={healthModal} handleCloseModal={handleCloseHealth} >
                 <ContainerHealth>
                     <div className='label'>Editar saúde</div>
                     <div className='life'>
                         <div className='inputs'>
                             <button onClick={() => handleHealth('life', lifeValue ?? 0 ,'remove')}>Remover</button>
-                            <TextField id="standard-basic" size='small' label="Pv" variant="filled" value={lifeValue} onChange={(e) => {
+                            <TextField id="standard-basic" size='small' label="Pv" variant="filled" inputMode='numeric' value={lifeValue} onChange={(e) => {
                                 setlifeValue(Number(e.target.value));
                             }} />
                             <button onClick={() => handleHealth('life', lifeValue ?? 0 ,'add')}>Adicionar</button>
@@ -593,7 +589,7 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                     <div className='sanity'>
                         <div className='inputs'>
                             <button onClick={() => handleHealth('sanity', sanityValue ?? 0 ,'remove')}>Remover</button>
-                            <TextField id="standard-basic" size='small' label="Sanidade" variant="filled" value={sanityValue} onChange={(e) => {
+                            <TextField id="standard-basic" size='small' label="Sanidade" variant="filled" inputMode='numeric' value={sanityValue} onChange={(e) => {
                                 setsanityValue(Number(e.target.value));
                             }} />
                             <button onClick={() => handleHealth('sanity', sanityValue ?? 0 ,'add')}>Adicionar</button>
@@ -602,7 +598,7 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                     <div className='pe'>
                         <div className='inputs'>
                             <button onClick={() => handleHealth('pe', peValue ?? 0 ,'remove')}>Remover</button>
-                            <TextField id="standard-basic" size='small' label="PE" variant="filled" value={peValue} onChange={(e) => {
+                            <TextField id="standard-basic" size='small' label="PE" variant="filled" inputMode='numeric' value={peValue} onChange={(e) => {
                                 setPeValue(Number(e.target.value));
                             }} />
                             <button onClick={() => handleHealth('pe', peValue ?? 0 ,'add')}>Adicionar</button>
@@ -611,7 +607,7 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                     <div className='cyber'>
                         <div className='inputs'>
                             <button onClick={() => handleHealth('cyberpsicosy', cyberValue ?? 0 ,'remove')}>Remover</button>
-                            <TextField id="standard-basic" size='small' label="Cyberpsicose" variant="filled" value={cyberValue} onChange={(e) => {
+                            <TextField id="standard-basic" size='small' label="Cyberpsicose" variant="filled" inputMode='numeric' value={cyberValue} onChange={(e) => {
                                 setCyberValue(Number(e.target.value));
                             }} />
                             <button onClick={() => handleHealth('cyberpsicosy', cyberValue ?? 0 ,'add')}>Adicionar</button>
