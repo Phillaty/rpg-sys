@@ -92,3 +92,20 @@ export const uploadImage = async (file: File, path: string): Promise<uploadImage
 
     return errorList;
   }
+
+  export const getTypePosition = (type: string) => {
+    switch (type) {
+      case 'inventory': return "Inventário jodador";
+      case 'store': return "Loja";
+      case 'ground': return "No chão";
+      case 'entity': return "Inventário entidade";
+      case 'masterHold': return "Apenas mestre";
+      case 'weapon': return "Armamento";
+      case 'armadure': return "Armadura";
+      case 'addon': return "Addon";
+      case 'ammo': return "Munição";
+      case 'general': return "Item geral";
+      default:
+        return "-";
+    }
+  }

@@ -77,18 +77,68 @@ export const Container = styled.div<{isToCloseSheet: boolean}>`
     }
 
     .charInfo {
-        background-color: white;
         color: black;
-        padding: 32px 16px;
-        border-radius: 4px;
-
         width: 420px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
 
         .img {
             text-align: center;
 
             img {
                 width: 80px;
+            }
+        }
+
+        .infoBasics {
+            background-color: white;
+            padding: 32px 16px;
+            border-radius: 4px;
+        }
+
+        .infoMore {
+            .attributesTitle {
+                text-align: center;
+                font-size: 20px;
+                margin-bottom: 16px;
+                font-weight: 600;
+            }
+            .attributes {
+                display: flex;
+                justify-content: center;
+                gap: 16px;
+
+                .attrubuteItem {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    max-height: 75px;
+
+                    p {
+                        font-size: 20px;
+                    }
+
+                    button {
+                        padding: 4px 8px;
+                        background-color: #737ad3;
+                        color: white;
+                        border: 0;
+                        border-radius: 4px;
+                        cursor: pointer;
+                    }
+
+                    button:hover {
+                        opacity: 0.8;
+                        transition: 0.2s;
+                    }
+
+                    .disable, .disable:hover {
+                        background-color: gray;
+                        opacity: 1;
+                        cursor: auto;
+                    }
+                }
             }
         }
 

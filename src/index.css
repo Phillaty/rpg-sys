@@ -55,3 +55,48 @@ code {
 .MuiPopover-root {
   z-index: 9999999999999999 !important;
 }
+
+:root {
+  --toastify-color-progress-light: linear-gradient(
+    to right,
+    #4cd964,
+    #5ac8fa,
+    #007aff,
+    #34aadc,
+    #5856d6,
+    #ff2d55
+  ) !important;
+
+  --toastify-color-progress-success: var(--toastify-color-progress-light) !important;
+}
+
+.chip-weapon {
+  background-color: #b02323 !important;
+}
+.chip-armadure {
+  background-color: #2348b0 !important;
+}
+.chip-addon {
+  background-color: #2389b0 !important;
+}
+.chip-ammo {
+  background-color: #32b023 !important;
+}
+.chip-general {
+  background-color: #de8121 !important;
+}
+.chip-inventory {
+  background-color: #1972be !important;
+}
+.chip-store {
+  background-color: #6f19be !important;
+}
+.chip-ground {
+  background-color: #be1919 !important;
+}
+.chip-entity {
+  background-color: #be19b9 !important;
+}
+.chip-masterHold {
+  background-color: #ff36a5 !important;
+}

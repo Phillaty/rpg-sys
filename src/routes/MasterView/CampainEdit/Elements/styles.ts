@@ -41,7 +41,7 @@ export const Container = styled.div`
         }
 
         .right {
-            width: 40vw;
+            width: 30vw;
             padding: 0 16px;
             display: flex;
             flex-direction: column;
@@ -57,6 +57,14 @@ export const Container = styled.div`
                 display: flex;
                 align-items: center;
                 justify-content: center;
+            }
+
+            .duo {
+                display: flex;
+                gap: 4px;
+                > div {
+                    width: 50%;
+                }
             }
 
             > div {
@@ -261,76 +269,6 @@ export const Container = styled.div`
         .noClasses {
             width: 0;
             padding: 0;
-        }
-
-        .buffItem {
-            padding: 16px;
-
-            button {
-                background-color: #737ad3;
-                color: white;
-                border: 0;
-                border-radius: 4px;
-                padding: 8px 16px;
-                cursor: pointer;
-            }
-
-            button:hover {
-                opacity: 0.8;
-                transition: 0.2s;
-            }
-
-            .remove {
-                background-color: #d37373;
-            }
-
-            .itembuffContainer {
-                display: flex;
-                flex-direction: column;
-                gap: 8px;
-
-                > .remove {
-                    width: 200px;
-                    margin-top: 16px;
-                }
-
-                .inputs {
-                    display: flex;
-                    gap: 8px;
-
-                    > div {
-                        width: 50%;
-                    }
-                }
-
-                .inputsOne > div {
-                    width: 100%;
-                }
-
-                .perkBuffList {
-                    display: flex;
-                    flex-direction: column;
-                    gap: 4px;
-                }
-
-                .perkBuffListItem {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    padding: 8px 16px;
-                    border-radius: 4px;
-                    border: 1px solid #d1d1d1;
-
-                    p {
-                        margin: 0;
-                        font-size: 14px;
-                    }
-
-                    label {
-                        font-weight: 600;
-                    }
-                }
-            }
         }
     }
 `

@@ -9,6 +9,11 @@ export type userDataType = {
     id: string;
 };
 
+export type discordType = {
+    webhook?: string;
+    sendDices?: boolean;
+}
+
 export type campainType = {
     description: string;
     img: string;
@@ -22,7 +27,9 @@ export type campainType = {
     basics: basicsCampainType;
     classes: string[];
     origins: string[];
+    elements: string[];
     skills: string[];
+    discord?: discordType;
 }
 
 export type campainDataType = {
@@ -42,6 +49,7 @@ export type classCharType = {
 }
 
 export type unlockType = {
+    attributePoints: number;
     habilityPoints: number;
     perkPoints: number;
     maxPerkLevel: number;
@@ -161,8 +169,8 @@ export type buffPerkVantageType = {
 export type habilityBuffType = {
     lifePerLevel?: buffLifeType;
     lifeTotal?: buffLifeType;
-    modifyRoll?: buffPerkType;
-    rollVantage?: buffPerkVantageType;
+    modifyRoll?: buffPerkType[];
+    rollVantage?: buffPerkVantageType[];
 }
 
 export type habilityType = {
@@ -172,6 +180,7 @@ export type habilityType = {
     require?: string[];
     buff?: habilityBuffType;
     type: string;
+    verified?: boolean;
 }
 
 export type habilityDataType = {
@@ -205,4 +214,123 @@ export type uploadImageResponse = {
 export type alertType = {
     message: string;
     type: 'warning' | 'error';
+}
+
+export type itemTypeRoll = {
+    base?: number[];
+    mod?: number[];
+}
+
+export type itemTypePosition = {
+    type: 'inventory' | 'store' | 'ground' | 'entity' | 'masterHold';
+    idGetter?: string;
+}
+
+export type itemTypeCrit = {
+    multiply?: number;
+    roll?: number;
+}
+
+export type itemBuffType = {
+    modifyRoll?: buffPerkType[];
+}
+
+export type itemTypeModifications = {
+    name?: string;
+    description?: string;
+}
+
+export type itemType = {
+    name: string;
+    description: string;
+    type: 'weapon' | 'armadure' | 'addon' | 'ammo' | 'general' | '';
+    position: itemTypePosition;
+    weaponConfigs?: {
+        crit?: itemTypeCrit;
+        damage?: itemTypeRoll;
+        type?: 'range' | 'melee';
+    };
+    armadureConfigs?: {
+        protection?: number;
+        type?: 'heavy' | 'light';
+    };
+    roll?: itemTypeRoll;
+    reach?: string;
+    damagetype?: string;
+    weight: number;
+    category: number;
+    buff?: itemBuffType;
+    campainId?: string;
+    verified?: boolean;
+    cost: number;
+    modifications?: itemTypeModifications[];
+}
+
+export type itemDataType = {
+    id: string;
+    data: itemType;
+}
+
+export type storeType = {
+    title: string;
+    location: string;
+    description: string;
+    moneyHolding: number;
+    tax: number;
+    verified?: boolean;
+}
+
+export type storeDataType = {
+    id: string;
+    data: storeType;
+}
+
+export type elementType = {
+    name: string;
+    description: string;
+    colors?: {
+        background?: string;
+        color?: string;
+    };
+    verified?: boolean,
+}
+
+export type elementDataType = {
+    id: string;
+    data: elementType;
+}
+
+export type elementMagicType = {
+    name: string;
+    id: string;
+    color?: string;
+    backgroundColor?: string;
+}
+
+export type magicTypeUpgrades = {
+    title: string;
+    description: string;
+    level: number;
+    peCost?: number;
+}
+
+export type magicType = {
+    name: string;
+    description: string;
+    upgrades: magicTypeUpgrades[];
+    element: elementMagicType,
+    circle: number,
+    verified?: boolean,
+    campainId: string,
+
+    duration: string,
+    reach: string,
+    target: string,
+    execution: string,
+    resistance?: string,
+}
+
+export type magicDataType = {
+    id: string;
+    data: magicType;
 }

@@ -3,7 +3,7 @@ import { Container } from './styles';
 import { useLocation } from 'react-router-dom';
 import { collection, doc, onSnapshot, query, where } from 'firebase/firestore';
 import { db } from '../../../firebase/firebase';
-import { alertType, avatarDataType, campainType, classeDataType, habilityDataType, originDataType, perkDataType, subclassDataType } from '../../../types';
+import { alertType, avatarDataType, campainDataType, classeDataType, elementDataType, habilityDataType, originDataType, perkDataType, storeDataType, subclassDataType } from '../../../types';
 import { ColorRing } from 'react-loader-spinner';
 import Stack from '@mui/material/Stack';
 import Alert from '@mui/material/Alert';
@@ -17,6 +17,22 @@ import Pericias from './Pericias';
 import Habilidades from './Habilidades';
 import { ToastContainer, toast } from 'react-toastify';
 import { getAlertsCampain } from '../../../utils';
+import { AppBar, Dialog, IconButton, Slide, Toolbar, Typography } from '@mui/material';
+import Itens from './Itens';
+import { TransitionProps } from '@mui/material/transitions';
+import Elements from './Elements';
+import Magics from './Magics';
+import Stores from './Stores';
+import Discord from './Discord';
+
+const Transition = React.forwardRef(function Transition(
+    props: TransitionProps & {
+      children: React.ReactElement<unknown>;
+    },
+    ref: React.Ref<unknown>,
+  ) {
+    return <Slide direction="up" ref={ref} {...props} />;
+  });
 
 const CampainEdit = () => {
 
@@ -26,7 +42,7 @@ const CampainEdit = () => {
     const urlParams = new URLSearchParams(queryString);
     const campainId = urlParams.get('camp') ?? '';
 
-    const [campain, setCampain] = useState<campainType>();
+    const [campain, setCampain] = useState<campainDataType>();
     const [classes, setClasses] = useState<classeDataType[]>([]);
 
     const [showClassesModal, setShowClassesModal] = useState<boolean>(false);
@@ -34,6 +50,7 @@ const CampainEdit = () => {
     const [showOrigensModal, setShowOrigensModal] = useState<boolean>(false);
     const [showPericiasModal, setShowPericiasModal] = useState<boolean>(false);
     const [showHabilidadesModal, setShowHabilidadesModal] = useState<boolean>(false);
+    const [showElementsModal, setShowElementsModal] = useState<boolean>(false);
 
     const [subclasses, setSubclasses] = useState<subclassDataType[]>([]);
 
@@ -45,7 +62,34 @@ const CampainEdit = () => {
 
     const [characters, setCharacters] = useState<avatarDataType[]>([]);
 
+    const [stores, setStores] = useState<storeDataType[]>([]);
+
+    const [elements, setElements] = useState<elementDataType[]>([]);
+
     const [alertsList, setAlertsList] = useState<alertType[]>([]);
+
+    const [openItemModal, setOpenItemModal] = useState<boolean>(false);
+    const [openMagicModal, setOpenMagicModal] = useState<boolean>(false);
+    const [openStoreModal, setOpenStoreModal] = useState<boolean>(false);
+    const [openDiscordModal, setOpenDiscordModal] = useState<boolean>(false);
+
+    const handleClickItemOpen = () => {
+        setOpenItemModal(true);
+    };
+
+    const handleClickMagicOpen = () => {
+        setOpenMagicModal(true);
+    };
+
+    const handleCloseItem = () => {
+        setOpenItemModal(false);
+    };
+
+    const handleCloseMagic = () => {
+        setOpenMagicModal(false);
+    };
+
+    
 
     const handleCloseModals = () => {
         setShowClassesModal(false);
@@ -53,6 +97,9 @@ const CampainEdit = () => {
         setShowOrigensModal(false);
         setShowPericiasModal(false);
         setShowHabilidadesModal(false);
+        setShowElementsModal(false);
+        setOpenStoreModal(false);
+        setOpenDiscordModal(false);
     }
 
     useEffect(() => {
@@ -60,15 +107,18 @@ const CampainEdit = () => {
             const docRef = doc(db, 'campains', campainId);
 
             onSnapshot(docRef, (querySnapshot) => {
-                const docData = querySnapshot.data() as campainType;
+                const docData = {
+                    id: querySnapshot.id,
+                    data: querySnapshot.data(),
+                } as campainDataType;
                 setCampain(docData);
             });
         }
     }, [campainId]);
 
     useEffect(() => {
-        if (campain && campain.classes.length > 0) {
-            const qClasses = query(collection(db, "classes"), where("__name__", "in", campain.classes));
+        if (campain && campain.data.classes.length > 0) {
+            const qClasses = query(collection(db, "classes"), where("__name__", "in", campain.data.classes));
 
             onSnapshot(qClasses, (querySnapshot) => {
                 const docData = querySnapshot.docs.map(doc => ({
@@ -80,7 +130,7 @@ const CampainEdit = () => {
         }
 
         if (campain) {
-            const errors = getAlertsCampain(campain);
+            const errors = getAlertsCampain(campain.data);
             setAlertsList(errors);
         }
     }, [campain])
@@ -88,7 +138,7 @@ const CampainEdit = () => {
     const getSubclasses = async () => {
         const p = query(
             collection(db, 'subclass'),
-            where('classId', 'in', campain?.classes && campain?.classes.length > 0 ? campain?.classes : ['non'])
+            where('classId', 'in', campain?.data?.classes && campain?.data?.classes.length > 0 ? campain?.data?.classes : ['non'])
         );
 
         onSnapshot(p, (querySnapshot) => {
@@ -105,7 +155,7 @@ const CampainEdit = () => {
     const getHabilities = async () => {
         const p = query(
             collection(db, 'hability'),
-            where('classId', 'in', campain?.classes && campain?.classes.length > 0 ? campain?.classes : ['non'])
+            where('classId', 'in', campain?.data?.classes && campain?.data?.classes.length > 0 ? campain?.data?.classes : ['non'])
         );
 
         onSnapshot(p, (querySnapshot) => {
@@ -122,7 +172,7 @@ const CampainEdit = () => {
     const getOrigins = async () => {
         const p = query(
             collection(db, 'origin'),
-            where('__name__', 'in', campain?.origins && campain?.origins.length > 0 ? campain?.origins : ['non'])
+            where('__name__', 'in', campain?.data?.origins && campain?.data?.origins.length > 0 ? campain?.data?.origins : ['non'])
         );
 
         onSnapshot(p, (querySnapshot) => {
@@ -139,7 +189,7 @@ const CampainEdit = () => {
     const getPerks = async () => {
         const p = query(
             collection(db, 'skills'),
-            where('__name__', 'in', campain?.skills && campain?.skills.length > 0 ? campain?.skills : ['non'])
+            where('__name__', 'in', campain?.data?.skills && campain?.data?.skills.length > 0 ? campain?.data?.skills : ['non'])
         );
 
         onSnapshot(p, (querySnapshot) => {
@@ -156,7 +206,7 @@ const CampainEdit = () => {
     const getCharacters = async () => {
         const p = query(
             collection(db, 'character'),
-            where('__name__', 'in', campain?.characters && campain?.characters.length > 0 ? campain?.characters : ['non'])
+            where('__name__', 'in', campain?.data?.characters && campain?.data?.characters.length > 0 ? campain?.data?.characters : ['non'])
         );
 
         onSnapshot(p, (querySnapshot) => {
@@ -170,6 +220,40 @@ const CampainEdit = () => {
         });
     }
 
+    const getStores = async () => {
+        const p = query(
+            collection(db, 'stores'),
+            where('__name__', 'in', campain?.data?.stores && campain?.data?.stores.length > 0 ? campain?.data?.stores : ['non'])
+        );
+
+        onSnapshot(p, (querySnapshot) => {
+            const docData = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                data: doc.data(),
+            })) as storeDataType[];
+
+            const sorted = docData.sort((a, b) => a.data.title.localeCompare(b.data.title));
+            setStores(sorted);
+        });
+    }
+
+    const getElements = async () => {
+        const p = query(
+            collection(db, 'elements'),
+            where('__name__', 'in', campain?.data?.elements && campain?.data?.elements.length > 0 ? campain?.data?.elements : ['non'])
+        );
+
+        onSnapshot(p, (querySnapshot) => {
+            const docData = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                data: doc.data(),
+            })) as elementDataType[];
+
+            const sorted = docData.sort((a, b) => a.data.name.localeCompare(b.data.name));
+            setElements(sorted);
+        });
+    }
+
     useEffect(() => {
         if (classes.length > 0) {
             getSubclasses();
@@ -177,6 +261,8 @@ const CampainEdit = () => {
             getOrigins();
             getPerks();
             getCharacters();
+            getStores();
+            getElements();
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [classes]);
@@ -193,10 +279,10 @@ const CampainEdit = () => {
                     </div>
                     <div className='options'>
                         <button>Editar informações</button>
-                        <button>Gerenciar Lojas</button>
+                        <button onClick={() => setOpenStoreModal(true)}>Gerenciar Lojas</button>
                         <button>Gerenciar entidades</button>
                         <button>Gerenciar convite</button>
-                        <button>Configurar bot Discord</button>
+                        <button onClick={() => setOpenDiscordModal(true)}>Configurar bot Discord</button>
                     </div>
                 </div>
                 <div className='center'>
@@ -220,7 +306,7 @@ const CampainEdit = () => {
                                     <div className='box'>
                                         <div>
                                             <p className='name'>Classes</p>
-                                            <p className='quantity'><i className="fa-solid fa-cube"></i> {campain.classes.length}</p>
+                                            <p className='quantity'><i className="fa-solid fa-cube"></i> {campain.data.classes.length}</p>
                                         </div>
                                         <div>
                                             <button onClick={() => setShowClassesModal(true)}>Editar</button>
@@ -238,7 +324,7 @@ const CampainEdit = () => {
                                     <div className='box'>
                                         <div>
                                             <p className='name'>Origens</p>
-                                            <p className='quantity'><i className="fa-solid fa-cube"></i> {campain.origins.length}</p>
+                                            <p className='quantity'><i className="fa-solid fa-cube"></i> {campain.data.origins.length}</p>
                                         </div>
                                         <div>
                                             <button onClick={() => setShowOrigensModal(true)}>Editar</button>
@@ -255,7 +341,7 @@ const CampainEdit = () => {
                                     <div className='box'>
                                         <div>
                                             <p className='name'>Perícias</p>
-                                            <p className='quantity'><i className="fa-solid fa-cube"></i> {campain.skills.length}</p>
+                                            <p className='quantity'><i className="fa-solid fa-cube"></i> {campain.data.skills.length}</p>
                                         </div>
                                         <div>
                                             <button onClick={() => setShowPericiasModal(true)}>Editar</button>
@@ -267,7 +353,7 @@ const CampainEdit = () => {
                                             <p className='quantity'><i className="fa-solid fa-cube"></i> {habilities.length}</p>
                                         </div>
                                         <div>
-                                            <button>Editar</button>
+                                            <button onClick={() => setShowHabilidadesModal(true)}>Editar</button>
                                         </div>
                                     </div>
                                 </div>
@@ -275,25 +361,31 @@ const CampainEdit = () => {
 
                             <div className='options'>
                                 <div className='titleConfig'>
-                                    <p>Configuração de itens</p>
+                                    <p>Configuração de itens e magias</p>
                                 </div>
                                 <div className='listConfig'>
                                     <div className='box'>
                                         <div>
                                             <p className='name'>Itens</p>
-                                            <p className='quantity'><i className="fa-solid fa-cube"></i> -</p>
                                         </div>
                                         <div>
-                                            <button>Editar</button>
+                                            <button onClick={handleClickItemOpen}>Editar</button>
+                                        </div>
+                                    </div>
+                                    <div className='box'>
+                                        <div>
+                                            <p className='name'>Elementos</p>
+                                        </div>
+                                        <div>
+                                            <button onClick={() => setShowElementsModal(true)}>Editar</button>
                                         </div>
                                     </div>
                                     <div className='box'>
                                         <div>
                                             <p className='name'>Magias</p>
-                                            <p className='quantity'><i className="fa-solid fa-cube"></i> -</p>
                                         </div>
                                         <div>
-                                            <button>Editar</button>
+                                            <button onClick={handleClickMagicOpen}>Editar</button>
                                         </div>
                                     </div>
                                 </div>
@@ -338,21 +430,85 @@ const CampainEdit = () => {
         </>}
 
         <Modal isOpen={showClassesModal} handleCloseModal={handleCloseModals}>
-            <Classes classes={classes} toast={toast} campain={campain} subclasses={subclasses} />
+            <Classes classes={classes} toast={toast} campain={campain?.data} subclasses={subclasses} />
         </Modal>
         <Modal isOpen={showSubclassesModal} handleCloseModal={handleCloseModals}>
-            <Subclasses classes={classes} subclasses={subclasses} toast={toast} campain={campain} />
+            <Subclasses classes={classes} subclasses={subclasses} toast={toast} campain={campain?.data} />
         </Modal>
         <Modal isOpen={showOrigensModal} handleCloseModal={handleCloseModals}>
-            <Origens toast={toast} campain={campain} origins={origins} perks={perks} characters={characters} />
+            <Origens toast={toast} campain={campain?.data} origins={origins} perks={perks} characters={characters} />
         </Modal>
         <Modal isOpen={showPericiasModal} handleCloseModal={handleCloseModals}>
-            <Pericias toast={toast} campain={campain} characters={characters} perks={perks} />
+            <Pericias toast={toast} campain={campain?.data} characters={characters} perks={perks} />
         </Modal>
         <Modal isOpen={showHabilidadesModal} handleCloseModal={handleCloseModals}>
-            <Habilidades />
+            <Habilidades classes={classes} toast={toast} habilities={habilities} characters={characters} perks={perks} />
         </Modal>
-        <ToastContainer />
+        <Modal isOpen={showElementsModal} handleCloseModal={handleCloseModals}>
+            <Elements toast={toast} elements={elements} />
+        </Modal>
+
+
+
+
+        <Dialog
+            fullScreen
+            open={openItemModal}
+            onClose={handleCloseItem}
+            TransitionComponent={Transition}
+        >
+            <AppBar sx={{ position: 'relative', backgroundColor: '#343493' }}>
+            <Toolbar>
+                <IconButton
+                edge="start"
+                color="inherit"
+                onClick={handleCloseItem}
+                aria-label="close"
+                >
+                    <i className="fa-solid fa-xmark"></i>
+                </IconButton>
+                <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
+                    Gerenciamento de itens
+                </Typography>
+            </Toolbar>
+            </AppBar>
+            <Itens toast={toast} stores={stores} perks={perks} characters={characters} />
+        </Dialog>
+
+        <Dialog
+            fullScreen
+            open={openMagicModal}
+            onClose={handleCloseMagic}
+            TransitionComponent={Transition}
+        >
+            <AppBar sx={{ position: 'relative', backgroundColor: '#343493' }}>
+            <Toolbar>
+                <IconButton
+                edge="start"
+                color="inherit"
+                onClick={handleCloseMagic}
+                aria-label="close"
+                >
+                    <i className="fa-solid fa-xmark"></i>
+                </IconButton>
+                <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
+                    Gerenciamento de Magias
+                </Typography>
+            </Toolbar>
+            </AppBar>
+            <Magics toast={toast} elements={elements} />
+        </Dialog>
+        
+
+        <Modal isOpen={openStoreModal} handleCloseModal={handleCloseModals}>
+            <Stores toast={toast} stores={stores} />
+        </Modal>
+        <Modal isOpen={openDiscordModal} handleCloseModal={handleCloseModals}>
+            <Discord toast={toast} campain={campain} />
+        </Modal>
+
+
+        <ToastContainer style={{zIndex: '999999999999999999'}} />
         </>
     )
 }

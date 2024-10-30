@@ -67,8 +67,6 @@ const Login = () => {
 
             const dataLogin = data[0] as userType;
 
-            console.log(encrypt(formData.password));
-
             if (formData.password !== decrypt(dataLogin.password)) {
                 toast.error("Senha incorreta!");
                 return;

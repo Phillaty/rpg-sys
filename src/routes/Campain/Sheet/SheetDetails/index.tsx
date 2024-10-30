@@ -7,6 +7,7 @@ import Modal from '../../../../commom/Modal';
 import { db } from '../../../../firebase/firebase';
 import { arrayUnion, doc, updateDoc } from 'firebase/firestore';
 import { toast, ToastContainer } from 'react-toastify';
+import { Vortex } from 'react-loader-spinner';
 
 type prop = {
     charcater?: avatarDataType;
@@ -25,6 +26,7 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
     const [showHabilityModal, setShowHabilityModal] = useState<boolean>(false);
     const [showSubclassModal, setShowSubclassModal] = useState<boolean>(false);
     const [showPerksModal, setShowPerksModal] = useState<boolean>(false);
+    const [loadingAtt, setLoadingAtt] = useState<boolean>(false);
 
     const [habilityToAdd, setHabilityToAdd] = useState<habilityDataType>();
     const [subclassToAdd, setSubclassToAdd] = useState<subclassDataType>();
@@ -128,8 +130,9 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
             await updateDoc(userDocRef, {
                 skill: newSkillsChar,
                 unlock: {
+                    attributePoints: charcater?.data.unlock.attributePoints,
                     habilityPoints: charcater?.data.unlock.habilityPoints,
-                    maxPerkLevel: (charcater?.data.unlock.maxPerkLevel ?? 0) - perksToUpgrade.length,
+                    maxPerkLevel: charcater?.data.unlock.maxPerkLevel,
                     perkPoints: (charcater?.data.unlock.perkPoints ?? 0) - perksToUpgrade.length,
                 }
             }).then(() => {
@@ -157,6 +160,28 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
         return true;
     }
 
+    const upAttribute = async (att: 'INT' | 'AGI' | 'FOR' | 'PRE' | 'VIG') => {
+        setLoadingAtt(true);
+        const userDocRef = doc(db, "character", charcater?.id ?? '');
+
+        const dataToUp = {
+            [att]: (charcater?.data[att] ?? 0) + 1,
+            unlock: {
+                attributePoints: (charcater?.data.unlock.attributePoints ?? 0) - 1,
+                habilityPoints: charcater?.data.unlock.habilityPoints ?? 0,
+                maxPerkLevel: charcater?.data.unlock.maxPerkLevel ?? 0,
+                perkPoints: charcater?.data.unlock.perkPoints ?? 0,
+            }
+        }
+        console.log(dataToUp);
+
+        await updateDoc(userDocRef, dataToUp).then(() => {
+            toast.success("Perícias atualizadas!");
+        });
+
+        setLoadingAtt(false);
+    }
+
     return (
         <>
         <Container isToCloseSheet={isToCloseSheet}>
@@ -167,30 +192,179 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
             </div>
             <div className='mainDetails'>
                 <div className='charInfo'>
-                    <div className='img'>
-                        <img src={logo} alt='' />
+                    <div className='infoBasics'>
+                        <div className='img'>
+                            <img src={logo} alt='' />
+                        </div>
+                        <div className='infos'>
+                            <div>
+                                <p className='label'>Nome</p>
+                                <p className='info'>{charcater?.data.name}</p>
+                            </div>
+                            <div>
+                                <p className='label'>Idade</p>
+                                <p className='info'>{!!charcater?.data.age ? charcater?.data.age : '-'}</p>
+                            </div>
+                            <div>
+                                <p className='label'>Classe</p>
+                                <p className='info'>{charcater?.data.class.title}</p>
+                            </div>
+                            <div>
+                                <p className='label'>Lore</p>
+                                <p className='info'>{charcater?.data.lore}</p>
+                            </div>
+                        </div>
+                        <div className='button'>
+                            <button>Editar informações</button>
+                        </div>
                     </div>
-                    <div className='infos'>
-                        <div>
-                            <p className='label'>Nome</p>
-                            <p className='info'>{charcater?.data.name}</p>
-                        </div>
-                        <div>
-                            <p className='label'>Idade</p>
-                            <p className='info'>{!!charcater?.data.age ? charcater?.data.age : '-'}</p>
-                        </div>
-                        <div>
-                            <p className='label'>Classe</p>
-                            <p className='info'>{charcater?.data.class.title}</p>
-                        </div>
-                        <div>
-                            <p className='label'>Lore</p>
-                            <p className='info'>{charcater?.data.lore}</p>
+
+                    <div className='infoBasics infoMore'>
+                        <div className='attributesTitle'>Atributos</div>
+                        <div className='attributes'>
+                            <div className='attrubuteItem'>
+                                <p>AGI</p>
+                                <span>{charcater?.data.AGI}</span>
+                                {(charcater?.data.unlock.attributePoints ?? 0) > 0 && (charcater?.data.AGI ?? 0) < 5 ?
+                                    <>
+                                        {loadingAtt ? 
+                                            <Vortex
+                                            visible={true}
+                                            height="30"
+                                            width="30"
+                                            ariaLabel="vortex-loading"
+                                            wrapperStyle={{}}
+                                            wrapperClass="vortex-wrapper"
+                                            colors={['red', 'green', 'blue', 'yellow', 'orange', 'purple']}
+                                            />
+                                            : 
+                                            <button onClick={() => {
+                                                upAttribute('AGI');
+                                            }}>
+                                                <i className="fa-solid fa-angles-up"></i>
+                                            </button>
+                                            
+                                        }
+                                    </>
+                                    :
+                                    <button className='disable'><i className="fa-solid fa-angles-up"></i></button>
+                                }
+                            </div>
+                            <div className='attrubuteItem'>
+                                <p>INT</p>
+                                <span>{charcater?.data.INT}</span>
+                                {(charcater?.data.unlock.attributePoints ?? 0) > 0 && (charcater?.data.INT ?? 0) < 5 ?
+                                    <>
+                                        {loadingAtt ? 
+                                            <Vortex
+                                            visible={true}
+                                            height="30"
+                                            width="30"
+                                            ariaLabel="vortex-loading"
+                                            wrapperStyle={{}}
+                                            wrapperClass="vortex-wrapper"
+                                            colors={['red', 'green', 'blue', 'yellow', 'orange', 'purple']}
+                                            />
+                                            : 
+                                            <button onClick={() => {
+                                                upAttribute('INT');
+                                            }}>
+                                                <i className="fa-solid fa-angles-up"></i>
+                                            </button>
+                                            
+                                        }
+                                    </>
+                                    :
+                                    <button className='disable'><i className="fa-solid fa-angles-up"></i></button>
+                                }
+                            </div>
+                            <div className='attrubuteItem'>
+                                <p>VIG</p>
+                                <span>{charcater?.data.VIG}</span>
+                                {(charcater?.data.unlock.attributePoints ?? 0) > 0 && (charcater?.data.VIG ?? 0) < 5 ?
+                                    <>
+                                        {loadingAtt ? 
+                                            <Vortex
+                                            visible={true}
+                                            height="30"
+                                            width="30"
+                                            ariaLabel="vortex-loading"
+                                            wrapperStyle={{}}
+                                            wrapperClass="vortex-wrapper"
+                                            colors={['red', 'green', 'blue', 'yellow', 'orange', 'purple']}
+                                            />
+                                            : 
+                                            <button onClick={() => {
+                                                upAttribute('VIG');
+                                            }}>
+                                                <i className="fa-solid fa-angles-up"></i>
+                                            </button>
+                                            
+                                        }
+                                    </>
+                                    :
+                                    <button className='disable'><i className="fa-solid fa-angles-up"></i></button>
+                                }
+                            </div>
+                            <div className='attrubuteItem'>
+                                <p>PRE</p>
+                                <span>{charcater?.data.PRE}</span>
+                                {(charcater?.data.unlock.attributePoints ?? 0) > 0 && (charcater?.data.PRE ?? 0) < 5 ?
+                                    <>
+                                        {loadingAtt ? 
+                                            <Vortex
+                                            visible={true}
+                                            height="30"
+                                            width="30"
+                                            ariaLabel="vortex-loading"
+                                            wrapperStyle={{}}
+                                            wrapperClass="vortex-wrapper"
+                                            colors={['red', 'green', 'blue', 'yellow', 'orange', 'purple']}
+                                            />
+                                            : 
+                                            <button onClick={() => {
+                                                upAttribute('PRE');
+                                            }}>
+                                                <i className="fa-solid fa-angles-up"></i>
+                                            </button>
+                                            
+                                        }
+                                    </>
+                                    :
+                                    <button className='disable'><i className="fa-solid fa-angles-up"></i></button>
+                                }
+                            </div>
+                            <div className='attrubuteItem'>
+                                <p>FOR</p>
+                                <span>{charcater?.data.FOR}</span>
+                                {(charcater?.data.unlock.attributePoints ?? 0) > 0 && (charcater?.data.FOR ?? 0) < 5 ?
+                                    <>
+                                        {loadingAtt ? 
+                                            <Vortex
+                                            visible={true}
+                                            height="30"
+                                            width="30"
+                                            ariaLabel="vortex-loading"
+                                            wrapperStyle={{}}
+                                            wrapperClass="vortex-wrapper"
+                                            colors={['red', 'green', 'blue', 'yellow', 'orange', 'purple']}
+                                            />
+                                            : 
+                                            <button onClick={() => {
+                                                upAttribute('FOR');
+                                            }}>
+                                                <i className="fa-solid fa-angles-up"></i>
+                                            </button>
+                                            
+                                        }
+                                    </>
+                                    :
+                                    <button className='disable'><i className="fa-solid fa-angles-up"></i></button>
+                                }
+                            </div>
                         </div>
                     </div>
-                    <div className='button'>
-                        <button>Editar informações</button>
-                    </div>
+                    
                 </div>
                 <div className='habilitys'>
                     <div className='hability'>
