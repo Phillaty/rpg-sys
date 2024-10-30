@@ -49,6 +49,7 @@ export type classCharType = {
 }
 
 export type unlockType = {
+    attributePoints: number;
     habilityPoints: number;
     perkPoints: number;
     maxPerkLevel: number;

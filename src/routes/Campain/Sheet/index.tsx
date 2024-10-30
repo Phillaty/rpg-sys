@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Container } from './styles';
-import { avatarDataType, campainType, habilityDataType, subclassDataType } from '../../../types';
+import { Container, ContainerHability } from './styles';
+import { avatarDataType, campainType, habilityDataType, itemDataType, subclassDataType } from '../../../types';
 import logo from '../../../imgs/profile-user-icon-2048x2048-m41rxkoe.png';
 import { skillFiltr, skillTy } from '..';
 import Roll from '../../../commom/ROLL';
@@ -9,6 +9,8 @@ import SheetDetails from './SheetDetails';
 import { collection, onSnapshot, query, where } from 'firebase/firestore';
 import { db } from '../../../firebase/firebase';
 import { useLocation, useNavigate } from 'react-router-dom';
+import Modal from '../../../commom/Modal';
+import Backpack from './Backpack';
 
 type prop = {
     charcater?: avatarDataType;
@@ -25,6 +27,8 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
     const queryString = location.search;
     const urlParams = new URLSearchParams(queryString);
     const [wentFromCreate, setWentFromCreate] = useState<boolean>(Boolean(urlParams.get('wentFromCreate')));
+
+    const campainId = urlParams.get('camp') ?? '';
 
     const [dice, setdice] = useState<number[]>();
     const [diceMod, setdiceMod] = useState<number[]>();
@@ -43,6 +47,18 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
 
     const [charSubclass, setCharSubclass] = useState<subclassDataType>();
 
+    const [backpackModal, setBackpackModal] = useState<boolean>(false);
+
+    const [habilityModal, setHabilityModal] = useState<boolean>(false);
+    const [habilitySelected, setHabilitySelected] = useState<habilityDataType>();
+
+    const [itemsAll, setItemsALL] = useState<itemDataType[]>([]);
+    const [itemsCharInventory, setItemsCharInventory] = useState<itemDataType[]>([]);
+
+    const [itensGeral, setItensGeral] = useState<itemDataType[]>([]);
+    const [itensWeapon, setItensWeapon] = useState<itemDataType[]>([]);
+    const [itensArmadure, setItensArmadure] = useState<itemDataType[]>([]);
+
     const handleCloseDicePer = () => {
         setdicePers([]);
         setdicePersMod([]);
@@ -57,6 +73,23 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
             setIsToCloseSheet(false);
         }, 500);
     }
+
+    const handleCloseBackpack = () => {
+        setBackpackModal(false);
+    }
+
+    const handleCloseHability = () => {
+        setHabilityModal(false);
+        setHabilitySelected(undefined);
+    }
+
+    useEffect(() => {
+        if(habilitySelected) {
+            setHabilityModal(true);
+        } else {
+            setHabilityModal(false);
+        }
+    }, [habilitySelected])
 
     const removeWentFromCreateParam = () => {
         urlParams.delete('wentFromCreate');
@@ -135,12 +168,90 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
         }
     }, [charcater, habilities]);
 
+    const getItems = async () => {
+        const p = query(
+            collection(db, 'item'),
+            where('campainId', '==', campainId)
+        );
+
+        onSnapshot(p, (querySnapshot) => {
+            const docData = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                data: doc.data(),
+            })) as itemDataType[];
+
+            const sorted = docData.sort((a, b) => a.data.name.localeCompare(b.data.name));
+            setItemsALL(sorted);
+        });
+    }
+
+    useEffect(() => {
+        if(campainId) {
+            getItems();
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [campainId]);
+
+    useEffect(() => {
+        if (itemsAll) {
+            const chatItensGet = itemsAll.filter((i) => i.data.position.idGetter === charcater?.id);
+
+            setItemsCharInventory(chatItensGet);
+
+            const geralItenGet = chatItensGet.filter((i) => !['weapon', 'armadure'].includes(i.data.type));
+            const weaponsItenGet = chatItensGet.filter((i) => ['weapon'].includes(i.data.type));
+            const armadureItenGet = chatItensGet.filter((i) => ['armadure'].includes(i.data.type));
+
+            setItensGeral(geralItenGet);
+            setItensWeapon(weaponsItenGet);
+            setItensArmadure(armadureItenGet);
+        }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [itemsAll]);
+
+    const handleRoll = (item: skillTy, aditionalMod?: number) => {
+        let totalModify:number[] = [];
+
+        if (item.expertise) {
+            totalModify = [item.expertise];
+        }
+
+        if (aditionalMod) totalModify.push(aditionalMod);
+
+        const totalDice = [20];
+
+        if(!!habilitiesChar) {
+            habilitiesChar.forEach((i) => {
+                i.data.buff?.modifyRoll?.forEach((j) => {
+                    if(j.perkId === item.id && i.data.type === "passive") totalModify.push(j.value);
+                })
+            });
+
+            habilitiesChar.forEach((i) => {
+                i.data.buff?.rollVantage?.forEach((j) => {
+                    if(j.perkId === item.id && i.data.type === "passive") totalDice.push(20);
+                })
+            });
+        }
+
+        if(charcater){
+            const attributeMod = getAttrubuteMod(item.base ?? '', charcater?.data);
+            if (attributeMod && attributeMod > 0) {
+                totalModify.push(attributeMod);
+            }
+        }
+
+        setdiceMod(totalModify);
+        setdice(totalDice);
+    }
+
     return (
         <>
             <Container>
                 <div className='topInfo'>
                     <div className='buttonsChar'>
-                        <button className='backpack'><i className="fa-solid fa-list"></i> Mochila</button>
+                        <button className='backpack' onClick={() => {setBackpackModal(true)}}><i className="fa-solid fa-list"></i> Mochila</button>
                         <button className='sheet' onClick={() => {setShowSheetDetails(true)}}><i className="fa-solid fa-address-book"></i> Ficha completa</button>
                     </div>
                     <div className='charInfo'>
@@ -260,6 +371,58 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                         </>
                     }
                 </div>
+                {!!itensWeapon.length && 
+                    <div className='weapons'>
+                        <div className='weaponList'>
+                            {itensWeapon.map((item, key) => (
+                                <div className='itemWeapon' key={key}>
+                                    <p>{item.data.name}</p>
+                                    <p>Dano: 
+                                        [{item.data.weaponConfigs?.damage?.base?.join(', ')}] {' '}
+                                        {item.data.weaponConfigs?.damage?.mod && <>
+                                            + {item.data.weaponConfigs?.damage?.mod.join(' + ')}
+                                        </>} | {item.data.weaponConfigs?.crit?.roll ?? 20}/{item.data.weaponConfigs?.crit?.multiply ?? 2}x
+                                    </p>
+                                    <div>
+                                        <button className='test' onClick={() => {
+                                            
+                                            const getPerkItem = skillsAll.find(i => i.name === (item.data.weaponConfigs?.type === 'melee' ? 'Luta' : 'Pontaria'));
+                                            if(getPerkItem) handleRoll(getPerkItem);
+
+                                        }}>{item.data.weaponConfigs?.type === 'melee' ? 'Luta': 'Pontaria'}</button>
+
+                                        <button className='dmg' onClick={() => {
+                                            if(item.data.weaponConfigs?.damage?.mod) setdiceMod(item.data.weaponConfigs?.damage?.mod);
+                                            setdice(item.data.weaponConfigs?.damage?.base);
+                                        }}>Dano normal</button>
+
+                                        <button className='dmg crit' onClick={() => {
+                                            if(item.data.weaponConfigs?.damage?.mod) setdiceMod(item.data.weaponConfigs?.damage?.mod);
+                                            
+                                            const dicesDmg: number[] = []
+                                            for (let index = 0; index < (item.data.weaponConfigs?.crit?.multiply ?? 2); index++) {
+                                                item.data.weaponConfigs?.damage?.base?.forEach(element => {
+                                                    dicesDmg.push(element);
+                                                });
+                                            }
+                                            setdice(dicesDmg);
+                                        }}>Dano crítico</button>
+                                    </div>
+                                    
+                                </div>
+                            ))}
+                            
+                        </div>
+                    </div>
+                }
+                <div className='habilities'>
+                    <div className='habilityTitle'>Habilidades ativas <small>Clique para ver mais</small></div>
+                    <div className='habilityList'>
+                        {habilitiesChar?.map((item, key) => (
+                            <div className='habilityItem' onClick={() => setHabilitySelected(item)}>{item.data.name}</div>
+                        ))}
+                    </div>
+                </div>
                 <div className='skill'>
                     <div className='skillItems'>
                         <div>
@@ -267,32 +430,7 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                             <div className='skillsgrid'>
                                 {skills.trained?.map((item, key) => (
                                     <div key={key} className='itemSkill' onClick={() => {
-                                        const totalModify = [item.expertise ?? 0];
-                                        const totalDice = [20];
-
-                                        if(!!habilitiesChar) {
-                                            habilitiesChar.forEach((i) => {
-                                                i.data.buff?.modifyRoll?.forEach((j) => {
-                                                    if(j.perkId === item.id) totalModify.push(j.value);
-                                                })
-                                            });
-
-                                            habilitiesChar.forEach((i) => {
-                                                i.data.buff?.rollVantage?.forEach((j) => {
-                                                    if(j.perkId === item.id) totalModify.push(20);
-                                                })
-                                            });
-                                        }
-
-                                        if(charcater){
-                                            const attributeMod = getAttrubuteMod(item.base ?? '', charcater?.data);
-                                            if (attributeMod && attributeMod > 0) {
-                                                totalModify.push(attributeMod);
-                                            }
-                                        }
-
-                                        setdiceMod(totalModify);
-                                        setdice(totalDice);
+                                        handleRoll(item);
                                     }}>
                                         {item.name}
                                     </div>
@@ -305,30 +443,7 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                             <div className='skillsgrid'>
                                 {skills.notTrained.map((item, key) => ( 
                                     <div key={key} className='itemSkill' onClick={() => {
-                                        const totalModify = [];
-                                        const totalDice = [20];
-
-                                        if(!!habilitiesChar) {
-                                            habilitiesChar.forEach((i) => {
-                                                i.data.buff?.modifyRoll?.forEach((j) => {
-                                                    if(j.perkId === item.id) totalModify.push(j.value);
-                                                })
-                                            })
-                                            habilitiesChar.forEach((i) => {
-                                                i.data.buff?.rollVantage?.forEach((j) => {
-                                                    if(j.perkId === item.id) totalModify.push(20);
-                                                })
-                                            });
-                                        }
-
-                                        if(charcater){
-                                            const attributeMod = getAttrubuteMod(item.base ?? '', charcater?.data);
-                                            if (attributeMod && attributeMod > 0) {
-                                                totalModify.push(attributeMod);
-                                            }
-                                        }
-                                        setdiceMod(totalModify);
-                                        setdice(totalDice);
+                                        handleRoll(item);
                                     }}>
                                         {item.name}
                                     </div>
@@ -360,6 +475,45 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                 />
             }
             
+            <Modal isOpen={backpackModal} handleCloseModal={handleCloseBackpack} >
+                <Backpack itens={itemsCharInventory} itensArmadure={itensArmadure} itensGeral={itensGeral} itensWeapon={itensWeapon} />
+            </Modal>
+
+            <Modal isOpen={habilityModal} handleCloseModal={handleCloseHability} >
+                <ContainerHability>
+                    {habilitySelected && <>
+                    
+                    <div className='data'>
+                        <p>Nome da habilidade</p>
+                        <span>{habilitySelected.data.name}</span>
+                    </div>
+                    <div className='data'>
+                        <p>Descrição</p>
+                        <span>{habilitySelected.data.description}</span>
+                    </div>
+                    {!!habilitySelected.data.buff?.modifyRoll?.length && 
+                        <div className='data'>
+                            <p>Modificador de pericia ganho</p>
+                            <span>
+                                <div>
+                                    {habilitySelected.data.buff?.modifyRoll?.map((i, key) => (
+                                        <div key={key} className='perkItem' onClick={() => {
+                                            const getPerkItem = skillsAll.find((j) => i.perkId === j.id);
+                                            if (getPerkItem) {
+                                                console.log(i);
+                                                handleRoll(getPerkItem, Number(i.value));
+                                            }
+                                            handleCloseHability();
+                                        }}>{i.perkName} | valor: {i.value}</div>
+                                    ))}
+                                </div>
+                            </span>
+                        </div>
+                    }
+                    
+                    </>}
+                </ContainerHability>
+            </Modal>
         </>
     )
 }

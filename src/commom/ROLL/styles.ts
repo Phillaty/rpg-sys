@@ -55,4 +55,8 @@ export const Container = styled.div`
     .closeBtn {
         background-color: #e37744;
     }
+
+    .resultsEach {
+        font-size: 14px;
+    }
 `

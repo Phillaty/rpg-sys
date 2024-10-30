@@ -167,10 +167,156 @@ export const Container = styled.div`
                     }
                 }
             } 
+        }        
+    }
+
+    .weapons {
+        border: 0;
+        background-color: #1c273b;
+        padding: 8px;
+        margin-top: 14px;
+        border-radius: 4px;
+        p {
+            margin: 0;
+        }
+
+        .weaponList {
+            display: flex;
+            flex-wrap: wrap;
+
+            .itemWeapon {
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+                border: 1px solid #7b7b7b87;
+                padding: 8px;
+                width: 50%;
+                border-radius: 4px;
+
+                @media (max-width: 1000px) {
+                    width: 100%;
+                }
+
+                > div {
+                    display: flex;
+                    gap: 4px;
+                }
+                button {
+                    border-radius: 4px;
+                    padding: 4px 8px;
+                    cursor: pointer;
+                    transition: 0.2s;
+                    margin-top: 8px;
+                }
+
+                .test {
+                    background-color: #3c4fd3;
+                    color: white;
+                    border: 1px solid #3c4fd3;
+                }
+
+                .dmg {
+                    background-color: #df4747;
+                    color: white;
+                    border: 1px solid #df4747;
+                }
+
+                .crit {
+                    background-color: #bb5600;
+                    color: white;
+                    border: 1px solid #bb5600;
+                }
+
+                button:hover {
+                    background-color: white;
+                    border-color: white;
+                    color: #181a1b; 
+                    transition: 0.2s;
+                }
+            }
+        }
+    }
+
+    .habilities {
+        border: 0;
+        background-color: #1c273b;
+        padding: 16px;
+        margin-top: 14px;
+        border-radius: 4px;
+
+        p {
+            margin: 0;
+        }
+
+        .habilityTitle {
+            font-weight: 600;
+
+            small {
+                font-weight: 500;
+                font-size: 12px;
+            }
+        }
+
+        .habilityList {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 16px;
+
+            .habilityItem {
+                border: 1px solid gray;
+                border-radius: 4px;
+                padding: 4px 8px;
+                cursor: pointer;
+                transition: 0.2s;
+            }
+
+            .habilityItem:hover {
+                background-color: white;
+                border-color: white;
+                color: #181a1b; 
+                transition: 0.2s;
+            }
         }
     }
 
     @media screen and (max-width: 1000px) {
         min-height: auto;
+    }
+`
+
+export const ContainerHability = styled.div`
+    background-color: white;
+    padding: 16px;
+    border-radius: 4px;
+    color: black;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    p {
+        margin: 0;
+    }
+
+    .data {
+        p {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        span > div {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 4px;
+        }
+
+        .perkItem {
+            border: 1px solid gray;
+            display: flex;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
     }
 `

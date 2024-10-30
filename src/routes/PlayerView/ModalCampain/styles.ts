@@ -9,6 +9,8 @@ export const Container = styled.div`
     background: #343493;
     border-radius: 4px;
 
+    gap: 8px;
+
     .campain {
         width: 50%;
         background-color: white;
@@ -71,6 +73,11 @@ export const Container = styled.div`
         text-align: center;
         justify-content: center;
 
+        background-color: white;
+        border-radius: 4px;
+
+        color: #484848;
+
         .createDescriptions{
             padding: 16px;
 
@@ -96,7 +103,7 @@ export const Container = styled.div`
         }
 
         .characterImg {
-            background-color: white;
+            background-color: #0000000f;
             border-radius: 99999px;
             margin: 0;
             padding: 8px;
@@ -129,15 +136,31 @@ export const Container = styled.div`
             margin: 8px 0;
 
             .attribute {
-                background-color: white;
+                background-color: #c5c5c5;
                 color: black;
-                padding: 0 4px;
+                padding: 2px 6px;
                 font-size: 14px;
                 border-radius: 4px;
 
                 .attributeNum {
                     
                 }
+            }
+        }
+
+        .buttons {
+            button {
+                background-color: #737ad3;
+                color: white;
+                border: 0;
+                border-radius: 4px;
+                padding: 8px 32px;
+                cursor: pointer;
+            }
+
+            button:hover {
+                opacity: 0.8;
+                transition: 0.2s;
             }
         }
     }

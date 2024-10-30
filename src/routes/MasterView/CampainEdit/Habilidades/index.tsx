@@ -82,7 +82,7 @@ const Habilidades = ({toast, characters, habilities, classes, perks}: props) => 
             classId: habilityForm.classId,
             description: habilityForm.description,
             name: habilityForm.name,
-            require: habilityForm.require,
+            require: habilityForm.require ?? [],
             buff: {
                 rollVantage: isToAddVantage ? habilityForm.buff?.rollVantage : [],
                 lifePerLevel: isToAddPvPerLevel ? habilityForm.buff?.lifePerLevel : Object(),

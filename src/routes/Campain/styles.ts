@@ -112,6 +112,7 @@ export const Container = styled.div`
         background-color: #39393982;
         color: white;
         border-radius: 4px;
+        margin-bottom: 32px;
 
 
         .skillItems {

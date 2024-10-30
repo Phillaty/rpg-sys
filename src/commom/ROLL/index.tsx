@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Container } from './styles';
 import Modal from '../Modal';
 import diceGif from '../../imgs/dice.gif';
-import { avatarType, discordType, userDataType } from '../../types';
+import { avatarType, discordType } from '../../types';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
-import { decrypt } from '../../crypt';
 import { randomColors } from '../../constants';
 
 type prop = {
@@ -23,8 +22,11 @@ const Roll = ({dice, mod, setdice, setdiceMod, onClose, discord, char}: prop) =>
     const [isOpen, setIsOpen] = useState<boolean>(true);
 
     const [result, setResult] = useState<string>();
+    const [resultEach, setResultEach] = useState<string>();
     const [resultTotal, setResultTotal] = useState<number>();
     const [resultTotalMod, setResultTotalMod] = useState<number>();
+
+    const [total, setTotal] = useState<number>();
 
     const handleClose = () => {
         setIsOpen(false);
@@ -44,12 +46,12 @@ const Roll = ({dice, mod, setdice, setdiceMod, onClose, discord, char}: prop) =>
             results.push(res);
         });
         
-        let somaTotal = results.reduce((acumulador, valorAtual) => acumulador + valorAtual, 0);
+        const somaTotal = results.reduce((acumulador, valorAtual) => acumulador + valorAtual, 0);
 
         let somaMod:number = 0;
 
         if(!!mod?.length) {
-            somaMod = mod.reduce((acumulador, valorAtual) => acumulador + valorAtual, 0);
+            somaMod = mod.reduce((acumulador, valorAtual) => Number(acumulador) + Number(valorAtual), 0);
             setResultTotalMod(somaMod);
         }
 
@@ -57,6 +59,11 @@ const Roll = ({dice, mod, setdice, setdiceMod, onClose, discord, char}: prop) =>
             return i + somaMod;
         })
 
+        const resultsEachTotal = results.map(i => {
+            return Number(i) + Number(somaMod)
+        })
+
+        setResultEach(resultsEachTotal.join(', '))
         setResultTotal(somaTotal);
         setResult(results.join(", "));
         
@@ -67,9 +74,6 @@ const Roll = ({dice, mod, setdice, setdiceMod, onClose, discord, char}: prop) =>
             let text = "";
             const media = somaTotal / results.length;
             const higherDice = Math.max.apply(null, results);
-
-            console.log(results);
-            console.log(higherDice);
             
             
             if (higherDice === 20) {
@@ -109,6 +113,14 @@ const Roll = ({dice, mod, setdice, setdiceMod, onClose, discord, char}: prop) =>
             }
         }
     }
+
+    useEffect(() => {
+        if(resultTotal && resultTotalMod) {
+            setTotal(Number(resultTotal) + Number(resultTotalMod));
+        } else if (resultTotal) {
+            setTotal(Number(resultTotal));
+        }
+    }, [resultTotal, resultTotalMod])
     return (
         <>
         <Modal isOpen={isOpen} handleCloseModal={handleClose}>
@@ -122,15 +134,13 @@ const Roll = ({dice, mod, setdice, setdiceMod, onClose, discord, char}: prop) =>
                     {result ? 
                         <div className='result'>
                             {result}
-                            <div className='subResults'>Total: {(resultTotal ?? 0) + (resultTotalMod ?? 0)} {resultTotalMod && <span>({resultTotal} + {resultTotalMod})</span>}</div>
+                            <div className='subResults'>Total: {total} {resultTotalMod && <span>({resultTotal} + {resultTotalMod})</span>}</div>
+                            {dice.length > 1 && resultTotalMod && <div className='resultsEach'>Total por dado: [{resultEach}]</div>}
                         </div> 
                         : 
                         <img alt='' src={diceGif} /> 
                     }
                 </div>
-
-
-                
 
                 {result ? <button className='closeBtn' onClick={() => handleClose()}>Fechar</button> : <button onClick={() => roll()}>Rolar</button>}
                 

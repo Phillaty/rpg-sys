@@ -66,7 +66,6 @@ const ItemModal = ({toast, itemSelected, stores, perks, characters}: props) => {
         verified: true,
         cost: 0,
     });
-    console.log(itemForm)
 
     useEffect(() => {
         if(itemSelected){
@@ -187,8 +186,6 @@ const ItemModal = ({toast, itemSelected, stores, perks, characters}: props) => {
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [itemForm.position.type])
-
-    console.log(itemForm.modifications);
 
     return (
         <>
