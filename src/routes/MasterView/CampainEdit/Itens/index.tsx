@@ -54,6 +54,9 @@ const Itens = ({toast, stores, perks, characters}: prop) => {
 
     const [search, setSearch] = useState<string>("");
 
+    const [filter, setFilter] = useState<string[]>([]);
+    const [filterPlayer, setFilterPlayer] = useState<string[]>([]);
+
     const getClassesVerified = async () => {
         if (campainId) {
             const p = query(
@@ -69,8 +72,8 @@ const Itens = ({toast, stores, perks, characters}: prop) => {
 
                 const sorted = docData.sort((a, b) => a.data.name.localeCompare(b.data.name));
                 setItens(sorted);
-                setItensFiltered(sorted);
     
+                filterItemsF(sorted);
                 
             });
         }
@@ -89,9 +92,27 @@ const Itens = ({toast, stores, perks, characters}: prop) => {
         setSelectIten(undefined);
     };
 
-    useEffect(() => {
+    const filterItemsF = (itensAll: itemDataType[]) => {
+        if (filter.length > 0) {
+            const filtered = itensAll.filter(item => 
+                filter.some((j) => j === item.data.position.type)
+            );
+            const sorted = filtered.sort((a, b) => a.data.name.localeCompare(b.data.name));
+
+            itensAll = sorted;
+        }
+
+        if (filterPlayer.length > 0) {
+            const filtered = itensAll.filter(item => 
+                filterPlayer.some((j) => j === item.data.position.idGetter && item.data.position.type === "inventory")
+            );
+            const sorted = filtered.sort((a, b) => a.data.name.localeCompare(b.data.name));
+
+            itensAll = sorted;
+        }
+
         if (search) {
-            const filtered = itens.filter(item => 
+            const filtered = itensAll.filter(item => 
                 item.data.name.toLowerCase().includes(search.toLowerCase()) ||
                 item.data.description.toLowerCase().includes(search.toLowerCase())
             );
@@ -99,10 +120,25 @@ const Itens = ({toast, stores, perks, characters}: prop) => {
 
             setItensFiltered(sorted);
         } else {
-            setItensFiltered(itens);
+            setItensFiltered(itensAll);
         }
+    }
+
+    useEffect(() => {
+        filterItemsF(itens);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [search])
+    }, [search, filter, filterPlayer]);
+
+    const handleFilterType = (type: string) => {
+        if(filter.includes(type)) {
+            const newFilter = filter.filter(k => k !== type);
+            setFilter(newFilter);
+        } else {
+            setFilter([...filter, type]);
+        }
+        
+        setFilterPlayer([]);
+    }
 
     return (
         <>
@@ -112,6 +148,54 @@ const Itens = ({toast, stores, perks, characters}: prop) => {
                     <div className='search'>
                         <TextField id="outlined-basic" label="Pesquisar" variant="outlined" value={search} onChange={(e) => setSearch(e.target.value)} size='small' />
                         <button><i className="fa-solid fa-magnifying-glass"></i></button>
+                        
+                        <div className='filter'>
+                            <Chip 
+                                label="Inventario jogador" 
+                                color={filter.includes('inventory') ? 'primary' : 'default'} 
+                                onClick={() => {handleFilterType('inventory')}} 
+                            />
+                            <Chip 
+                                label="Loja" 
+                                color={filter.includes('store') ? 'primary' : 'default'} 
+                                onClick={() => {handleFilterType('store')}} 
+                            />
+                            <Chip 
+                                label="No chão" 
+                                color={filter.includes('ground') ? 'primary' : 'default'} 
+                                onClick={() => {handleFilterType('ground')}} 
+                            />
+                            <Chip 
+                                label="Entidade" 
+                                color={filter.includes('entity') ? 'primary' : 'default'} 
+                                onClick={() => {handleFilterType('entity')}} 
+                            />
+                            <Chip 
+                                label="Apenas mestre" 
+                                color={filter.includes('masterHold') ? 'primary' : 'default'} 
+                                onClick={() => {handleFilterType('masterHold')}} 
+                            />
+                            |
+
+                            {characters.map((char, key) => (
+                                <Chip 
+                                    key={key}
+                                    label={char.data.name} 
+                                    color={filterPlayer.includes(char.id) ? 'primary' : 'default'} 
+                                    onClick={() => {
+                                        if(filter.includes(char.id)) {
+                                            const newFilter = filterPlayer.filter(k => k !== char.id);
+                                            setFilterPlayer(newFilter);
+                                        } else {
+                                            setFilterPlayer([...filter, char.id]);
+                                        }
+
+                                        setFilter([]);
+                                    }} 
+                                />
+                            ))}
+                        </div>
+                        
                     </div>
                     <div className='buttons'>
                         <button onClick={() => {

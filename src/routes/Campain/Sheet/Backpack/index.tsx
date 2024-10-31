@@ -3,20 +3,38 @@ import { Container } from './styles';
 import { Box, Divider, Tab, Tabs } from '@mui/material';
 import { a11yProps } from '../../../../utils/components';
 import { itemDataType } from '../../../../types';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '../../../../firebase/firebase';
 
 type prop = {
     itens: itemDataType[];
     itensGeral: itemDataType[];
     itensWeapon: itemDataType[];
     itensArmadure: itemDataType[];
+    handleRollBackpack: (dices: number[], mods: number[]) => void;
+    toast: any;
 }
 
-const Backpack = ({itens, itensGeral, itensWeapon, itensArmadure}: prop) => {
+const Backpack = ({itens, itensGeral, itensWeapon, itensArmadure, handleRollBackpack, toast}: prop) => {
     const [value, setValue] = React.useState(0);
 
     const handleChange = (event: React.SyntheticEvent, newValue: number) => {
         setValue(newValue);
     };
+
+    const handleSetToGroudItem = async (item: itemDataType) => {
+        if (item) {
+            const charImgDocRef = doc(db, "item", item?.id ?? '');
+            await updateDoc(charImgDocRef, {
+                position: {
+                    idGetter: "",
+                    type: "ground",
+                }
+            }).then(() => {
+                toast.success("Item jogado no chão!");
+            });
+        }
+    }
 
     return (
         <>
@@ -67,8 +85,10 @@ const Backpack = ({itens, itensGeral, itensWeapon, itensArmadure}: prop) => {
                                 <Divider />
                             </div>
                             <div className='buttons'>
-                                {item.data.roll && <button>Rolar dado</button> }
-                                <button>Jogar no chão</button>
+                                {item.data.roll && <button onClick={() => {
+                                    handleRollBackpack(item.data.roll?.base ?? [], item.data.roll?.mod ?? []);
+                                }}>Rolar dado</button> }
+                                <button onClick={() => handleSetToGroudItem(item)}>Jogar no chão</button>
                             </div>
                             
                         </div>

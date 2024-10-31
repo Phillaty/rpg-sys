@@ -40,6 +40,13 @@ export const Container = styled.div`
             button {
                 padding: 0 16px;
             }
+
+            .filter {
+                display: flex;
+                align-items: center;
+                gap: 4px;
+                margin-left: 4px;
+            }
         }
 
         .buttons {

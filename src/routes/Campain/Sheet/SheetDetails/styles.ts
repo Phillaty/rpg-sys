@@ -94,11 +94,50 @@ export const Container = styled.div<{isToCloseSheet: boolean}>`
             border-radius: 4px;
             
 
+            .loadingImg {
+                height: 100px;
+                margin-bottom: 16px;
+                display: flex;
+                justify-content: center;
+            }
+
             .img {
                 margin-bottom: 16px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
+                position: relative;
+
+                input {
+                    position: absolute;
+                    z-index: 2;
+                    height: 100px;
+                    width: 100px;
+                    left: 0;
+                    right: 0;
+                    margin: auto;
+                    opacity: 0;
+                    cursor: pointer;
+                }
+
+                input:hover ~ span {
+                    opacity: 1;
+                    transition: 0.1s;
+                }
+
+                span {
+                    opacity: 0;
+                    position: absolute;
+                    height: 100px;
+                    width: 100px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 25px;
+                    background-color: #00000070;
+                    border-radius: 9999px;
+                    color: #e5e5e5;
+                }
             }
         }
 

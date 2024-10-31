@@ -6,6 +6,11 @@ export const Container = styled.div`
     padding: 16px;
     color: #838383;
 
+    @media (max-width: 600px) {
+        min-width: 95vw;
+        width: 95vw;
+    }
+
     .title {
         font-size: 20px;
         padding: 4px 0 16px 0;
@@ -90,7 +95,7 @@ export const Container = styled.div`
         display: flex;
         justify-content: flex-end;
         align-items: center;
-        
+
         button {
             float: right;
             padding: 8px 32px;

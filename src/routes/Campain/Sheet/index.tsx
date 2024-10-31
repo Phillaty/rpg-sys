@@ -261,6 +261,16 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [itemsAll]);
 
+    const handleRollBackpack = (dices: number[], mods: number[]) => {
+        if(dices.length > 0) {
+            if(mods.length > 0)setdiceMod(dices);
+
+            setdice(dices);
+
+            handleCloseBackpack();
+        }
+    }
+
     const handleRoll = (item: skillTy, aditionalMod?: number) => {
         let totalModify:number[] = [];
 
@@ -284,6 +294,16 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                     if(j.perkId === item.id && i.data.type === "passive") totalDice.push(20);
                 })
             });
+        }
+
+        if(itemsCharInventory.length > 0) {
+            itemsCharInventory.forEach((i) => {
+                if(i.data.buff?.modifyRoll) {
+                    i.data.buff?.modifyRoll.forEach((j) => {
+                        if(j.perkId === item.id) totalModify.push(j.value);
+                    })
+                }
+            })
         }
 
         if(charcater){
@@ -350,7 +370,7 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                 }
                 <div className='topInfo'>
                     <div className='buttonsChar'>
-                        <button className='backpack' onClick={() => {setBackpackModal(true)}}><i className="fa-solid fa-list"></i> Mochila</button>
+                        <button className='backpack' onClick={() => {setBackpackModal(true)}}><i className="fa-solid fa-list"></i> Mochila {itemsCharInventory.length > 0 ? `(${itemsCharInventory.length})` : ''}</button>
                         <button className='sheet' onClick={() => {setShowSheetDetails(true)}}><i className="fa-solid fa-address-book"></i> Ficha completa</button>
                     </div>
                     <div className='charInfo'>
@@ -587,7 +607,7 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
             }
             
             <Modal isOpen={backpackModal} handleCloseModal={handleCloseBackpack} >
-                <Backpack itens={itemsCharInventory} itensArmadure={itensArmadure} itensGeral={itensGeral} itensWeapon={itensWeapon} />
+                <Backpack itens={itemsCharInventory} itensArmadure={itensArmadure} itensGeral={itensGeral} itensWeapon={itensWeapon} handleRollBackpack={handleRollBackpack} toast={toast} />
             </Modal>
 
             <Modal isOpen={habilityModal} handleCloseModal={handleCloseHability} >

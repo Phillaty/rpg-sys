@@ -6,8 +6,8 @@ import logo from '../../../../imgs/profile-user-icon-2048x2048-m41rxkoe.png';
 import Modal from '../../../../commom/Modal';
 import { db } from '../../../../firebase/firebase';
 import { arrayUnion, doc, updateDoc } from 'firebase/firestore';
-import { Vortex } from 'react-loader-spinner';
-import { levelUp } from '../../../../utils';
+import { ColorRing, Vortex } from 'react-loader-spinner';
+import { levelUp, uploadImage } from '../../../../utils';
 import EditInfo from './ModalEditInfo';
 import { Avatar } from '@mui/material';
 
@@ -40,6 +40,8 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
     const [habilitiesToAdd, setHabilitiesToAdd] = useState<habilityDataType[]>();
 
     const [perksToUpgrade, setPerksToUpgrade] = useState<skillTy[]>([]);
+
+    const [loading, setloading] = useState<boolean>(false);
 
     const [levelUpInfo, setLevelUpInfo] = useState<{
         beforeBasic: basicsCharType,
@@ -216,6 +218,31 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
         setLoadingAtt(false);
     }
 
+    const handleUpdateImage = async (fileImg: File) => {
+        if (fileImg) {
+            setloading(true);
+            const charImgDocRef = doc(db, "character", charcater?.id ?? '');
+            
+            const resultImg = await uploadImage(fileImg, `character/${charcater?.id ?? ""}/image`);
+
+            if(resultImg.error) {
+                toast.error(resultImg.error);
+                return;
+            }
+
+            const urlImage = resultImg.url ?? "";
+            
+
+            await updateDoc(charImgDocRef, {
+                img: urlImage,
+            }).then(() => {
+                toast.success("Personagem atualizado!");
+            });
+
+            setloading(false);
+        }
+    }
+
     return (
         <>
         <Container isToCloseSheet={isToCloseSheet}>
@@ -242,9 +269,28 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
                         </div>
                     }
                     <div className='infoBasics'>
-                        <div className='img'>
-                            <Avatar src={charcater?.data.img ?? logo} sx={{ width: 100, height: 100 }} />
-                        </div>
+                        {loading ? <>
+                            <div className='loadingImg'>
+                                <ColorRing
+                                    visible={true}
+                                    height="80"
+                                    width="80"
+                                    ariaLabel="color-ring-loading"
+                                    wrapperStyle={{}}
+                                    wrapperClass="color-ring-wrapper"
+                                    colors={['#d82c38', '#f4a860', '#fde350', '#53ac2a', '#3164c4']}
+                                />
+                            </div>
+                        </> : <>
+                            <div className='img'>
+                                <input type='file' onChange={(e) => {
+                                    if(e.target.files)
+                                    handleUpdateImage(e.target.files[0]);
+                                }} />
+                                <Avatar src={charcater?.data.img ?? logo} sx={{ width: 100, height: 100 }} />
+                                <span><i className="fa-regular fa-pen-to-square"></i></span>
+                            </div>
+                        </>}
                         <div className='infos'>
                             <div>
                                 <p className='label'>Nome</p>
