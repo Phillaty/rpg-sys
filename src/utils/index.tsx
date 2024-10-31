@@ -143,8 +143,8 @@ export const uploadImage = async (file: File, path: string): Promise<uploadImage
     const beforeBasic = character.data.basics;
 
     const newLife = {
-      max: character.data.basics.life.max + (classe.data.life.perLevel + (character.data.VIG * 3)),
-      actual: character.data.basics.life.actual + (classe.data.life.perLevel + character.data.VIG + (character.data.VIG * 3))
+      max: character.data.basics.life.max + (classe.data.life.perLevel + (character.data.VIG * 2)),
+      actual: character.data.basics.life.actual + (classe.data.life.perLevel + (character.data.VIG * 2))
     }
     const newSanity = {
       max: character.data.basics.sanity.max + classe.data.sanity.perLevel,
@@ -223,7 +223,7 @@ export const uploadImage = async (file: File, path: string): Promise<uploadImage
         newUnlock = getUnlockNew(character.data.unlock, ["perkPoints", "maxPerkLevel"], (classe.data.perk.middle + (character.data.INT > 0 ? character.data.INT : 0) ));
         messages.push({
           title: "Pontos de perícia",
-          description: `Você ganhou ${classe.data.perk.middle} pontos pra destribuir entre as perícias e agora pode aumentar para o nível 2!`,
+          description: `Você ganhou ${(classe.data.perk.middle + (character.data.INT > 0 ? character.data.INT : 0) )} pontos pra destribuir entre as perícias e agora pode aumentar para o nível 2!`,
         });
       break;
       case 7:
@@ -264,7 +264,7 @@ export const uploadImage = async (file: File, path: string): Promise<uploadImage
         newUnlock = getUnlockNew(character.data.unlock, ["perkPoints", "maxPerkLevel"], classe.data.perk.end + (character.data.INT > 0 ? character.data.INT : 0) );
         messages.push({
           title: "Pontos de perícia",
-          description: `Você ganhou ${classe.data.perk.end} pontos pra destribuir entre as perícias e agora pode aumentar para o nível 3!`,
+          description: `Você ganhou ${classe.data.perk.end + (character.data.INT > 0 ? character.data.INT : 0)} pontos pra destribuir entre as perícias e agora pode aumentar para o nível 3!`,
         });
       break;
       case 14:

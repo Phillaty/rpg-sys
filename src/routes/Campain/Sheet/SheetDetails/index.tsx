@@ -97,6 +97,10 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
 
             await updateDoc(userDocRef, {
                 hability: arrayUnion(habilityToAdd.id),
+                unlock: {
+                    ...charcater?.data.unlock,
+                    habilityPoints: (charcater?.data?.unlock?.habilityPoints ?? 0) - 1
+                }
             }).then(() => {
                 toast.success("Habilidade adicionada!");
                 setHabilityToAdd(undefined);
@@ -206,7 +210,7 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
         }
 
         await updateDoc(userDocRef, dataToUp).then(() => {
-            toast.success("Perícias atualizadas!");
+            toast.success("Atributos atualizados!");
         });
 
         setLoadingAtt(false);
@@ -432,7 +436,7 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
                             {habilitiesChar?.map((item, key) => (
                                 <div className='item' key={key}>
                                     <p className='name'>{item.data.name}</p>
-                                    <p className='detail'>{item.data.description}</p>
+                                    <p className='detail' dangerouslySetInnerHTML={{ __html: item?.data?.description ?? "" }} />
                                 </div>
                             ))}
                             {!habilitiesChar?.length && <small>Nenhuma habilidade ainda, jogue mais! :D</small>}
@@ -457,7 +461,7 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
                                         return (
                                             <div className='item' key={key}>
                                                 <p className='name'>{item.name}</p>
-                                                <p className='detail'>{item.description}</p>
+                                                <p className='detail' dangerouslySetInnerHTML={{ __html: item.description ?? "" }} />
                                             </div>
                                         );
                                     }

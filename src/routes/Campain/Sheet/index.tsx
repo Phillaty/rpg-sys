@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Container, ContainerHability, ContainerHealth } from './styles';
-import { avatarDataType, campainType, classeDataType, habilityDataType, itemDataType, subclassDataType } from '../../../types';
+import { alertType, avatarDataType, campainType, classeDataType, habilityDataType, itemDataType, subclassDataType } from '../../../types';
 import logo from '../../../imgs/profile-user-icon-2048x2048-m41rxkoe.png';
 import { skillFiltr, skillTy } from '..';
 import Roll from '../../../commom/ROLL';
@@ -11,7 +11,7 @@ import { db } from '../../../firebase/firebase';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Modal from '../../../commom/Modal';
 import Backpack from './Backpack';
-import { Avatar, TextField } from '@mui/material';
+import { Alert, Avatar, Stack, TextField } from '@mui/material';
 import { toast, ToastContainer } from 'react-toastify';
 
 type prop = {
@@ -68,6 +68,8 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
     const [sanityValue, setsanityValue] = useState<number>();
     const [peValue, setPeValue] = useState<number>();
     const [cyberValue, setCyberValue] = useState<number>();
+
+    const [alertsList, setAlertsList] = useState<alertType[]>([]);
 
     const handleCloseDicePer = () => {
         setdicePers([]);
@@ -226,6 +228,18 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
         if(charcater && charcater.data.class.id){
             getClass();
         }
+
+        if(charcater) {
+            let warnings:alertType[] = [];
+
+            if(charcater.data.unlock.levelPoint > 0) warnings.push({message: "Você pode subir de nível! Abra a ficha completa para continuar", type: 'info'});
+            if(charcater.data.unlock.attributePoints > 0) warnings.push({message: "Você tem pontos de atributos! Abra a ficha completa para continuar", type: 'info'});
+            if(charcater.data.unlock.habilityPoints > 0) warnings.push({message: "Você tem pontos de habilidade! Abra a ficha completa para continuar", type: 'info'});
+            if(charcater.data.unlock.perkPoints > 0) warnings.push({message: "Você tem pontos de perícia! Abra a ficha completa para continuar", type: 'info'});
+
+            if(warnings.length > 0) setAlertsList(warnings);
+            else setAlertsList([]);
+        }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [charcater])
 
@@ -325,6 +339,15 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
     return (
         <>
             <Container>
+                {!!alertsList.length &&
+                    <div className='warnings'>
+                        <Stack sx={{ width: '100%' }} spacing={1}>
+                            {alertsList.map((i, key) => (
+                                <Alert severity={i.type} key={key}>{i.message}</Alert>
+                            ))}
+                        </Stack>
+                    </div>
+                }
                 <div className='topInfo'>
                     <div className='buttonsChar'>
                         <button className='backpack' onClick={() => {setBackpackModal(true)}}><i className="fa-solid fa-list"></i> Mochila</button>
@@ -412,6 +435,11 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                             <div className='buttons'>
                                 <p>Adicionar modificações: </p>
                                 <div>
+                                    <button onClick={() => {setdicePersMod([...dicePersMod, -5])}}>-5</button>
+                                    <button onClick={() => {setdicePersMod([...dicePersMod, -4])}}>-4</button>
+                                    <button onClick={() => {setdicePersMod([...dicePersMod, -3])}}>-3</button>
+                                    <button onClick={() => {setdicePersMod([...dicePersMod, -2])}}>-2</button>
+                                    <button onClick={() => {setdicePersMod([...dicePersMod, -1])}}>-1</button>
                                     <button onClick={() => {setdicePersMod([...dicePersMod, 1])}}>+1</button>
                                     <button onClick={() => {setdicePersMod([...dicePersMod, 2])}}>+2</button>
                                     <button onClick={() => {setdicePersMod([...dicePersMod, 3])}}>+3</button>
@@ -429,7 +457,7 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                                             <div key={keyMod} onClick={(() => {
                                                 const newDices = dicePersMod.filter((i, index) => index !== keyMod);
                                                 setdicePersMod(newDices);
-                                            })}><span className='diceitem'>+{mod}</span><span className='error'><i className="fa-solid fa-xmark"></i></span></div>
+                                            })}><span className='diceitem'>{mod >= 0 ? '+' : ''}{mod}</span><span className='error'><i className="fa-solid fa-xmark"></i></span></div>
                                         ))}
                                     </div>
                                 </div>

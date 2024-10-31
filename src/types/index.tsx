@@ -230,7 +230,7 @@ export type uploadImageResponse = {
 
 export type alertType = {
     message: string;
-    type: 'warning' | 'error';
+    type: 'warning' | 'error' | 'info';
 }
 
 export type itemTypeRoll = {

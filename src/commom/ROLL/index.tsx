@@ -55,12 +55,9 @@ const Roll = ({dice, mod, setdice, setdiceMod, onClose, discord, char}: prop) =>
             setResultTotalMod(somaMod);
         }
 
-        const eachdiceWithMod = results.map((i) => {
-            return i + somaMod;
-        })
-
         const resultsEachTotal = results.map(i => {
-            return Number(i) + Number(somaMod)
+            const t = Number(i) + Number(somaMod);
+            return t <= 0 ? 1 : t;
         })
 
         setResultEach(resultsEachTotal.join(', '))
@@ -88,7 +85,7 @@ const Roll = ({dice, mod, setdice, setdiceMod, onClose, discord, char}: prop) =>
                 tts: false,
                 embeds: [{
                     title: `${char.name} fez uma rolagem!`,
-                    description: `## **Dados rolados:**\n dados: [d${dice.join(', d')}]\n### :sparkles: [${results.join(", ")}] :sparkles: \n${!!mod?.length ? `### Modificações: \n+${mod.join(' +')}` : ''}\n## Total tudo somado: ${total}${!!mod?.length && dice.length > 1 ? `\n## Total dado separado:\n[${eachdiceWithMod.join(', ')}]` : ''}`,
+                    description: `## **Dados rolados:**\n dados: [d${dice.join(', d')}]\n### :sparkles: [${results.join(", ")}] :sparkles: \n${!!mod?.length ? `### Modificações: \n[${mod.join(', ')}]` : ''}\n## Total tudo somado: ${total}${!!mod?.length && dice.length > 1 ? `\n## Total dado separado:\n[${resultsEachTotal.join(', ')}]` : ''}`,
                     color: randomColors[Math.floor(Math.random() * 23)],
                     footer: {
                         text: text
@@ -127,14 +124,14 @@ const Roll = ({dice, mod, setdice, setdiceMod, onClose, discord, char}: prop) =>
             <Container>
                 <p>Rolando D{dice.join(", D")}</p>
                 {mod && mod.length > 0 &&
-                    <p>Modificadores: +{mod.join(", +")}</p>
+                    <p>Modificadores: [{mod.join(", ")}]</p>
                 }
 
                 <div>
                     {result ? 
                         <div className='result'>
                             {result}
-                            <div className='subResults'>Total: {total} {resultTotalMod && <span>({resultTotal} + {resultTotalMod})</span>}</div>
+                            <div className='subResults'>Total: {total} {resultTotalMod && <span>({resultTotal} {resultTotalMod < 0 ? '' : '+'} {resultTotalMod})</span>}</div>
                             {dice.length > 1 && resultTotalMod && <div className='resultsEach'>Total por dado: [{resultEach}]</div>}
                         </div> 
                         : 

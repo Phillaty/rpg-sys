@@ -130,7 +130,6 @@ const SheetCreation = () => {
     }
 
     const getHabilities = async () => {
-        console.log(classeSelected)
         if(classes) {
             const classesIds = classes.map((i) => i.id);
 
@@ -155,8 +154,6 @@ const SheetCreation = () => {
                 
             }
         }
-           
-        
     }
 
     useEffect(() => {
@@ -251,6 +248,7 @@ const SheetCreation = () => {
             originId: originSelected?.id,
             playerId: userId,
             level: 1,
+            hability: hability ? [hability.id] : [],
             skill: persk?.map((item) => {
                 return {
                     expertise: 1,

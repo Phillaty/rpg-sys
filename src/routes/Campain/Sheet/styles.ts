@@ -14,6 +14,10 @@ export const Container = styled.div`
         margin-bottom: 16px;
     }
 
+    .warnings {
+        margin-bottom: 16px;
+    }
+
     .buttonsChar {
         display: flex;
         justify-content: flex-end;
