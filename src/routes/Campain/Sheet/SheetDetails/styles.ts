@@ -444,8 +444,10 @@ export const ContainerModal = styled.div`
         max-height: 60vh;
         overflow: auto;
 
+        padding-right: 8px;
+
         .item {
-            max-width: 300px;
+            width: 100%;
             border: 1px solid gray;
             padding: 8px;
             cursor: pointer;
