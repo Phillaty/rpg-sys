@@ -143,16 +143,16 @@ export const uploadImage = async (file: File, path: string): Promise<uploadImage
     const beforeBasic = character.data.basics;
 
     const newLife = {
-      max: character.data.basics.life.max + classe.data.life.perLevel + (character.data.VIG * 3),
-      actual: character.data.basics.life.actual + classe.data.life.perLevel + character.data.VIG + (character.data.VIG * 3)
+      max: character.data.basics.life.max + (classe.data.life.perLevel + (character.data.VIG * 3)),
+      actual: character.data.basics.life.actual + (classe.data.life.perLevel + character.data.VIG + (character.data.VIG * 3))
     }
     const newSanity = {
       max: character.data.basics.sanity.max + classe.data.sanity.perLevel,
       actual: character.data.basics.sanity.actual + classe.data.sanity.perLevel
     }
     const newPE = {
-      max: character.data.basics.pe.max + classe.data.pe.perLevel + (character.data.PRE * 3),
-      actual: character.data.basics.pe.actual + classe.data.pe.perLevel + (character.data.PRE * 3)
+      max: character.data.basics.pe.max + (classe.data.pe.perLevel + (character.data.PRE * 3)),
+      actual: character.data.basics.pe.actual + (classe.data.pe.perLevel + (character.data.PRE * 3))
     }
 
     const basicsNew = {
@@ -220,7 +220,7 @@ export const uploadImage = async (file: File, path: string): Promise<uploadImage
       break;
       case 6:
         //grau treinamento
-        newUnlock = getUnlockNew(character.data.unlock, ["perkPoints", "maxPerkLevel"], classe.data.perk.middle);
+        newUnlock = getUnlockNew(character.data.unlock, ["perkPoints", "maxPerkLevel"], (classe.data.perk.middle + (character.data.INT > 0 ? character.data.INT : 0) ));
         messages.push({
           title: "Pontos de perícia",
           description: `Você ganhou ${classe.data.perk.middle} pontos pra destribuir entre as perícias e agora pode aumentar para o nível 2!`,
@@ -261,7 +261,7 @@ export const uploadImage = async (file: File, path: string): Promise<uploadImage
       break;
       case 13:
         //grau de treinamento
-        newUnlock = getUnlockNew(character.data.unlock, ["perkPoints", "maxPerkLevel"], classe.data.perk.end);
+        newUnlock = getUnlockNew(character.data.unlock, ["perkPoints", "maxPerkLevel"], classe.data.perk.end + (character.data.INT > 0 ? character.data.INT : 0) );
         messages.push({
           title: "Pontos de perícia",
           description: `Você ganhou ${classe.data.perk.end} pontos pra destribuir entre as perícias e agora pode aumentar para o nível 3!`,

@@ -6,9 +6,10 @@ import logo from '../../../../imgs/profile-user-icon-2048x2048-m41rxkoe.png';
 import Modal from '../../../../commom/Modal';
 import { db } from '../../../../firebase/firebase';
 import { arrayUnion, doc, updateDoc } from 'firebase/firestore';
-import { toast, ToastContainer } from 'react-toastify';
 import { Vortex } from 'react-loader-spinner';
 import { levelUp } from '../../../../utils';
+import EditInfo from './ModalEditInfo';
+import { Avatar } from '@mui/material';
 
 type prop = {
     charcater?: avatarDataType;
@@ -21,19 +22,22 @@ type prop = {
     subclasses: subclassDataType[];
     charSubclass?: subclassDataType;
     classChar?: classeDataType;
+    toast: any;
 }
 
-const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, skillsAll, habilities, subclasses, charSubclass, classChar }: prop) => {
+const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, skillsAll, habilities, subclasses, charSubclass, classChar, toast }: prop) => {
 
     const [showHabilityModal, setShowHabilityModal] = useState<boolean>(false);
     const [showSubclassModal, setShowSubclassModal] = useState<boolean>(false);
     const [showPerksModal, setShowPerksModal] = useState<boolean>(false);
     const [loadingAtt, setLoadingAtt] = useState<boolean>(false);
+    const [editInfo, setEditInfo] = useState<boolean>(false);
 
     const [habilityToAdd, setHabilityToAdd] = useState<habilityDataType>();
     const [subclassToAdd, setSubclassToAdd] = useState<subclassDataType>();
 
     const [habilitiesChar, setHabilitiesChar] = useState<habilityDataType[]>();
+    const [habilitiesToAdd, setHabilitiesToAdd] = useState<habilityDataType[]>();
 
     const [perksToUpgrade, setPerksToUpgrade] = useState<skillTy[]>([]);
 
@@ -52,13 +56,17 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
         setLevelUpInfo(undefined);
     }
 
+    const handleClodeEdit = () => {
+        setEditInfo(false);
+    }
+
     useEffect(() => {
         if(skillsAll && skills.trained?.length > 0) {
-            skillsAll.forEach((i) => {
-                const findSkill = skills.trained.find((j) => j.id === i.id);
+            skillsAll?.forEach((i) => {
+                const findSkill = skills?.trained?.find((j) => j.id === i.id);
 
                 if(findSkill) {
-                    i.expertise = findSkill.expertise;
+                    i.expertise = findSkill?.expertise;
                 }
             })
         }
@@ -66,9 +74,13 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
 
     useEffect(() => {
         if (charcater && habilities) {
-            const habilitiesFind = habilities.filter((i) => charcater?.data?.hability?.some((j) => j === i.id));
-            const sorted = habilitiesFind.sort((a, b) => a.data.name.localeCompare(b.data.name));
+            const habilitiesFind = habilities?.filter((i) => charcater?.data?.hability?.some((j) => j === i?.id));
+            const sorted = habilitiesFind?.sort((a, b) => a?.data?.name?.localeCompare(b?.data?.name));
             setHabilitiesChar(sorted);
+
+            const habilitiesToAddFind = habilities?.filter((i) => !charcater?.data?.hability?.includes(i?.id));
+            const sortedToAdd = habilitiesToAddFind?.sort((a, b) => a?.data?.name?.localeCompare(b?.data?.name));
+            setHabilitiesToAdd(sortedToAdd);
         }
     }, [charcater, habilities]);
 
@@ -118,15 +130,15 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
             const skillsChar = charcater?.data.skill;
             const newSkillsChar = [] as skillType[];
 
-            skillsAll.forEach((i) => {
-                const isToUpgrade = perksToUpgrade.find(j => j.id === i.id);
+            skillsAll?.forEach((i) => {
+                const isToUpgrade = perksToUpgrade?.find(j => j?.id === i?.id);
 
-                const alreadyIn = skillsChar?.find(j => j.perk === i.id);
+                const alreadyIn = skillsChar?.find(j => j?.perk === i?.id);
                 
                 if (!!isToUpgrade){
                     newSkillsChar.push({
-                        perk: i.id,
-                        expertise: isToUpgrade.expertise
+                        perk: i?.id,
+                        expertise: isToUpgrade?.expertise
                     } as skillType);
 
                     return;
@@ -134,8 +146,8 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
 
                 if (!!alreadyIn) {
                     newSkillsChar.push({
-                        perk: i.id,
-                        expertise: alreadyIn.expertise
+                        perk: i?.id,
+                        expertise: alreadyIn?.expertise
                     } as skillType);
 
                     return;
@@ -147,11 +159,11 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
             await updateDoc(userDocRef, {
                 skill: newSkillsChar,
                 unlock: {
-                    attributePoints: charcater?.data.unlock.attributePoints,
-                    habilityPoints: charcater?.data.unlock.habilityPoints,
-                    maxPerkLevel: charcater?.data.unlock.maxPerkLevel,
-                    perkPoints: (charcater?.data.unlock.perkPoints ?? 0) - perksToUpgrade.length,
-                    levelPoint: charcater?.data.unlock.levelPoint ?? 0,
+                    attributePoints: charcater?.data?.unlock?.attributePoints,
+                    habilityPoints: charcater?.data?.unlock?.habilityPoints,
+                    maxPerkLevel: charcater?.data?.unlock?.maxPerkLevel,
+                    perkPoints: (charcater?.data?.unlock?.perkPoints ?? 0) - perksToUpgrade.length,
+                    levelPoint: charcater?.data?.unlock?.levelPoint ?? 0,
                 }
             }).then(() => {
                 toast.success("Perícias atualizadas!");
@@ -164,13 +176,13 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
 
     const verifyPerkToImprove = (perk: skillTy) => {
         if(charcater && perk) {
-            if(charcater.data.unlock.perkPoints <= 0) return false;
+            if(charcater?.data?.unlock?.perkPoints <= 0) return false;
 
-            if ((perk.expertise ?? 0) >= charcater?.data.unlock.maxPerkLevel) {
+            if ((perk?.expertise ?? 0) >= charcater?.data?.unlock?.maxPerkLevel) {
                 return false;
             }
 
-            if (perksToUpgrade.length >= charcater.data.unlock.perkPoints) {
+            if (perksToUpgrade?.length >= charcater?.data?.unlock?.perkPoints) {
                 return false;
             }
         }
@@ -185,11 +197,11 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
         const dataToUp = {
             [att]: (charcater?.data[att] ?? 0) + 1,
             unlock: {
-                attributePoints: (charcater?.data.unlock.attributePoints ?? 0) - 1,
-                habilityPoints: charcater?.data.unlock.habilityPoints ?? 0,
-                maxPerkLevel: charcater?.data.unlock.maxPerkLevel ?? 0,
-                perkPoints: charcater?.data.unlock.perkPoints ?? 0,
-                levelPoint: charcater?.data.unlock.levelPoint ?? 0,
+                attributePoints: (charcater?.data?.unlock?.attributePoints ?? 0) - 1,
+                habilityPoints: charcater?.data?.unlock?.habilityPoints ?? 0,
+                maxPerkLevel: charcater?.data?.unlock?.maxPerkLevel ?? 0,
+                perkPoints: charcater?.data?.unlock?.perkPoints ?? 0,
+                levelPoint: charcater?.data?.unlock?.levelPoint ?? 0,
             }
         }
 
@@ -210,7 +222,7 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
             </div>
             <div className='mainDetails'>
                 <div className='charInfo'>
-                    {(charcater?.data.unlock.levelPoint ?? 0) > 0 &&
+                    {(charcater?.data?.unlock?.levelPoint ?? 0) > 0 &&
                         <div className='infoBasics levelUp'>
                             <p className='levelUpP'>Você consegue upar!</p>
                             <button onClick={async () => {
@@ -227,32 +239,34 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
                     }
                     <div className='infoBasics'>
                         <div className='img'>
-                            <img src={logo} alt='' />
+                            <Avatar src={charcater?.data.img ?? logo} sx={{ width: 100, height: 100 }} />
                         </div>
                         <div className='infos'>
                             <div>
                                 <p className='label'>Nome</p>
-                                <p className='info'>{charcater?.data.name}</p>
+                                <p className='info'>{charcater?.data?.name}</p>
                             </div>
                             <div>
                                 <p className='label'>Nível</p>
-                                <p className='info'>{charcater?.data.level}</p>
+                                <p className='info'>{charcater?.data?.level}</p>
                             </div>
                             <div>
                                 <p className='label'>Idade</p>
-                                <p className='info'>{!!charcater?.data.age ? charcater?.data.age : '-'}</p>
+                                <p className='info'>{!!charcater?.data?.age ? charcater?.data.age : '-'}</p>
                             </div>
                             <div>
                                 <p className='label'>Classe</p>
-                                <p className='info'>{charcater?.data.class.title}</p>
+                                <p className='info'>{charcater?.data?.class?.title}</p>
                             </div>
                             <div>
                                 <p className='label'>Lore</p>
-                                <p className='info'>{charcater?.data.lore}</p>
+                                <p className='info'>{charcater?.data?.lore}</p>
                             </div>
                         </div>
                         <div className='button'>
-                            <button>Editar informações</button>
+                            <button onClick={() => {
+                                setEditInfo(true);
+                            }}>Editar informações</button>
                         </div>
                     </div>
 
@@ -289,8 +303,8 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
                             </div>
                             <div className='attrubuteItem'>
                                 <p>INT</p>
-                                <span>{charcater?.data.INT}</span>
-                                {(charcater?.data.unlock.attributePoints ?? 0) > 0 && (charcater?.data.INT ?? 0) < 5 ?
+                                <span>{charcater?.data?.INT}</span>
+                                {(charcater?.data?.unlock?.attributePoints ?? 0) > 0 && (charcater?.data?.INT ?? 0) < 5 ?
                                     <>
                                         {loadingAtt ? 
                                             <Vortex
@@ -317,8 +331,8 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
                             </div>
                             <div className='attrubuteItem'>
                                 <p>VIG</p>
-                                <span>{charcater?.data.VIG}</span>
-                                {(charcater?.data.unlock.attributePoints ?? 0) > 0 && (charcater?.data.VIG ?? 0) < 5 ?
+                                <span>{charcater?.data?.VIG}</span>
+                                {(charcater?.data?.unlock?.attributePoints ?? 0) > 0 && (charcater?.data?.VIG ?? 0) < 5 ?
                                     <>
                                         {loadingAtt ? 
                                             <Vortex
@@ -345,8 +359,8 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
                             </div>
                             <div className='attrubuteItem'>
                                 <p>PRE</p>
-                                <span>{charcater?.data.PRE}</span>
-                                {(charcater?.data.unlock.attributePoints ?? 0) > 0 && (charcater?.data.PRE ?? 0) < 5 ?
+                                <span>{charcater?.data?.PRE}</span>
+                                {(charcater?.data?.unlock?.attributePoints ?? 0) > 0 && (charcater?.data?.PRE ?? 0) < 5 ?
                                     <>
                                         {loadingAtt ? 
                                             <Vortex
@@ -415,8 +429,8 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
                                     <p>Adicionar habilidade</p>
                                 </div>
                             }
-                            {habilitiesChar?.map((item) => (
-                                <div className='item'>
+                            {habilitiesChar?.map((item, key) => (
+                                <div className='item' key={key}>
                                     <p className='name'>{item.data.name}</p>
                                     <p className='detail'>{item.data.description}</p>
                                 </div>
@@ -437,11 +451,11 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
                                     <p>Adicionar subclasse</p>
                                 </div>
                                 </> : <>
-                                {charSubclass.data.habilities?.map((item) => {
+                                {charSubclass.data.habilities?.map((item, key) => {
                                     // eslint-disable-next-line array-callback-return
                                     if(item.level <= (charcater?.data.level ?? 0)) {
                                         return (
-                                            <div className='item'>
+                                            <div className='item' key={key}>
                                                 <p className='name'>{item.name}</p>
                                                 <p className='detail'>{item.description}</p>
                                             </div>
@@ -482,12 +496,12 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
                     <p>Adicionar habilidade</p>
                 </div>
                 <div className='itens'>
-                    {habilities.map((item) => (
-                        <div className={`item ${habilityToAdd === item && 'selected'}`} onClick={() => {
+                    {habilitiesToAdd?.map((item, key) => (
+                        <div className={`item ${habilityToAdd === item && 'selected'}`} key={key} onClick={() => {
                             setHabilityToAdd(item);
                         }}>
-                            <p className='name'>{item.data.name}</p>
-                            <p className='detail'>{item.data.description}</p>
+                            <p className='name'>{item?.data?.name}</p>
+                            <p className='detail' dangerouslySetInnerHTML={{ __html: item?.data?.description ?? "" }} />
                         </div>
                     ))}
                 </div>
@@ -506,7 +520,7 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
                 </div>
                 <div className='subclass'>
                     <div className='subclassItens'>
-                        {subclasses.filter(i => i.data.classId === charcater?.data.class.id).map((item, key) => (
+                        {subclasses?.filter(i => i?.data?.classId === charcater?.data?.class?.id).map((item, key) => (
                             <div key={key} className={`item ${subclassToAdd === item && 'selected'}`} onClick={() => {
                                 setSubclassToAdd(item);
                             }}>
@@ -627,7 +641,11 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
                 
             </ContainerLevel>    
         </Modal>
-        <ToastContainer />
+        {charcater && 
+            <Modal isOpen={editInfo} handleCloseModal={handleClodeEdit} >
+                <EditInfo charcater={charcater} toast={toast} />
+            </Modal>
+        }
         </>
     )
 }

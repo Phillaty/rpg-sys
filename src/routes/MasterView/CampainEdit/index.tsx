@@ -25,6 +25,8 @@ import Magics from './Magics';
 import Stores from './Stores';
 import Discord from './Discord';
 import Invite from './Invite';
+import SheetDetails from '../../Campain/Sheet/SheetDetails';
+import { skillFiltr, skillTy } from '../../Campain';
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
@@ -65,6 +67,7 @@ const CampainEdit = () => {
     const [perks, setPerks] = useState<perkDataType[]>([]);
 
     const [characters, setCharacters] = useState<avatarDataType[]>([]);
+    const [characterSelected, setCharactersSelected] = useState<avatarDataType>();
 
     const [stores, setStores] = useState<storeDataType[]>([]);
 
@@ -76,6 +79,55 @@ const CampainEdit = () => {
     const [openMagicModal, setOpenMagicModal] = useState<boolean>(false);
     const [openStoreModal, setOpenStoreModal] = useState<boolean>(false);
     const [openDiscordModal, setOpenDiscordModal] = useState<boolean>(false);
+
+    const [openSheetModal, setOpenSheetModal] = useState<boolean>(false);
+
+    const [skills, setSkills] = useState<skillTy[]>();
+
+    const [skillsFiltered, setSkillsFiltered] = useState<skillFiltr>({
+        trained: [],
+        notTrained: [],
+    });
+
+
+    useEffect(() => {
+        if (skills) {
+            const notTreined = skills?.filter((i) => !characterSelected?.data.skill.some((j) => j.perk === i.id)) ?? [];
+            const treined = characterSelected?.data.skill.map((i) => {
+                const skillData = skills?.find((j) => j.id === i.perk);
+                return {
+                    name: skillData?.name,
+                    id: i.perk,
+                    expertise: i.expertise,
+                    base: skillData?.base,
+                }
+            }) as skillTy[];
+
+            setSkillsFiltered({
+                trained: treined,
+                notTrained: notTreined,
+            })
+        }
+
+
+    }, [characterSelected, skills]);
+
+    useEffect(() => {
+        if(perks) {
+            const perksArray = [] as skillTy[];
+
+            perks.forEach((i) => {
+                perksArray.push({
+                    id: i.id,
+                    name: i.data.name,
+                    base: i.data.base,
+                });
+            });
+
+            setSkills(perksArray);
+        }
+    }, [perks])
+
 
     const handleClickItemOpen = () => {
         setOpenItemModal(true);
@@ -93,7 +145,10 @@ const CampainEdit = () => {
         setOpenMagicModal(false);
     };
 
-    
+    const handleCloseSheet = () => {
+        setOpenSheetModal(false);
+        setCharactersSelected(undefined);
+    }
 
     const handleCloseModals = () => {
         setShowClassesModal(false);
@@ -422,14 +477,17 @@ const CampainEdit = () => {
                         {characters.map((char, key) => (
                             <div className='item' key={key}>
                                 <div className='img'>
-                                    <Avatar alt="Cindy Baker" src={char.data.img ?? avatarlogo} />
+                                    <Avatar alt="" src={char.data.img ?? avatarlogo} />
                                 </div>
                                 <div className='option'>
                                     <p className='name'>{char.data.name}</p>
                                     <p>Nível {char.data.level}</p>
                                     <p>Pontos de nível: {char.data.unlock.levelPoint}</p>
                                     <div className='buttons'>
-                                        <button><i className="fa-solid fa-pen-to-square"></i></button>
+                                        <button onClick={() => {
+                                            setCharactersSelected(char);
+                                            setOpenSheetModal(true);
+                                        }}><i className="fa-solid fa-pen-to-square"></i></button>
                                         <button onClick={() => promoteChar(char)}><i className="fa-solid fa-angles-up"></i> Nível</button>
                                     </div>
                                 </div>
@@ -456,7 +514,7 @@ const CampainEdit = () => {
         </>}
 
         <Modal isOpen={showClassesModal} handleCloseModal={handleCloseModals}>
-            <Classes classes={classes} toast={toast} campain={campain?.data} subclasses={subclasses} />
+            <Classes classes={classes} toast={toast} campain={campain?.data} subclasses={subclasses} habilities={habilities} />
         </Modal>
         <Modal isOpen={showSubclassesModal} handleCloseModal={handleCloseModals}>
             <Subclasses classes={classes} subclasses={subclasses} toast={toast} campain={campain?.data} />
@@ -536,6 +594,21 @@ const CampainEdit = () => {
             <Invite toast={toast} campain={campain} />
         </Modal>
 
+        {openSheetModal && skills && characterSelected && 
+            <SheetDetails 
+                isToCloseSheet={false} 
+                charcater={characterSelected} 
+                campain={campain?.data} 
+                skills={skillsFiltered} 
+                skillsAll={skills} 
+                onClose={handleCloseSheet}
+                habilities={habilities}
+                subclasses={subclasses}
+                charSubclass={subclasses.find(i => i.id === characterSelected.data.subclass.id)}
+                classChar={classes.find(i => i.id === characterSelected.data.class.id)}
+                toast={toast}
+            />
+        }
 
         <ToastContainer style={{zIndex: '999999999999999999'}} />
         </>

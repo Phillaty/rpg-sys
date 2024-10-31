@@ -11,7 +11,7 @@ import { db } from '../../../firebase/firebase';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Modal from '../../../commom/Modal';
 import Backpack from './Backpack';
-import { TextField } from '@mui/material';
+import { Avatar, TextField } from '@mui/material';
 import { toast, ToastContainer } from 'react-toastify';
 
 type prop = {
@@ -124,10 +124,10 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
     }, []);
 
     useEffect(() => {
-        if(campain) {
+        if(charcater) {
             const q = query(
                 collection(db, 'hability'),
-                where('classId', 'in', campain?.classes)
+                where('classId', '==', charcater?.data.class.id),
             );
 
             onSnapshot(q, (querySnapshot) => {
@@ -141,7 +141,7 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
             });
         }
 
-    }, [campain]);
+    }, [charcater]);
 
     useEffect(() => {
         if(campain && charcater) {
@@ -333,7 +333,7 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                     <div className='charInfo'>
                         <div className='charimage'>
                             <span>
-                                <img src={logo} alt='' />
+                                <Avatar src={charcater?.data.img ?? logo} sx={{ width: 100, height: 100 }} />
                             </span>
                         </div>
                         <div className='charInfos'>
@@ -554,6 +554,7 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                     subclasses={subclasses}
                     charSubclass={charSubclass}
                     classChar={classChar}
+                    toast={toast}
                 />
             }
             

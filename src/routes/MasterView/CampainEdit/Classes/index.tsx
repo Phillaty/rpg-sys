@@ -1,21 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { Container } from './styles';
-import { campainType, classeDataType, classeType, subclassDataType } from '../../../../types';
+import { campainType, classeDataType, classeType, habilityDataType, subclassDataType } from '../../../../types';
 import TextField from '@mui/material/TextField';
 import Chip from '@mui/material/Chip';
 import { addDoc, arrayUnion, collection, deleteDoc, doc, getDocs, query, updateDoc, where } from 'firebase/firestore';
 import { db } from '../../../../firebase/firebase';
 import { useLocation } from 'react-router-dom';
 import { ColorRing } from 'react-loader-spinner';
+import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 
 type props = {
     classes: classeDataType[];
     toast: any;
     campain?: campainType;
     subclasses: subclassDataType[];
+    habilities: habilityDataType[]
 }
 
-const Classes = ({classes, toast, campain, subclasses}: props) => {
+const Classes = ({classes, toast, campain, subclasses, habilities}: props) => {
 
     const location = useLocation();
 
@@ -473,6 +475,28 @@ const Classes = ({classes, toast, campain, subclasses}: props) => {
                                 })} 
                             />
                         </div>
+                    </div>
+                    <div className='description'>
+                        <FormControl variant="filled" sx={{ minWidth: 120 }}>
+                            <InputLabel id="demo-simple-select-filled-label">Alvo</InputLabel>
+                            <Select
+                                labelId="demo-simple-select-label"
+                                id="demo-simple-select"
+                                value={classForm.habilityDefault ?? ""}
+                                label="perícia"
+                                variant="filled"
+                                onChange={(e) => {
+                                    setClassForm({
+                                        ...classForm,
+                                        habilityDefault: e.target.value
+                                    });
+                                }}
+                            >
+                                {habilities.map((item, key) => (
+                                    <MenuItem value={item.id} key={key}>{item.data.name}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
                     </div>
                     
                     <div className='buttons'>

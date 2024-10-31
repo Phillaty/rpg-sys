@@ -86,16 +86,20 @@ export const Container = styled.div<{isToCloseSheet: boolean}>`
 
         .img {
             text-align: center;
-
-            img {
-                width: 80px;
-            }
         }
 
         .infoBasics {
             background-color: white;
-            padding: 32px 16px;
+            padding: 16px 16px 28px 16px;
             border-radius: 4px;
+            
+
+            .img {
+                margin-bottom: 16px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
         }
 
         .levelUp {

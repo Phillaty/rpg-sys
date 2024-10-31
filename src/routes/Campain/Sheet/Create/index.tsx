@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Container } from './styles';
 import { addDoc, arrayUnion, collection, doc, getDocs, onSnapshot, query, updateDoc, where } from 'firebase/firestore';
-import { campainType, classeDataType, originDataType, perkDataType, userDataType } from '../../../../types';
+import { campainType, classeDataType, habilityDataType, originDataType, perkDataType, userDataType } from '../../../../types';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { db } from '../../../../firebase/firebase';
 import { ColorRing, Hearts } from 'react-loader-spinner';
@@ -47,6 +47,9 @@ const SheetCreation = () => {
     const [origins, setOrigins] = useState<originDataType[]>();
     const [classes, setClasses] = useState<classeDataType[]>();
     const [skills, setSkills] = useState<perkDataType[]>();
+
+    const [habilitys, setHabilitys] = useState<habilityDataType[]>();
+    const [hability, setHability] = useState<habilityDataType>();
 
     const [simpleData, setSimpleData] = useState<simpleData>({
         name: ''
@@ -125,6 +128,56 @@ const SheetCreation = () => {
         }
         
     }
+
+    const getHabilities = async () => {
+        console.log(classeSelected)
+        if(classes) {
+            const classesIds = classes.map((i) => i.id);
+
+            if(!!classesIds.length) {
+                const p = query(
+                    collection(db, 'hability'),
+                    where('classId', 'in', classesIds),
+                );
+    
+                const querySnapshot = await getDocs(p);
+        
+                const habilityArray = [] as habilityDataType[];
+                querySnapshot.forEach((doc) => {
+                    habilityArray.push({
+                        id: doc.id,
+                        data: doc.data()
+                    } as habilityDataType);
+                });
+    
+               
+                setHabilitys(habilityArray);
+                
+            }
+        }
+           
+        
+    }
+
+    useEffect(() => {
+        if(!!classes) {
+            getHabilities();
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [classes]);
+
+    useEffect(() => {
+        if (classeSelected) {
+            const getHabilityClassDefauld = habilitys?.find(i => i.id === (classeSelected?.data?.habilityDefault ?? ""));
+
+            if (getHabilityClassDefauld) {
+                setHability(getHabilityClassDefauld);
+            } else {
+                setHability(undefined);
+            }
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [classeSelected])
 
     const getSkills = async () => {
         if(campain) {
@@ -352,11 +405,20 @@ const SheetCreation = () => {
                                         <p className='title'>Escolha a classe agora</p>
                                         <p className='description'>A classe é o tipo de trabalho que opera no RPG! <br/> Escolha com cuidado depois que o rpg começar não vai poder mudar!</p>
                                     </div>
+                                    {hability && 
+                                        <div className='hability'>
+                                            <div className='titleHab'>Você irá receber esta habilidade com essa classe!</div>
+                                            <div className='item'>
+                                                <p className='name'>{hability?.data.name}</p>
+                                                <p className='description' dangerouslySetInnerHTML={{ __html: hability?.data.description.replace(/\n/g, '<br />') }} />
+                                            </div>
+                                        </div>
+                                    }
                                     <div className='classes'>
                                         {classes?.map((item, key) => (
                                             <div className={`classItem ${item.id === classeSelected?.id && 'selected'}`} key={key} onClick={() => setClasseSelected(item)}>
                                                 {item.data.name}
-                                                <p>{item.data.description}</p>
+                                                <p dangerouslySetInnerHTML={{ __html: item.data.description.replace(/\n/g, '<br />') }} />
                                                 <span>{item.data.infos.map((i, index) => (<div key={index}>- {i}</div>))}</span>
                                             </div>
                                         ))}

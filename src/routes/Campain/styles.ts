@@ -69,23 +69,6 @@ export const Container = styled.div`
     .charimage {
         display: flex;
         justify-content: center;
-
-        img {
-            width: 100%;
-            margin: 0;
-            padding: 0;
-        }
-
-        span {
-            width: 80px;
-            padding: 4px;
-            background-color: white;
-            border-radius: 9999px;
-
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
     }
 
     .charInfos {
@@ -139,11 +122,22 @@ export const Container = styled.div`
                     transition: 0.2s;
                 }
 
-                .itemSkill:hover {
-                    background-color: white;
-                    border-color: white;
-                    color: #181a1b; 
-                    transition: 0.2s;
+                @media (min-width: 1000px) {
+                    .itemSkill:hover {
+                        background-color: white;
+                        border-color: white;
+                        color: #181a1b; 
+                        transition: 0.2s;
+                    }
+                }
+
+                @media (max-width: 1000px) {
+                    .itemSkill:active {
+                        background-color: white;
+                        border-color: white;
+                        color: #181a1b; 
+                        transition: 0.2s;
+                    }
                 }
             }
             

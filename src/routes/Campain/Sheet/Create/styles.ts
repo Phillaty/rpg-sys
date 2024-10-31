@@ -142,15 +142,18 @@ export const Container = styled.div`
                 }
             }
 
-            .originItem:hover {
-                background-color: #737ad3;
-                color: white;
-                border-color: transparent;
-
-                span {
+            @media (min-width: 1000px) {
+               .originItem:hover {
+                    background-color: #737ad3;
                     color: white;
-                }
+                    border-color: transparent;
+
+                    span {
+                        color: white;
+                    }
+                } 
             }
+            
 
             .selected {
                 background-color: #739ed3;
@@ -197,15 +200,19 @@ export const Container = styled.div`
                 }
             }
 
-            .classItem:hover {
-                background-color: #737ad3;
-                color: white;
-                border-color: transparent;
-
-                span {
+            @media (min-width: 1000px) {
+                .classItem:hover {
+                    background-color: #737ad3;
                     color: white;
+                    border-color: transparent;
+
+                    span {
+                        color: white;
+                    }
                 }
             }
+
+            
 
             .selected {
                 background-color: #739ed3;
@@ -314,15 +321,19 @@ export const Container = styled.div`
                 }
             }
 
-            > div:hover {
-                background-color: #737ad3;
-                color: white;
-                border-color: transparent;
-
-                span {
+            @media (min-width: 1000px) {
+                > div:hover {
+                    background-color: #737ad3;
                     color: white;
-                }
+                    border-color: transparent;
+
+                    span {
+                        color: white;
+                    }
+                }     
             }
+
+                 
 
             .selected {
                 background-color: #739ed3;
@@ -343,6 +354,19 @@ export const Container = styled.div`
             align-items: center;
             flex-direction: column;
             padding: 100px 0;
+        }
+    }
+
+    .hability {
+        margin-bottom: 16px;
+
+        .titleHab {
+            font-size: 18px;
+        }
+
+        .item {
+            border-top: 1px solid lightgray;
+            margin-top: 4px;
         }
     }
 

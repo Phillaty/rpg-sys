@@ -73,6 +73,7 @@ export type avatarType = {
     subclass: classCharType;
     money: number;
     name: string;
+    gender: string;
     originId: string;
     playerId: string;
     level: number;
@@ -159,6 +160,7 @@ export type classeType = {
         end: number;
     };
     verified?: boolean;
+    habilityDefault?: string;
 }
 
 export type classeDataType = {
@@ -384,4 +386,8 @@ export type entityType = {
 export type entityDataType = {
     id: string;
     data: entityType;
+}
+
+export type battleDataType = {
+    
 }

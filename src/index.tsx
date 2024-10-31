@@ -15,6 +15,7 @@ import SheetCreation from './routes/Campain/Sheet/Create';
 import CreateCampain from './routes/MasterView/CreateCampain';
 import CampainEdit from './routes/MasterView/CampainEdit';
 import Help from './routes/Help';
+import CampainPlay from './routes/MasterView/CampainPlay';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -32,6 +33,7 @@ root.render(
           <Route path="campain/sheet/create" element={<SheetCreation />} />
           <Route path="master/campain/create" element={<CreateCampain />} />
           <Route path="master/campain/edit" element={<CampainEdit />} />
+          <Route path="master/campain/play" element={<CampainPlay />} />
           <Route path="help" element={<Help />} />
         </Route>
         <Route path="/login" element={<Login />} />

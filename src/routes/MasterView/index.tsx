@@ -80,7 +80,9 @@ const HomeMaster = (props: prop) => {
                         </div>
                     </div>
                     <div className='options'>
-                        <button>Jogar campanha</button>
+                        <button onClick={() => {
+                            navigate(`/master/campain/play?camp=${campainSelected.id}`);
+                        }}>Jogar campanha</button>
                         <button onClick={() => {
                             navigate(`/master/campain/edit?camp=${campainSelected.id}`);
                         }}>Editar campanha</button>
