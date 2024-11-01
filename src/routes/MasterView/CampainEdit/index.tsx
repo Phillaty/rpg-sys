@@ -3,7 +3,7 @@ import { Container } from './styles';
 import { useLocation } from 'react-router-dom';
 import { collection, doc, onSnapshot, query, updateDoc, where } from 'firebase/firestore';
 import { db } from '../../../firebase/firebase';
-import { alertType, avatarDataType, campainDataType, classeDataType, elementDataType, habilityDataType, originDataType, perkDataType, storeDataType, subclassDataType } from '../../../types';
+import { alertType, avatarDataType, campainDataType, classeDataType, elementDataType, habilityDataType, magicDataType, originDataType, perkDataType, storeDataType, subclassDataType, userDataTypeData } from '../../../types';
 import { ColorRing } from 'react-loader-spinner';
 import Stack from '@mui/material/Stack';
 import Alert from '@mui/material/Alert';
@@ -27,6 +27,7 @@ import Discord from './Discord';
 import Invite from './Invite';
 import SheetDetails from '../../Campain/Sheet/SheetDetails';
 import { skillFiltr, skillTy } from '../../Campain';
+import MagicPlayers from './MagicPlayers';
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
@@ -36,6 +37,13 @@ const Transition = React.forwardRef(function Transition(
   ) {
     return <Slide direction="up" ref={ref} {...props} />;
   });
+
+export type magicPlayerDestibution = {
+    player: string;
+    playerId: string;
+    magic: string;
+    magicId: string;
+}
 
 const CampainEdit = () => {
 
@@ -57,6 +65,7 @@ const CampainEdit = () => {
     const [showHabilidadesModal, setShowHabilidadesModal] = useState<boolean>(false);
     const [showElementsModal, setShowElementsModal] = useState<boolean>(false);
     const [showInviteModal, setShowInviteModal] = useState<boolean>(false);
+    const [showMagicPlayerModal, setMagicPlayerModal] = useState<boolean>(false);
 
     const [subclasses, setSubclasses] = useState<subclassDataType[]>([]);
 
@@ -66,14 +75,21 @@ const CampainEdit = () => {
 
     const [perks, setPerks] = useState<perkDataType[]>([]);
 
+    const [magicPlayer, setMagicPlayer] = useState<magicPlayerDestibution[]>([]);
+
     const [characters, setCharacters] = useState<avatarDataType[]>([]);
     const [characterSelected, setCharactersSelected] = useState<avatarDataType>();
 
     const [stores, setStores] = useState<storeDataType[]>([]);
 
+    const [users, setUsers] = useState<userDataTypeData[]>([]);
+
     const [elements, setElements] = useState<elementDataType[]>([]);
 
     const [alertsList, setAlertsList] = useState<alertType[]>([]);
+
+    const [magicFiltered, setMagicFiltered] = useState<magicDataType[]>([]);
+    const [magics, setMagics] = useState<magicDataType[]>([]);
 
     const [openItemModal, setOpenItemModal] = useState<boolean>(false);
     const [openMagicModal, setOpenMagicModal] = useState<boolean>(false);
@@ -160,6 +176,7 @@ const CampainEdit = () => {
         setOpenStoreModal(false);
         setOpenDiscordModal(false);
         setShowInviteModal(false);
+        setMagicPlayerModal(false)
     }
 
     useEffect(() => {
@@ -297,6 +314,23 @@ const CampainEdit = () => {
         });
     }
 
+    const getUsers = async () => {
+        const p = query(
+            collection(db, 'user'),
+            where('__name__', 'in', campain?.data?.players && campain?.data?.players.length > 0 ? campain?.data?.players : ['non'])
+        );
+
+        onSnapshot(p, (querySnapshot) => {
+            const docData = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                data: doc.data(),
+            })) as userDataTypeData[];
+
+            const sorted = docData.sort((a, b) => a.data.name.localeCompare(b.data.name));
+            setUsers(sorted);
+        });
+    }
+
     const getElements = async () => {
         const p = query(
             collection(db, 'elements'),
@@ -314,18 +348,70 @@ const CampainEdit = () => {
         });
     }
 
+    const getMagics = async () => {
+        if (campainId) {
+            const p = query(
+                collection(db, 'magics'),
+                where('campainId', '==', campainId)
+            );
+    
+            onSnapshot(p, (querySnapshot) => {
+                const docData = querySnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    data: doc.data(),
+                })) as magicDataType[];
+
+                const sorted = docData.sort((a, b) => a.data.name.localeCompare(b.data.name));
+                setMagics(sorted);
+                setMagicFiltered(sorted);                
+            });
+        }
+    }
+
     useEffect(() => {
         if (classes.length > 0) {
             getSubclasses();
             getHabilities();
             getOrigins();
             getPerks();
-            getCharacters();
-            getStores();
-            getElements();
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [classes]);
+
+    useEffect(() => {
+        if (campain) {
+            getCharacters();
+            getStores();
+            getElements();
+            getUsers();
+            getMagics();
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [campain])
+
+    useEffect(() => {
+        if(magics && characters) {
+
+            const separate:magicPlayerDestibution[] = [];
+
+            magics.forEach((i) => {
+                characters.forEach(j => {
+                    if(j.data.magics?.includes(i.id)){
+                        separate.push({
+                            player: j.data.name,
+                            playerId: j.id,
+                            magic: i.data.name,
+                            magicId: i.id,
+                        } as magicPlayerDestibution);
+                    }
+                })
+            });
+
+            const sorted = separate.sort((a, b) => a.player.localeCompare(b.player));
+
+            setMagicPlayer(sorted);
+        }
+    }, [characters, magics])
 
     const promoteChar = async (char: avatarDataType) => {
         if (char) {
@@ -342,7 +428,6 @@ const CampainEdit = () => {
             });
         }
     }
-
     return (
         <>
         {campain || loading ? 
@@ -465,6 +550,18 @@ const CampainEdit = () => {
                                         </div>
                                     </div>
                                 </div>
+                                <div className='options' style={{marginTop: "8px"}}>
+                                    <div className='listConfig'>
+                                        <div className='box'>
+                                            <div>
+                                                <p className='name'>Magias dos jogadores</p>
+                                            </div>
+                                            <div>
+                                                <button onClick={() => setMagicPlayerModal(true)}>Editar</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -477,10 +574,11 @@ const CampainEdit = () => {
                         {characters.map((char, key) => (
                             <div className='item' key={key}>
                                 <div className='img'>
-                                    <Avatar alt="" src={char.data.img ?? avatarlogo} />
+                                    <Avatar sx={{ width: 56, height: 56 }} alt="" src={char.data.img ?? avatarlogo} />
                                 </div>
                                 <div className='option'>
                                     <p className='name'>{char.data.name}</p>
+                                    <p>{users.find(a => a.id === char.data.playerId)?.data.name}</p>
                                     <p>Nível {char.data.level}</p>
                                     <p>Pontos de nível: {char.data.unlock.levelPoint}</p>
                                     <div className='buttons'>
@@ -580,7 +678,7 @@ const CampainEdit = () => {
                 </Typography>
             </Toolbar>
             </AppBar>
-            <Magics toast={toast} elements={elements} />
+            <Magics toast={toast} elements={elements} magicFiltered={magicFiltered} magics={magics} setMagicFiltered={setMagicFiltered} />
         </Dialog>
         
 
@@ -594,6 +692,10 @@ const CampainEdit = () => {
             <Invite toast={toast} campain={campain} />
         </Modal>
 
+        <Modal isOpen={showMagicPlayerModal} handleCloseModal={handleCloseModals}>
+            <MagicPlayers toast={toast} magic={magics} char={characters} magicPlayer={magicPlayer} />
+        </Modal>
+
         {openSheetModal && skills && characterSelected && 
             <SheetDetails 
                 isToCloseSheet={false} 
@@ -604,8 +706,8 @@ const CampainEdit = () => {
                 onClose={handleCloseSheet}
                 habilities={habilities}
                 subclasses={subclasses}
-                charSubclass={subclasses.find(i => i.id === characterSelected.data.subclass.id)}
-                classChar={classes.find(i => i.id === characterSelected.data.class.id)}
+                charSubclass={subclasses.find(i => i.id === characterSelected?.data?.subclass?.id)}
+                classChar={classes.find(i => i.id === characterSelected?.data?.class?.id)}
                 toast={toast}
             />
         }

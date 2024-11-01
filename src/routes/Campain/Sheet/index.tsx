@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Container, ContainerHability, ContainerHealth } from './styles';
-import { alertType, avatarDataType, campainType, classeDataType, habilityDataType, itemDataType, subclassDataType } from '../../../types';
+import { Container, ContainerHability, ContainerHealth, ContainerMagics } from './styles';
+import { alertType, avatarDataType, campainType, classeDataType, elementDataType, habilityDataType, itemDataType, magicDataType, subclassDataType } from '../../../types';
 import logo from '../../../imgs/profile-user-icon-2048x2048-m41rxkoe.png';
 import { skillFiltr, skillTy } from '..';
 import Roll from '../../../commom/ROLL';
@@ -11,8 +11,9 @@ import { db } from '../../../firebase/firebase';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Modal from '../../../commom/Modal';
 import Backpack from './Backpack';
-import { Alert, Avatar, Stack, TextField } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Alert, Avatar, Chip, Stack, TextField, Typography } from '@mui/material';
 import { toast, ToastContainer } from 'react-toastify';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 type prop = {
     charcater?: avatarDataType;
@@ -44,6 +45,9 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
 
     const [habilities, setHabilities] = useState<habilityDataType[]>([]);
     const [subclasses, setSubclasses] = useState<subclassDataType[]>([]);
+    const [magics, setMagics] = useState<magicDataType[]>([]);
+    const [magicsFiltered, setMagicsFiltered] = useState<magicDataType[]>([]);
+    const [elements, setElements] = useState<elementDataType[]>([]);
     const [classChar, setClassChar] = useState<classeDataType>();
 
     const [habilitiesChar, setHabilitiesChar] = useState<habilityDataType[]>();
@@ -53,6 +57,8 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
     const [backpackModal, setBackpackModal] = useState<boolean>(false);
 
     const [healthModal, sethealthModal] = useState<boolean>(false);
+
+    const [magicModal, setMagicModal] = useState<boolean>(false);
 
     const [habilityModal, setHabilityModal] = useState<boolean>(false);
     const [habilitySelected, setHabilitySelected] = useState<habilityDataType>();
@@ -64,12 +70,21 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
     const [itensWeapon, setItensWeapon] = useState<itemDataType[]>([]);
     const [itensArmadure, setItensArmadure] = useState<itemDataType[]>([]);
 
+    const [magicModalFilter, setMagicModalFilter] = useState<string>("");
+
     const [lifeValue, setlifeValue] = useState<number>();
     const [sanityValue, setsanityValue] = useState<number>();
     const [peValue, setPeValue] = useState<number>();
     const [cyberValue, setCyberValue] = useState<number>();
 
     const [alertsList, setAlertsList] = useState<alertType[]>([]);
+
+    const [expanded, setExpanded] = React.useState<string | false>(false);
+
+    const handleChangeTagMagic =
+        (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => {
+        setExpanded(isExpanded ? panel : false);
+    };
 
     const handleCloseDicePer = () => {
         setdicePers([]);
@@ -101,6 +116,10 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
         setsanityValue(undefined);
         setPeValue(undefined);
         setCyberValue(undefined);
+    }
+
+    const handleCloseMagics = () => {
+        setMagicModal(false);
     }
 
     useEffect(() => {
@@ -205,6 +224,40 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
         });
     }
 
+    const getMagics = async () => {
+        const p = query(
+            collection(db, 'magics'),
+            where('__name__', 'in', charcater?.data.magics)
+        );
+
+        onSnapshot(p, (querySnapshot) => {
+            const docData = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                data: doc.data(),
+            })) as magicDataType[];
+
+            const sorted = docData.sort((a, b) => a.data.name.localeCompare(b.data.name));
+            setMagics(sorted);
+        });
+    }
+
+    const getElements = async () => {
+        const p = query(
+            collection(db, 'elements'),
+            where('__name__', 'in', campain?.elements)
+        );
+
+        onSnapshot(p, (querySnapshot) => {
+            const docData = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                data: doc.data(),
+            })) as elementDataType[];
+
+            const sorted = docData.sort((a, b) => a.data.name.localeCompare(b.data.name));
+            setElements(sorted);
+        });
+    }
+
     const getClass = async () => {
         const docRef = doc(db, 'classes', charcater?.data.class.id ?? "");
 
@@ -218,11 +271,33 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
     }
 
     useEffect(() => {
+        if(charcater && !!charcater?.data.magics?.length) {
+            getMagics();
+            getElements();
+        } 
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [charcater])
+
+    useEffect(() => {
         if(campainId) {
             getItems();
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [campainId]);
+
+    useEffect(() => {
+        if(magics) {
+            let filtermagicget = magics;
+           
+            if(magicModalFilter) {
+                filtermagicget = magics.filter((i) => i.data.element.id === magicModalFilter);
+            }
+          
+          
+          setMagicsFiltered(filtermagicget)
+        }
+    }, [magics, magicModalFilter])
 
     useEffect(() => {
         if(charcater && charcater.data.class.id){
@@ -370,7 +445,6 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                 }
                 <div className='topInfo'>
                     <div className='buttonsChar'>
-                        <button className='backpack' onClick={() => {setBackpackModal(true)}}><i className="fa-solid fa-list"></i> Mochila {itemsCharInventory.length > 0 ? `(${itemsCharInventory.length})` : ''}</button>
                         <button className='sheet' onClick={() => {setShowSheetDetails(true)}}><i className="fa-solid fa-address-book"></i> Ficha completa</button>
                     </div>
                     <div className='charInfo'>
@@ -542,6 +616,12 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                         </div>
                     </div>
                 }
+                {!!magics.length && 
+                    <div className='buttonsInventory'>
+                        <button className='magics' onClick={() => {setMagicModal(true)}}><i className="fa-solid fa-wand-magic-sparkles"></i> Magias</button>
+                        <button className='backpack' onClick={() => {setBackpackModal(true)}}><i className="fa-solid fa-list"></i> Mochila {itemsCharInventory.length > 0 ? `(${itemsCharInventory.length})` : ''}</button>
+                    </div>
+                }
                 {!!habilitiesChar?.length && 
                     <div className='habilities'>
                         <div className='habilityTitle'>Habilidades ativas <small>Clique para ver mais</small></div>
@@ -684,6 +764,58 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                         </div>
                     </div>
                 </ContainerHealth>
+            </Modal>
+            <Modal isOpen={magicModal} handleCloseModal={handleCloseMagics}>
+                <ContainerMagics>
+                    <div className='filters'>
+                        <p>Filtrar por elemento:</p>
+                        <div>{elements?.map((i, key) => (
+                            <Chip key={key} label={i.data.name} onClick={() => setMagicModalFilter(i.id)} color={magicModalFilter === i.id ? 'primary' : 'default'} />
+                        ))}</div>
+                    </div>
+                    
+                    <div className='list'>
+                        <div>
+                        {magicsFiltered.map((i, key) => (
+                            <Accordion key={key} expanded={expanded === `painer${i.id}`} onChange={handleChangeTagMagic(`painer${i.id}`)}>
+                                <AccordionSummary
+                                expandIcon={<ExpandMoreIcon />}
+                                aria-controls="panel1bh-content"
+                                id="panel1bh-header"
+                                >
+                                    <Typography className='nameMagic' sx={{ width: '33%', flexShrink: 0 }}>
+                                        {i.data.name}
+                                    </Typography>
+                                    <Typography sx={{ color: 'text.secondary' }} className='hideOnMoba'>{i.data.circle}º Circulo</Typography>
+                                </AccordionSummary>
+                                <AccordionDetails>
+                                    <div className='itemMagic'>
+                                        <div className='detailsMagic'>
+                                            <div>{i.data.circle}º Circulo</div>
+                                            {i.data.execution && <div>Execução: <span>{i.data.execution}</span></div>}
+                                            {i.data.reach && <div>Alcance: <span>{i.data.reach}</span></div>}
+                                            {i.data.target && <div>Alvo: <span>{i.data.target}</span></div>}
+                                            {i.data.duration && <div>Duração: <span>{i.data.duration}</span></div>}
+                                            {i.data.resistance && <div>Resistência: <span>{i.data.resistance}</span></div>}
+                                        </div>
+                                        <Typography>
+                                            <p className='description'>{i.data.description}</p>
+                                        </Typography>
+                                        {i.data.upgrades?.map((j, key) => (
+                                            <div className='upgrade'>
+                                                <div className='titleUpgrade'>{j.title} {j.peCost ? `- Custo adicional +${j.peCost}PE` : ''}</div>
+                                                <div className='descriptionUpgrade'>
+                                                    {j.description}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </AccordionDetails>
+                            </Accordion>
+                        ))}
+                        </div>
+                    </div>
+                </ContainerMagics>
             </Modal>
             <ToastContainer style={{zIndex: 9999999999999999}} />
         </>

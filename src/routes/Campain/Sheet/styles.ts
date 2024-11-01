@@ -241,6 +241,46 @@ export const Container = styled.div`
         }
     }
 
+    .buttonsInventory {
+        border: 0;
+        background-color: #261c3b;
+        padding: 16px;
+        margin-top: 14px;
+        border-radius: 4px;
+        display: flex;
+        gap: 8px;
+
+        button {
+            background-color: transparent;
+            color: white;
+            font-size: 16px;
+            border: 1px solid gray;
+            border-radius: 4px;
+            padding: 4px 8px;
+            cursor: pointer;
+            transition: 0.2s;
+
+            i {
+                font-size: 14px;
+            }
+        }
+
+        button:hover {
+            background-color: white;
+            border-color: white;
+            color: #181a1b; 
+            transition: 0.2s;
+        }
+
+        .magic {
+            
+        }
+
+        .backpack {
+            
+        }
+    }
+
     .habilities {
         border: 0;
         background-color: #1c273b;
@@ -367,5 +407,81 @@ export const ContainerHealth = styled.div`
             }
         }
         
+    }
+`
+
+export const ContainerMagics = styled.div`
+    background-color: white;
+    padding: 32px 16px;
+    border-radius: 4px;
+    color: black;
+    max-width: 700px;
+    min-width: 700px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    @media screen and (max-width: 800px) {
+        max-width: 100%;
+        min-width: 100%;
+    }
+
+    .filters {
+        > div {
+            margin-top: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+    }
+
+    p {
+        margin: 0;
+    }
+
+    .list {
+        max-height: 70vh;
+        overflow: auto;
+
+        > div {
+            display: inline-block;
+        }
+    }
+
+    .itemMagic {
+        max-height: 40vh;
+        overflow: auto;
+
+        .detailsMagic {
+            font-weight: 600;
+
+            span {
+                font-weight: 400;
+                color: gray;
+            }
+        }
+
+        .description {
+            margin-top: 8px;
+        }
+
+        .upgrade {
+
+            .titleUpgrade {
+                margin-top: 8px;
+                font-weight: 600;
+                font-size: 18px;
+            }
+        }
+    }
+
+    @media screen and (max-width: 1000px) {
+        .hideOnMoba {
+            display: none;
+        }
+
+        .nameMagic {
+            width: 100%;
+        }
     }
 `

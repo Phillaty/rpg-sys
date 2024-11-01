@@ -2,10 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Container } from './styles';
 import { Chip, styled, Table, TableBody, TableCell, tableCellClasses, TableContainer, TableHead, TableRow, TextField } from '@mui/material';
 import Paper from '@mui/material/Paper';
-import { collection, onSnapshot, query, where } from 'firebase/firestore';
-import { db } from '../../../../firebase/firebase';
 import { elementDataType, magicDataType } from '../../../../types';
-import { useLocation } from 'react-router-dom';
 import Modal from '../../../../commom/Modal';
 import MagicModal from './CreateUpdate';
 
@@ -32,19 +29,13 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
 type prop = {
     toast: any;
     elements: elementDataType[];
+    magicFiltered: magicDataType[];
+    magics: magicDataType[];
+    setMagicFiltered: React.Dispatch<React.SetStateAction<magicDataType[]>>
 }
 
-const Magics = ({toast, elements}: prop) => {
-
-    const location = useLocation();
-
-    const queryString = location.search;
-    const urlParams = new URLSearchParams(queryString);
-    const campainId = urlParams.get('camp') ?? '';
-
-    const [magicFiltered, setMagicFiltered] = useState<magicDataType[]>([]);
-    const [magics, setMagics] = useState<magicDataType[]>([]);
-
+const Magics = ({toast, elements, magicFiltered, magics, setMagicFiltered}: prop) => {
+   
     const [selectMagic, setSelectMagic] = useState<magicDataType>();
 
     const [openModalMagic, setOpenModalMagic] = useState<boolean>(false);
@@ -55,36 +46,6 @@ const Magics = ({toast, elements}: prop) => {
         setOpenModalMagic(false);
         setSelectMagic(undefined);
     };
-
-    const getClassesVerified = async () => {
-        if (campainId) {
-            const p = query(
-                collection(db, 'magics'),
-                where('campainId', '==', campainId)
-            );
-    
-            onSnapshot(p, (querySnapshot) => {
-                const docData = querySnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    data: doc.data(),
-                })) as magicDataType[];
-
-                const sorted = docData.sort((a, b) => a.data.name.localeCompare(b.data.name));
-                setMagics(sorted);
-                setMagicFiltered(sorted);
-    
-                
-            });
-        }
-    }
-
-    useEffect(() => {
-        if(campainId) {
-            getClassesVerified();
-        }
-       
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
 
     useEffect(() => {
         if (search) {

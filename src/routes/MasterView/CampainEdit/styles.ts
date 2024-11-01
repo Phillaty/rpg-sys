@@ -67,7 +67,7 @@ export const Container = styled.div`
             background-color: white;
             color: black;
             padding: 16px;
-            width: 60%;
+            width: 55%;
             border-radius: 4px;
 
             .alerts {
@@ -139,13 +139,15 @@ export const Container = styled.div`
             background-color: white;
             color: black;
             padding: 16px;
-            width: 20%;
+            width: 25%;
             border-radius: 4px;
 
             .charList {
                 display: flex;
                 flex-direction: column;
                 gap: 8px;
+                max-height: 70vh;
+                overflow: auto;
 
                 .item {
                     display: flex;

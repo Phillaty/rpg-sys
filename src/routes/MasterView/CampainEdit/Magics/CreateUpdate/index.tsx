@@ -78,9 +78,10 @@ const MagicModal = ({toast, magicSelected, elements}: props) => {
             target: magicForm.target,
             execution: magicForm.execution,
             resistance: magicForm.resistance ?? "",
+            upgrades: magicForm.upgrades ?? [],
         } as magicType;
 
-        if(!!magicForm.upgrades.length) magicFormToGo.upgrades = magicForm.upgrades;
+        if(!!magicForm.upgrades?.length) magicFormToGo.upgrades = magicForm.upgrades;
 
         setLoading(true);
         if (isToAdd) {
@@ -369,7 +370,7 @@ const MagicModal = ({toast, magicSelected, elements}: props) => {
                                         const magicUpgradeToAddNew = {
                                             title: magicUpgradeToAdd.title,
                                             description: magicUpgradeToAdd.description,
-                                            level: (magicForm.upgrades.length ?? 0) + 1,
+                                            level: (magicForm.upgrades?.length ?? 0) + 1,
                                         } as magicTypeUpgrades;
 
                                         if(!!magicUpgradeToAdd.peCost) magicUpgradeToAddNew.peCost = magicUpgradeToAdd.peCost;

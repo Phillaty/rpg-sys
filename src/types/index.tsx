@@ -9,6 +9,11 @@ export type userDataType = {
     id: string;
 };
 
+export type userDataTypeData = {
+    id: string;
+    data: userDataType;
+}
+
 export type discordType = {
     webhook?: string;
     sendDices?: boolean;
@@ -91,6 +96,7 @@ export type avatarType = {
     img: string;
     slotManagement: slotManagementType;
     defense: defenseType;
+    magics?: string[];
 };
 
 export type avatarDataType = {
@@ -339,7 +345,6 @@ export type magicType = {
     circle: number,
     verified?: boolean,
     campainId: string,
-
     duration: string,
     reach: string,
     target: string,
