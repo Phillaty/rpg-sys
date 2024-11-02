@@ -384,8 +384,12 @@ export type entityType = {
         description: string;
         testMod?: number;
         mod?: number;
-        type: string;
+        type: 'padrao' | 'livre' | 'bonus' | 'completa' | 'passiva';
+        damageRoll: number[];
+        damageMod: number;
     }[];
+    campainId: string;
+    resistence: string;
 }
 
 export type entityDataType = {
@@ -393,6 +397,19 @@ export type entityDataType = {
     data: entityType;
 }
 
+export type battleTurnType = {
+    id: string;
+    type: 'entity' | 'player',
+    iniciative: number,
+    life?: number,
+}
+
+export type battleType = {
+    campainId: string;
+    turns: battleTurnType[];
+}
+
 export type battleDataType = {
-    
+    id: string;
+    data: battleType
 }

@@ -3,7 +3,7 @@ import { Container } from './styles';
 import { useLocation } from 'react-router-dom';
 import { collection, doc, onSnapshot, query, updateDoc, where } from 'firebase/firestore';
 import { db } from '../../../firebase/firebase';
-import { alertType, avatarDataType, campainDataType, classeDataType, elementDataType, habilityDataType, magicDataType, originDataType, perkDataType, storeDataType, subclassDataType, userDataTypeData } from '../../../types';
+import { alertType, avatarDataType, campainDataType, classeDataType, elementDataType, entityDataType, habilityDataType, magicDataType, originDataType, perkDataType, storeDataType, subclassDataType, userDataTypeData } from '../../../types';
 import { ColorRing } from 'react-loader-spinner';
 import Stack from '@mui/material/Stack';
 import Alert from '@mui/material/Alert';
@@ -28,6 +28,7 @@ import Invite from './Invite';
 import SheetDetails from '../../Campain/Sheet/SheetDetails';
 import { skillFiltr, skillTy } from '../../Campain';
 import MagicPlayers from './MagicPlayers';
+import Entity from './Entity';
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
@@ -66,6 +67,7 @@ const CampainEdit = () => {
     const [showElementsModal, setShowElementsModal] = useState<boolean>(false);
     const [showInviteModal, setShowInviteModal] = useState<boolean>(false);
     const [showMagicPlayerModal, setMagicPlayerModal] = useState<boolean>(false);
+    const [showEntityModal, setEntityModal] = useState<boolean>(false);
 
     const [subclasses, setSubclasses] = useState<subclassDataType[]>([]);
 
@@ -85,6 +87,8 @@ const CampainEdit = () => {
     const [users, setUsers] = useState<userDataTypeData[]>([]);
 
     const [elements, setElements] = useState<elementDataType[]>([]);
+
+    const [entitys, setEntitys] = useState<entityDataType[]>([]);
 
     const [alertsList, setAlertsList] = useState<alertType[]>([]);
 
@@ -176,7 +180,8 @@ const CampainEdit = () => {
         setOpenStoreModal(false);
         setOpenDiscordModal(false);
         setShowInviteModal(false);
-        setMagicPlayerModal(false)
+        setMagicPlayerModal(false);
+        setEntityModal(false);
     }
 
     useEffect(() => {
@@ -368,6 +373,25 @@ const CampainEdit = () => {
         }
     }
 
+    const getEntity = async () => {
+        if (campainId) {
+            const p = query(
+                collection(db, 'entity'),
+                where('campainId', '==', campainId)
+            );
+    
+            onSnapshot(p, (querySnapshot) => {
+                const docData = querySnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    data: doc.data(),
+                })) as entityDataType[];
+
+                const sorted = docData.sort((a, b) => a.data.name.localeCompare(b.data.name));
+                setEntitys(sorted);              
+            });
+        }
+    }
+
     useEffect(() => {
         if (classes.length > 0) {
             getSubclasses();
@@ -385,6 +409,7 @@ const CampainEdit = () => {
             getElements();
             getUsers();
             getMagics();
+            getEntity();
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [campain])
@@ -441,7 +466,7 @@ const CampainEdit = () => {
                     <div className='options'>
                         <button>Editar informações</button>
                         <button onClick={() => setOpenStoreModal(true)}>Gerenciar Lojas</button>
-                        <button>Gerenciar entidades</button>
+                        <button onClick={() => setEntityModal(true)}>Gerenciar entidades</button>
                         <button onClick={() => setShowInviteModal(true)}>Gerenciar convite</button>
                         <button onClick={() => setOpenDiscordModal(true)}>Configurar bot Discord</button>
                     </div>
@@ -694,6 +719,10 @@ const CampainEdit = () => {
 
         <Modal isOpen={showMagicPlayerModal} handleCloseModal={handleCloseModals}>
             <MagicPlayers toast={toast} magic={magics} char={characters} magicPlayer={magicPlayer} />
+        </Modal>
+
+        <Modal isOpen={showEntityModal} handleCloseModal={handleCloseModals}>
+            <Entity toast={toast} entity={entitys} />
         </Modal>
 
         {openSheetModal && skills && characterSelected && 

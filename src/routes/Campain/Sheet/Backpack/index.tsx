@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Container } from './styles';
 import { Box, Divider, Tab, Tabs } from '@mui/material';
 import { a11yProps } from '../../../../utils/components';
@@ -13,10 +13,12 @@ type prop = {
     itensArmadure: itemDataType[];
     handleRollBackpack: (dices: number[], mods: number[]) => void;
     toast: any;
+    wheight?: number;
 }
 
-const Backpack = ({itens, itensGeral, itensWeapon, itensArmadure, handleRollBackpack, toast}: prop) => {
+const Backpack = ({itens, itensGeral, itensWeapon, itensArmadure, handleRollBackpack, toast, wheight}: prop) => {
     const [value, setValue] = React.useState(0);
+    const [actualWheigh, setActualWheigh] = useState<number>(0);
 
     const handleChange = (event: React.SyntheticEvent, newValue: number) => {
         setValue(newValue);
@@ -36,10 +38,19 @@ const Backpack = ({itens, itensGeral, itensWeapon, itensArmadure, handleRollBack
         }
     }
 
+    useEffect(() => {
+        let count = 0;
+        itens.forEach((i) => {
+            count = count + i.data.weight;
+        });
+        setActualWheigh(count);
+    }, [itens])
+
     return (
         <>
         <Container>
             <div>
+            <p className='weight'><i className="fa-solid fa-weight-hanging"></i> Peso: {actualWheigh}/{wheight ?? 0}</p>
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                 <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
                     <Tab label="Itens Gerais" {...a11yProps(0)} />

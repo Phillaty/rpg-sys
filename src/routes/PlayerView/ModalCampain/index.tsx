@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Container } from './styles';
+import { Container, ContainerLore } from './styles';
 import Modal from '../../../commom/Modal';
 import userProfile from '../../../imgs/profile-user-icon-2048x2048-m41rxkoe.png';
 import { useNavigate } from 'react-router-dom';
@@ -15,6 +15,7 @@ const ModalCampain = ({selectedCampain, setSelectedCampain}: prop) => {
     const navigate = useNavigate();
 
     const [openModal, setOpenModal] = useState<boolean>(false);
+    const [openModalLore, setOpenModalLore] = useState<boolean>(false);
 
     useEffect(() => {
         if(selectedCampain) {
@@ -27,9 +28,14 @@ const ModalCampain = ({selectedCampain, setSelectedCampain}: prop) => {
         setSelectedCampain(undefined);
     };
 
+    const handleCloseLore = () => {
+        setOpenModalLore(false);
+    };
+
     return (
         <>
         {selectedCampain && 
+            <>
             <Modal isOpen={openModal} handleCloseModal={handleClose}>
                 <Container>
                     <div className='topMobile' style={{
@@ -93,13 +99,22 @@ const ModalCampain = ({selectedCampain, setSelectedCampain}: prop) => {
                             <div className='detailItem'>
                                 <p>Lore</p>
                                 <span className='lore'>{selectedCampain.data.lore}</span>
-                                <button className='button-small button-blue'>Ver lore inteira</button>
+                                <button className='button-small button-blue' onClick={() => setOpenModalLore(true)}>Ver lore inteira</button>
                             </div>
                         </div>
                     </div>
                     
                 </Container>
             </Modal>
+            <Modal isOpen={openModalLore} handleCloseModal={handleCloseLore}>
+                <ContainerLore>
+                    <div>
+                        <div className='title'>{selectedCampain.data.title}</div>
+                        <div className='lore' dangerouslySetInnerHTML={{ __html: selectedCampain.data.lore ?? "" }} />
+                    </div>
+                </ContainerLore>
+            </Modal>
+            </>
         }
         </>
     )

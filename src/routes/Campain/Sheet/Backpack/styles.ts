@@ -6,6 +6,17 @@ export const Container = styled.div`
     padding: 16px;
     border-radius: 4px;
 
+    .weight {
+        margin: 0;
+        color: gray;
+        text-align: center;
+
+        i {
+            color: #656565;
+            font-size: 14px;
+        }
+    }
+
     .TabContainer {
         max-width: 400px;
         display: flex;

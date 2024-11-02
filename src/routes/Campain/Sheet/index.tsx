@@ -616,10 +616,14 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                         </div>
                     </div>
                 }
-                {!!magics.length && 
+                {(!!magics.length || !!itemsCharInventory.length) && 
                     <div className='buttonsInventory'>
+                        {!!magics.length &&
                         <button className='magics' onClick={() => {setMagicModal(true)}}><i className="fa-solid fa-wand-magic-sparkles"></i> Magias</button>
+                        }
+                        {!!itemsCharInventory.length &&
                         <button className='backpack' onClick={() => {setBackpackModal(true)}}><i className="fa-solid fa-list"></i> Mochila {itemsCharInventory.length > 0 ? `(${itemsCharInventory.length})` : ''}</button>
+                        }
                     </div>
                 }
                 {!!habilitiesChar?.length && 
@@ -687,7 +691,7 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
             }
             
             <Modal isOpen={backpackModal} handleCloseModal={handleCloseBackpack} >
-                <Backpack itens={itemsCharInventory} itensArmadure={itensArmadure} itensGeral={itensGeral} itensWeapon={itensWeapon} handleRollBackpack={handleRollBackpack} toast={toast} />
+                <Backpack wheight={charcater?.data.slotManagement.max} itens={itemsCharInventory} itensArmadure={itensArmadure} itensGeral={itensGeral} itensWeapon={itensWeapon} handleRollBackpack={handleRollBackpack} toast={toast} />
             </Modal>
 
             <Modal isOpen={habilityModal} handleCloseModal={handleCloseHability} >

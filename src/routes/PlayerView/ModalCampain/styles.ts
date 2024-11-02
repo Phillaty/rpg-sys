@@ -213,3 +213,24 @@ export const Container = styled.div`
         }
     }
 `
+
+export const ContainerLore = styled.div`
+    width: 800px;
+    padding: 16px;
+    display: flex;
+
+    background: #fff;
+    color: black;
+    border-radius: 4px;
+
+    gap: 8px;
+
+    .title {
+        font-weight: 600;
+        font-size: 20px;
+    }
+
+    .lore {
+        
+    }
+`
