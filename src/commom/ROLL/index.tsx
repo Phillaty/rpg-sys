@@ -2,16 +2,17 @@ import React, { useEffect, useState } from 'react';
 import { Container } from './styles';
 import Modal from '../Modal';
 import diceGif from '../../imgs/dice.gif';
-import { avatarType, discordType } from '../../types';
+import { avatarType, discordType, rollModType } from '../../types';
 import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import { randomColors } from '../../constants';
+import { Chip } from '@mui/material';
 
 type prop = {
     dice: number[];
-    mod?: number[];
+    mod?: rollModType[];
     setdice: React.Dispatch<React.SetStateAction<number[] | undefined>>;
-    setdiceMod?: React.Dispatch<React.SetStateAction<number[] | undefined>>;
+    setdiceMod?: React.Dispatch<React.SetStateAction<rollModType[] | undefined>>;
     onClose?: () => void;
     discord?: discordType;
     char?: avatarType;
@@ -25,6 +26,8 @@ const Roll = ({dice, mod, setdice, setdiceMod, onClose, discord, char}: prop) =>
     const [resultEach, setResultEach] = useState<string>();
     const [resultTotal, setResultTotal] = useState<number>();
     const [resultTotalMod, setResultTotalMod] = useState<number>();
+
+    const [isToAddPers, setIsToAddPers] = useState<boolean>(false);
 
     const [total, setTotal] = useState<number>();
 
@@ -51,7 +54,7 @@ const Roll = ({dice, mod, setdice, setdiceMod, onClose, discord, char}: prop) =>
         let somaMod:number = 0;
 
         if(!!mod?.length) {
-            somaMod = mod.reduce((acumulador, valorAtual) => Number(acumulador) + Number(valorAtual), 0);
+            somaMod = mod.reduce((acumulador, valorAtual) => Number(acumulador) + Number(valorAtual.roll), 0);
             setResultTotalMod(somaMod);
         }
 
@@ -80,12 +83,16 @@ const Roll = ({dice, mod, setdice, setdiceMod, onClose, discord, char}: prop) =>
             } else {
                 text = "Waaaa dado! (oﾟvﾟ)ノ";
             }
+
+            const modifications = mod?.map((i) => {
+                return `${i.name} ${i.roll >= 0 ? `+` : ``}${i.roll}`
+            })
             
             const body = {
                 tts: false,
                 embeds: [{
                     title: `${char.name} fez uma rolagem!`,
-                    description: `## **Dados rolados:**\n dados: [d${dice.join(', d')}]\n### :sparkles: [${results.join(", ")}] :sparkles: \n${!!mod?.length ? `### Modificações: \n[${mod.join(', ')}]` : ''}\n## Total tudo somado: ${total}${!!mod?.length && dice.length > 1 ? `\n## Total dado separado:\n[${resultsEachTotal.join(', ')}]` : ''}`,
+                    description: `## **Dados rolados:**\n dados: [d${dice.join(', d')}]\n### :sparkles: [${results.join(", ")}] :sparkles: \n${!!modifications?.length ? `### Modificações: \n- ${modifications.join('\n - ')}` : ''}\n## Total tudo somado: ${total}${!!mod?.length && dice.length > 1 ? `\n## Total dado separado:\n[${resultsEachTotal.join(', ')}]` : ''}`,
                     color: randomColors[Math.floor(Math.random() * 23)],
                     footer: {
                         text: text
@@ -124,14 +131,53 @@ const Roll = ({dice, mod, setdice, setdiceMod, onClose, discord, char}: prop) =>
             <Container>
                 <p>Rolando D{dice.join(", D")}</p>
                 {mod && mod.length > 0 &&
-                    <p>Modificadores: [{mod.join(", ")}]</p>
+                    <p className='mods'>
+                        {mod.map((item, key) => (<Chip key={key} label={`${item.name} ${item.roll >= 0 ? `+` : ``}${item.roll}`} size='small' className={item.type} />))}
+                            {!result && <Chip label="+" size='small' className='add' onClick={() => setIsToAddPers(!isToAddPers)} />}
+                    </p>
                 }
+
+                {isToAddPers && <>
+                    <div className='persRolls'>
+                        {[1,2,3,4,5].map((i, key) => (
+                            <button key={key} onClick={() => {
+                                if(setdiceMod)
+                                setdiceMod((prev) => ([
+                                    ...prev ?? [],
+                                    {
+                                        type: 'pers',
+                                        name: '',
+                                        roll: i
+                                    }
+                                ]));
+                                setIsToAddPers(false);
+                            }}>+{i}</button>
+                        ))}
+                    </div>
+                    <div className='persRolls'>
+                        {[-1,-2,-3,-4,-5].map((i, key) => (
+                            <button key={key} onClick={() => {
+                                if(setdiceMod)
+                                setdiceMod((prev) => ([
+                                    ...prev ?? [],
+                                    {
+                                        type: 'pers',
+                                        name: '',
+                                        roll: i
+                                    }
+                                ]));
+
+                                setIsToAddPers(false);
+                            }}>{i}</button>
+                        ))}
+                    </div>
+                </>}
 
                 <div>
                     {result ? 
                         <div className='result'>
-                            {result}
-                            <div className='subResults'>Total: {total} {resultTotalMod && <span>({resultTotal} {resultTotalMod < 0 ? '' : '+'} {resultTotalMod})</span>}</div>
+                            {total}
+                            <div className='subResults'>Dados: <big>{result}</big> <br/>{resultTotalMod && <span>({resultTotal} {resultTotalMod < 0 ? '' : '+'} {resultTotalMod})</span>}</div>
                             {dice.length > 1 && resultTotalMod && <div className='resultsEach'>Total por dado: [{resultEach}]</div>}
                         </div> 
                         : 

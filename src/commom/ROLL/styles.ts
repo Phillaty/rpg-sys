@@ -20,6 +20,31 @@ export const Container = styled.div`
         height: 200px;
     }
 
+    //'pericia' | 'atributo' | 'habilidade' | 'item' | 'damage' | 'pers'
+
+    .pericia {background-color: #ffb100;}
+    .atributo {background-color: #65dbff;}
+    .habilidade {background-color: #f784b4;}
+    .item {background-color: #b6f784;}
+    .damage {background-color: #f78484;}
+    .pers {background-color: #bbbbbb;}
+    .add {background-color: #3570ed; color: #fff; cursor: pointer;}
+    .add:hover {background-color: #99b9ff;}
+
+    .persRolls {
+        display: flex;
+        gap: 4px;
+        margin-top: 4px;
+        justify-content: center;
+    }
+
+    .mods {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        justify-content: center;
+    }
+
     .result {
         min-width: 200px;
         height: 200px;
@@ -31,11 +56,12 @@ export const Container = styled.div`
         padding: 0;
         margin: 0;
 
-        font-size: 56px;
+        font-size: 50px;
     }
 
     .subResults {
         font-size: 18px;
+        color:rgb(0, 0, 0);
 
         span {
             font-size: 14px;

@@ -4,7 +4,7 @@ import { Avatar, Chip, TextField } from '@mui/material';
 import { useLocation } from 'react-router-dom';
 import { addDoc, collection, doc, onSnapshot, query, updateDoc, where } from 'firebase/firestore';
 import { db } from '../../../firebase/firebase';
-import { avatarDataType, battleDataType, campainDataType, entityDataType, habilityDataType } from '../../../types';
+import { avatarDataType, battleDataType, campainDataType, entityDataType, habilityDataType, rollModType } from '../../../types';
 import Modal from '../../../commom/Modal';
 import Roll from '../../../commom/ROLL';
 import { toast, ToastContainer } from 'react-toastify';
@@ -55,7 +55,7 @@ const CampainPlay = () => {
     }>();
 
     const [dicePers, setdicePers] = useState<number[]>([]);
-    const [dicePersMod, setdicePersMod] = useState<number[]>([]);
+    const [dicePersMod, setdicePersMod] = useState<rollModType[]>();
     const [dicePersToRoll, setdicePersToRoll] = useState<number[]>();
 
     const [habilities, setHabilities] = useState<habilityDataType[]>([]);
@@ -275,13 +275,21 @@ const CampainPlay = () => {
                 <div className='info'>
                     <div className='habilities'>
                     {findEntity?.data.perks.map((i) => (
-                        <div className='actionItem'  onClick={() => {
-                            if(i.mod) setdicePersMod([i.mod]);
+                        <div className='actionItem' onClick={() => {
+                            if(i.mod) setdicePersMod([{
+                                    type: 'pericia',
+                                    name: i.name,
+                                    roll: i.mod
+                            }]);
                             setdicePersToRoll([20]);
                         }}>{i.name}</div>
                     ))}
                     <div className='actionItem'  onClick={() => {
-                            if(findEntity?.data.senses.perseption) setdicePersMod([findEntity?.data.senses.perseption]);
+                            if(findEntity?.data.senses.perseption) setdicePersMod([{
+                                type: 'pericia',
+                                name: 'Percepção',
+                                roll: findEntity?.data.senses.perseption
+                            }]);
                             setdicePersToRoll([20]);
                         }}>Perspectiva</div>
                     </div>
@@ -395,29 +403,29 @@ const CampainPlay = () => {
                                     <div className='buttons'>
                                         <p>Adicionar modificações: </p>
                                         <div>
-                                            <button onClick={() => {setdicePersMod([...dicePersMod, -5])}}>-5</button>
-                                            <button onClick={() => {setdicePersMod([...dicePersMod, -4])}}>-4</button>
-                                            <button onClick={() => {setdicePersMod([...dicePersMod, -3])}}>-3</button>
-                                            <button onClick={() => {setdicePersMod([...dicePersMod, -2])}}>-2</button>
-                                            <button onClick={() => {setdicePersMod([...dicePersMod, -1])}}>-1</button>
-                                            <button onClick={() => {setdicePersMod([...dicePersMod, 1])}}>+1</button>
-                                            <button onClick={() => {setdicePersMod([...dicePersMod, 2])}}>+2</button>
-                                            <button onClick={() => {setdicePersMod([...dicePersMod, 3])}}>+3</button>
-                                            <button onClick={() => {setdicePersMod([...dicePersMod, 4])}}>+4</button>
-                                            <button onClick={() => {setdicePersMod([...dicePersMod, 5])}}>+5</button>
+                                            <button onClick={() => {setdicePersMod([...dicePersMod ?? [], {type: 'pers', name: 'Personalizado', roll: -5} as rollModType])}}>-5</button>
+                                            <button onClick={() => {setdicePersMod([...dicePersMod ?? [], {type: 'pers', name: 'Personalizado', roll: -4} as rollModType])}}>-4</button>
+                                            <button onClick={() => {setdicePersMod([...dicePersMod ?? [], {type: 'pers', name: 'Personalizado', roll: -3} as rollModType])}}>-3</button>
+                                            <button onClick={() => {setdicePersMod([...dicePersMod ?? [], {type: 'pers', name: 'Personalizado', roll: -2} as rollModType])}}>-2</button>
+                                            <button onClick={() => {setdicePersMod([...dicePersMod ?? [], {type: 'pers', name: 'Personalizado', roll: -1} as rollModType])}}>-1</button>
+                                            <button onClick={() => {setdicePersMod([...dicePersMod ?? [], {type: 'pers', name: 'Personalizado', roll: 1} as rollModType])}}>+1</button>
+                                            <button onClick={() => {setdicePersMod([...dicePersMod ?? [], {type: 'pers', name: 'Personalizado', roll: 2} as rollModType])}}>+2</button>
+                                            <button onClick={() => {setdicePersMod([...dicePersMod ?? [], {type: 'pers', name: 'Personalizado', roll: 3} as rollModType])}}>+3</button>
+                                            <button onClick={() => {setdicePersMod([...dicePersMod ?? [], {type: 'pers', name: 'Personalizado', roll: 4} as rollModType])}}>+4</button>
+                                            <button onClick={() => {setdicePersMod([...dicePersMod ?? [], {type: 'pers', name: 'Personalizado', roll: 5} as rollModType])}}>+5</button>
                                         </div>
                                     </div>
                             
                                     <div className='preVisuTitle'><p>Dados para rolagem</p></div>
-                                    {dicePersMod.length > 0 && 
+                                    {dicePersMod && dicePersMod?.length > 0 && 
                                         <div className='preVisuMod'>
                                             <div className='dicesPerMod'>
                                                 <p>Modificações:</p>
-                                                {dicePersMod.map((mod, keyMod) => (
+                                                {dicePersMod?.map((mod, keyMod) => (
                                                     <div key={keyMod} onClick={(() => {
-                                                        const newDices = dicePersMod.filter((i, index) => index !== keyMod);
+                                                        const newDices = dicePersMod?.filter((i, index) => index !== keyMod);
                                                         setdicePersMod(newDices);
-                                                    })}><span className='diceitem'>{mod >= 0 ? '+' : ''}{mod}</span><span className='error'><i className="fa-solid fa-xmark"></i></span></div>
+                                                    })}><span className='diceitem'>{mod.roll >= 0 ? '+' : ''}{mod.roll}</span><span className='error'><i className="fa-solid fa-xmark"></i></span></div>
                                                 ))}
                                             </div>
                                         </div>
@@ -564,14 +572,22 @@ const CampainPlay = () => {
                 <div className='buttons'>
                     {!!modalshowHabilityDetails?.roll && <>
                         <button onClick={() => {
-                            if(modalshowHabilityDetails.rollMod) setdicePersMod([modalshowHabilityDetails.rollMod]);
+                            if(modalshowHabilityDetails.rollMod) setdicePersMod([{
+                                type: 'habilidade',
+                                name: modalshowHabilityDetails.title,
+                                roll: modalshowHabilityDetails.rollMod
+                            }]);
                             setdicePersToRoll([modalshowHabilityDetails?.roll ?? 20]);
                         }}>rolar teste</button>
                     </>}
 
                     {!!modalshowHabilityDetails?.damageRoll && <>
                         <button onClick={() => {
-                            if(modalshowHabilityDetails.damageMod) setdicePersMod([modalshowHabilityDetails.damageMod]);
+                            if(modalshowHabilityDetails.damageMod) setdicePersMod([{
+                                type: 'damage',
+                                name: 'Dano adicional',
+                                roll: modalshowHabilityDetails.damageMod
+                            }]);
                             setdicePersToRoll(modalshowHabilityDetails?.damageRoll ?? []);
                         }}>rolar dano</button>
                     </>}
@@ -579,7 +595,7 @@ const CampainPlay = () => {
             </ContainerAddModal>
         </Modal>
         {dicePersToRoll && dicePersToRoll.length > 0 &&
-            <Roll dice={dicePersToRoll} mod={dicePersMod} setdice={setdicePersToRoll} setdiceMod={setdicePersToRoll} onClose={() => {handleCloseDicePer()}} />
+            <Roll dice={dicePersToRoll} mod={dicePersMod} setdice={setdicePersToRoll} setdiceMod={setdicePersMod} onClose={() => {handleCloseDicePer()}} />
         }
         <ToastContainer style={{zIndex: '999999999999999999'}} />
         </>

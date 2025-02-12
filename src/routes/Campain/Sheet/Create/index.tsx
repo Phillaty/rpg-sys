@@ -57,7 +57,7 @@ const SheetCreation = () => {
     const [originSelected, setOriginSelected] = useState<originDataType>();
     const [classeSelected, setClasseSelected] = useState<classeDataType>();
 
-    const [attributePoints, setAttributePoints] = useState<number>(6);
+    const [attributePoints, setAttributePoints] = useState<number>(8);
     const [perkPoints, setPerkPoints] = useState<number>(0);
     const [attributes, setAttributes] = useState<attributesType>({
         AGI: 0,
@@ -222,7 +222,7 @@ const SheetCreation = () => {
 
             setPerks([]);
             setPerkPoints(classeSelected.data.perk.beggining + attributes.INT);
-            setAttributePoints(6);
+            setAttributePoints(8);
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [classeSelected]);

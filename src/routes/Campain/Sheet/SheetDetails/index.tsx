@@ -306,7 +306,7 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
                             </div>
                             <div>
                                 <p className='label'>Classe</p>
-                                <p className='info'>{charcater?.data?.class?.title}</p>
+                                <p className='info'>{charcater?.data?.class?.title ?? ""}</p>
                             </div>
                             <div>
                                 <p className='label'>Lore</p>

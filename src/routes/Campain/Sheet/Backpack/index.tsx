@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Container } from './styles';
 import { Box, Divider, Tab, Tabs } from '@mui/material';
 import { a11yProps } from '../../../../utils/components';
-import { itemDataType } from '../../../../types';
+import { itemDataType, rollModType } from '../../../../types';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../../../firebase/firebase';
 
@@ -11,7 +11,7 @@ type prop = {
     itensGeral: itemDataType[];
     itensWeapon: itemDataType[];
     itensArmadure: itemDataType[];
-    handleRollBackpack: (dices: number[], mods: number[]) => void;
+    handleRollBackpack: (dices: number[], mods: rollModType[]) => void;
     toast: any;
     wheight?: number;
 }
@@ -97,7 +97,17 @@ const Backpack = ({itens, itensGeral, itensWeapon, itensArmadure, handleRollBack
                             </div>
                             <div className='buttons'>
                                 {item.data.roll && <button onClick={() => {
-                                    handleRollBackpack(item.data.roll?.base ?? [], item.data.roll?.mod ?? []);
+                                    let rollArray:rollModType[] = [];
+
+                                    item.data.roll?.mod?.forEach((i) => {
+                                        rollArray.push({
+                                            type: 'item',
+                                            name: item.data.name,
+                                            roll: i
+                                        })
+                                    })
+
+                                    handleRollBackpack(item.data.roll?.base ?? [], rollArray);
                                 }}>Rolar dado</button> }
                                 <button onClick={() => handleSetToGroudItem(item)}>Jogar no chão</button>
                             </div>
@@ -144,7 +154,7 @@ const Backpack = ({itens, itensGeral, itensWeapon, itensArmadure, handleRollBack
                             </div>
                             <div className='buttons'>
                             {item.data.roll && <button>Rolar dado</button> }
-                                <button>Jogar no chão</button>
+                                <button onClick={() => handleSetToGroudItem(item)}>Jogar no chão</button>
                             </div>
                             
                         </div>
@@ -189,7 +199,7 @@ const Backpack = ({itens, itensGeral, itensWeapon, itensArmadure, handleRollBack
                             </div>
                             <div className='buttons'>
                                 {item.data.roll && <button>Rolar dado</button> }
-                                <button>Jogar no chão</button>
+                                <button onClick={() => handleSetToGroudItem(item)}>Jogar no chão</button>
                             </div>
                             
                         </div>

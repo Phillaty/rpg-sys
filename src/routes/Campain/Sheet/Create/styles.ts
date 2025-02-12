@@ -278,6 +278,9 @@ export const Container = styled.div`
             gap: 16px;
 
             .item {
+                border: 1px solid #00000030;
+                padding: 8px;
+                border-radius: 8px;
                 p {
                     text-align: center;
                 }

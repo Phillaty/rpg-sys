@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Container, ContainerHability, ContainerHealth, ContainerMagics } from './styles';
-import { alertType, avatarDataType, campainType, classeDataType, elementDataType, habilityDataType, itemDataType, magicDataType, subclassDataType } from '../../../types';
+import { alertType, avatarDataType, campainType, classeDataType, elementDataType, habilityDataType, itemDataType, magicDataType, rollModType, subclassDataType } from '../../../types';
 import logo from '../../../imgs/profile-user-icon-2048x2048-m41rxkoe.png';
 import { skillFiltr, skillTy } from '..';
 import Roll from '../../../commom/ROLL';
@@ -34,10 +34,10 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
     const campainId = urlParams.get('camp') ?? '';
 
     const [dice, setdice] = useState<number[]>();
-    const [diceMod, setdiceMod] = useState<number[]>();
+    const [diceMod, setdiceMod] = useState<rollModType[]>();
 
     const [dicePers, setdicePers] = useState<number[]>([]);
-    const [dicePersMod, setdicePersMod] = useState<number[]>([]);
+    const [dicePersMod, setdicePersMod] = useState<rollModType[]>();
     const [dicePersToRoll, setdicePersToRoll] = useState<number[]>();
     
     const [showSheetDetails, setShowSheetDetails] = useState<boolean>(false);
@@ -145,7 +145,7 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
     }, []);
 
     useEffect(() => {
-        if(charcater) {
+        if(charcater && charcater?.data?.class?.id) {
             const q = query(
                 collection(db, 'hability'),
                 where('classId', '==', charcater?.data.class.id),
@@ -259,7 +259,7 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
     }
 
     const getClass = async () => {
-        const docRef = doc(db, 'classes', charcater?.data.class.id ?? "");
+        const docRef = doc(db, 'classes', charcater?.data?.class?.id ?? "");
 
         onSnapshot(docRef, (querySnapshot) => {
             const docData = {
@@ -300,7 +300,7 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
     }, [magics, magicModalFilter])
 
     useEffect(() => {
-        if(charcater && charcater.data.class.id){
+        if(charcater && charcater.data?.class?.id){
             getClass();
         }
 
@@ -336,9 +336,9 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [itemsAll]);
 
-    const handleRollBackpack = (dices: number[], mods: number[]) => {
+    const handleRollBackpack = (dices: number[], mods: rollModType[]) => {
         if(dices.length > 0) {
-            if(mods.length > 0)setdiceMod(dices);
+            if(mods.length > 0)setdiceMod(mods);
 
             setdice(dices);
 
@@ -346,11 +346,15 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
         }
     }
 
-    const handleRoll = (item: skillTy, aditionalMod?: number) => {
-        let totalModify:number[] = [];
+    const handleRoll = (item: skillTy, aditionalMod?: rollModType) => {
+        let totalModify:rollModType[] = [];
 
         if (item.expertise) {
-            totalModify = [item.expertise];
+            totalModify = [{
+                type: 'pericia',
+                name: `${item.name} Nível ${item.expertise}`,
+                roll: item.expertise,
+            } as rollModType];
         }
 
         if (aditionalMod) totalModify.push(aditionalMod);
@@ -360,7 +364,11 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
         if(!!habilitiesChar) {
             habilitiesChar.forEach((i) => {
                 i.data.buff?.modifyRoll?.forEach((j) => {
-                    if(j.perkId === item.id && i.data.type === "passive") totalModify.push(j.value);
+                    if(j.perkId === item.id && i.data.type === "passive") totalModify.push({
+                        type: 'habilidade',
+                        name: i.data.name,
+                        roll: j.value,
+                    } as rollModType);
                 })
             });
 
@@ -375,7 +383,11 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
             itemsCharInventory.forEach((i) => {
                 if(i.data.buff?.modifyRoll) {
                     i.data.buff?.modifyRoll.forEach((j) => {
-                        if(j.perkId === item.id) totalModify.push(j.value);
+                        if(j.perkId === item.id) totalModify.push({
+                            type: 'item',
+                            name: i.data.name,
+                            roll: j.value,
+                        } as rollModType);
                     })
                 }
             })
@@ -384,7 +396,11 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
         if(charcater){
             const attributeMod = getAttrubuteMod(item.base ?? '', charcater?.data);
             if (attributeMod && attributeMod > 0) {
-                totalModify.push(attributeMod);
+                totalModify.push({
+                    type: 'atributo',
+                    name: item.base,
+                    roll: attributeMod,
+                } as rollModType);
             }
         }
 
@@ -456,7 +472,7 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                         <div className='charInfos'>
                             <p className='name'>{charcater?.data.name}</p>
                             <div className='info'>
-                                <p>{charcater?.data.class.title} - nível {charcater?.data.level}</p>
+                                <p>{charcater?.data?.class?.title && `${charcater?.data?.class?.title} -`} nível {charcater?.data.level}</p>
                             </div>
                         </div>
                     </div>
@@ -503,7 +519,7 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                     }
                 
                     <div className='editHealth'>
-                        <button onClick={() => sethealthModal(true)}>Editar saúde</button>
+                        <button onClick={() => sethealthModal(true)}>Gerenciar saúde</button>
                     </div>
                 </div>
                 <div className='rollPers'>
@@ -529,29 +545,29 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                             <div className='buttons'>
                                 <p>Adicionar modificações: </p>
                                 <div>
-                                    <button onClick={() => {setdicePersMod([...dicePersMod, -5])}}>-5</button>
-                                    <button onClick={() => {setdicePersMod([...dicePersMod, -4])}}>-4</button>
-                                    <button onClick={() => {setdicePersMod([...dicePersMod, -3])}}>-3</button>
-                                    <button onClick={() => {setdicePersMod([...dicePersMod, -2])}}>-2</button>
-                                    <button onClick={() => {setdicePersMod([...dicePersMod, -1])}}>-1</button>
-                                    <button onClick={() => {setdicePersMod([...dicePersMod, 1])}}>+1</button>
-                                    <button onClick={() => {setdicePersMod([...dicePersMod, 2])}}>+2</button>
-                                    <button onClick={() => {setdicePersMod([...dicePersMod, 3])}}>+3</button>
-                                    <button onClick={() => {setdicePersMod([...dicePersMod, 4])}}>+4</button>
-                                    <button onClick={() => {setdicePersMod([...dicePersMod, 5])}}>+5</button>
+                                    <button onClick={() => {setdicePersMod([...dicePersMod ?? [], {type: 'pers', name: 'Personalizado', roll: -5} as rollModType])}}>-5</button>
+                                    <button onClick={() => {setdicePersMod([...dicePersMod ?? [], {type: 'pers', name: 'Personalizado', roll: -4} as rollModType])}}>-4</button>
+                                    <button onClick={() => {setdicePersMod([...dicePersMod ?? [], {type: 'pers', name: 'Personalizado', roll: -3} as rollModType])}}>-3</button>
+                                    <button onClick={() => {setdicePersMod([...dicePersMod ?? [], {type: 'pers', name: 'Personalizado', roll: -2} as rollModType])}}>-2</button>
+                                    <button onClick={() => {setdicePersMod([...dicePersMod ?? [], {type: 'pers', name: 'Personalizado', roll: -1} as rollModType])}}>-1</button>
+                                    <button onClick={() => {setdicePersMod([...dicePersMod ?? [], {type: 'pers', name: 'Personalizado', roll: 1} as rollModType])}}>+1</button>
+                                    <button onClick={() => {setdicePersMod([...dicePersMod ?? [], {type: 'pers', name: 'Personalizado', roll: 2} as rollModType])}}>+2</button>
+                                    <button onClick={() => {setdicePersMod([...dicePersMod ?? [], {type: 'pers', name: 'Personalizado', roll: 3} as rollModType])}}>+3</button>
+                                    <button onClick={() => {setdicePersMod([...dicePersMod ?? [], {type: 'pers', name: 'Personalizado', roll: 4} as rollModType])}}>+4</button>
+                                    <button onClick={() => {setdicePersMod([...dicePersMod ?? [], {type: 'pers', name: 'Personalizado', roll: 5} as rollModType])}}>+5</button>
                                 </div>
                             </div>
                     
                             <div className='preVisuTitle'><p>Dados para rolagem</p></div>
-                            {dicePersMod.length > 0 && 
+                            {dicePersMod && dicePersMod?.length > 0 && 
                                 <div className='preVisuMod'>
                                     <div className='dicesPerMod'>
                                         <p>Modificações:</p>
-                                        {dicePersMod.map((mod, keyMod) => (
+                                        {dicePersMod?.map((mod, keyMod) => (
                                             <div key={keyMod} onClick={(() => {
                                                 const newDices = dicePersMod.filter((i, index) => index !== keyMod);
                                                 setdicePersMod(newDices);
-                                            })}><span className='diceitem'>{mod >= 0 ? '+' : ''}{mod}</span><span className='error'><i className="fa-solid fa-xmark"></i></span></div>
+                                            })}><span className='diceitem'>{mod.roll >= 0 ? '+' : ''}{mod.roll}</span><span className='error'><i className="fa-solid fa-xmark"></i></span></div>
                                         ))}
                                     </div>
                                 </div>
@@ -579,7 +595,7 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                                 <div className='itemWeapon' key={key}>
                                     <p>{item.data.name}</p>
                                     <p>Dano: 
-                                        [{item.data.weaponConfigs?.damage?.base?.join(', ')}] {' '}
+                                        [d{item.data.weaponConfigs?.damage?.base?.join(', d')}] {' '}
                                         {item.data.weaponConfigs?.damage?.mod && <>
                                             + {item.data.weaponConfigs?.damage?.mod.join(' + ')}
                                         </>} | {item.data.weaponConfigs?.crit?.roll ?? 20}/{item.data.weaponConfigs?.crit?.multiply ?? 2}x
@@ -593,12 +609,33 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                                         }}>{item.data.weaponConfigs?.type === 'melee' ? 'Luta': 'Pontaria'}</button>
 
                                         <button className='dmg' onClick={() => {
-                                            if(item.data.weaponConfigs?.damage?.mod) setdiceMod(item.data.weaponConfigs?.damage?.mod);
+                                            
+                                            item.data.weaponConfigs?.damage?.mod?.forEach((i) => {
+                                                setdiceMod([
+                                                    ...diceMod ?? [],
+                                                    {
+                                                        type: 'damage',
+                                                        name: 'Dano adicional',
+                                                        roll: i,
+                                                    } as rollModType
+                                                ]);
+                                            })
+                                                
+
                                             setdice(item.data.weaponConfigs?.damage?.base);
                                         }}>Dano normal</button>
 
                                         <button className='dmg crit' onClick={() => {
-                                            if(item.data.weaponConfigs?.damage?.mod) setdiceMod(item.data.weaponConfigs?.damage?.mod);
+                                            item.data.weaponConfigs?.damage?.mod?.forEach((i) => {
+                                                setdiceMod([
+                                                    ...diceMod ?? [],
+                                                    {
+                                                        type: 'damage',
+                                                        name: 'Dano adicional',
+                                                        roll: i,
+                                                    } as rollModType
+                                                ]);
+                                            })
                                             
                                             const dicesDmg: number[] = []
                                             for (let index = 0; index < (item.data.weaponConfigs?.crit?.multiply ?? 2); index++) {
@@ -671,7 +708,7 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                 <Roll dice={dice} mod={diceMod} setdice={setdice} setdiceMod={setdiceMod} discord={campain?.discord} char={charcater?.data} />
             }
             {dicePersToRoll && dicePersToRoll.length > 0 &&
-                <Roll dice={dicePersToRoll} mod={dicePersMod} setdice={setdicePersToRoll} setdiceMod={setdicePersToRoll} onClose={() => {handleCloseDicePer()}} discord={campain?.discord} char={charcater?.data} />
+                <Roll dice={dicePersToRoll} mod={dicePersMod} setdice={setdicePersToRoll} setdiceMod={setdicePersMod} onClose={() => {handleCloseDicePer()}} discord={campain?.discord} char={charcater?.data} />
             }
 
             {showSheetDetails && skills && 
@@ -704,7 +741,7 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                     </div>
                     <div className='data'>
                         <p>Descrição</p>
-                        <span>{habilitySelected.data.description}</span>
+                        <span dangerouslySetInnerHTML={{ __html: habilitySelected.data.description.replace(/\n/g, '<br />') }} />
                     </div>
                     {!!habilitySelected.data.buff?.modifyRoll?.length && 
                         <div className='data'>
@@ -715,7 +752,11 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                                         <div key={key} className='perkItem' onClick={() => {
                                             const getPerkItem = skillsAll.find((j) => i.perkId === j.id);
                                             if (getPerkItem) {
-                                                handleRoll(getPerkItem, Number(i.value));
+                                                handleRoll(getPerkItem, {
+                                                    type: 'habilidade',
+                                                    name: `${i.perkName} Adicional`,
+                                                    roll: i.value
+                                                });
                                             }
                                             handleCloseHability();
                                         }}>{i.perkName} | valor: {i.value}</div>
@@ -730,43 +771,51 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
             </Modal>
             <Modal isOpen={healthModal} handleCloseModal={handleCloseHealth} >
                 <ContainerHealth>
-                    <div className='label'>Editar saúde</div>
-                    <div className='life'>
-                        <div className='inputs'>
-                            <button onClick={() => handleHealth('life', lifeValue ?? 0 ,'remove')}>Remover</button>
-                            <TextField id="standard-basic" size='small' type='number' label="Pv" variant="filled" inputMode='numeric' value={lifeValue} onChange={(e) => {
-                                setlifeValue(Number(e.target.value));
-                            }} />
-                            <button onClick={() => handleHealth('life', lifeValue ?? 0 ,'add')}>Adicionar</button>
+                    <div className='label'>Gerenciar saúde</div>
+                    {campain?.basics.life && 
+                        <div className='life'>
+                            <div className='inputs'>
+                                <button onClick={() => handleHealth('life', lifeValue ?? 0 ,'remove')}>Remover</button>
+                                <TextField id="standard-basic" size='small' type='number' label="Pv" variant="filled" inputMode='numeric' value={lifeValue} onChange={(e) => {
+                                    setlifeValue(Number(e.target.value));
+                                }} />
+                                <button onClick={() => handleHealth('life', lifeValue ?? 0 ,'add')}>Adicionar</button>
+                            </div>
                         </div>
-                    </div>
-                    <div className='sanity'>
-                        <div className='inputs'>
-                            <button onClick={() => handleHealth('sanity', sanityValue ?? 0 ,'remove')}>Remover</button>
-                            <TextField id="standard-basic" size='small' type='number' label="Sanidade" variant="filled" inputMode='numeric' value={sanityValue} onChange={(e) => {
-                                setsanityValue(Number(e.target.value));
-                            }} />
-                            <button onClick={() => handleHealth('sanity', sanityValue ?? 0 ,'add')}>Adicionar</button>
+                    }
+                    {campain?.basics.sanity && 
+                        <div className='sanity'>
+                            <div className='inputs'>
+                                <button onClick={() => handleHealth('sanity', sanityValue ?? 0 ,'remove')}>Remover</button>
+                                <TextField id="standard-basic" size='small' type='number' label="Sanidade" variant="filled" inputMode='numeric' value={sanityValue} onChange={(e) => {
+                                    setsanityValue(Number(e.target.value));
+                                }} />
+                                <button onClick={() => handleHealth('sanity', sanityValue ?? 0 ,'add')}>Adicionar</button>
+                            </div>
                         </div>
-                    </div>
-                    <div className='pe'>
-                        <div className='inputs'>
-                            <button onClick={() => handleHealth('pe', peValue ?? 0 ,'remove')}>Remover</button>
-                            <TextField id="standard-basic" size='small' type='number' label="PE" variant="filled" inputMode='numeric' value={peValue} onChange={(e) => {
-                                setPeValue(Number(e.target.value));
-                            }} />
-                            <button onClick={() => handleHealth('pe', peValue ?? 0 ,'add')}>Adicionar</button>
+                    }
+                    {campain?.basics.pe && 
+                        <div className='pe'>
+                            <div className='inputs'>
+                                <button onClick={() => handleHealth('pe', peValue ?? 0 ,'remove')}>Remover</button>
+                                <TextField id="standard-basic" size='small' type='number' label="PE" variant="filled" inputMode='numeric' value={peValue} onChange={(e) => {
+                                    setPeValue(Number(e.target.value));
+                                }} />
+                                <button onClick={() => handleHealth('pe', peValue ?? 0 ,'add')}>Adicionar</button>
+                            </div>
                         </div>
-                    </div>
-                    <div className='cyber'>
-                        <div className='inputs'>
-                            <button onClick={() => handleHealth('cyberpsicosy', cyberValue ?? 0 ,'remove')}>Remover</button>
-                            <TextField id="standard-basic" size='small' type='number' label="Cyberpsicose" variant="filled" inputMode='numeric' value={cyberValue} onChange={(e) => {
-                                setCyberValue(Number(e.target.value));
-                            }} />
-                            <button onClick={() => handleHealth('cyberpsicosy', cyberValue ?? 0 ,'add')}>Adicionar</button>
+                    }
+                    {campain?.basics.cyberpsicosy && 
+                        <div className='cyber'>
+                            <div className='inputs'>
+                                <button onClick={() => handleHealth('cyberpsicosy', cyberValue ?? 0 ,'remove')}>Remover</button>
+                                <TextField id="standard-basic" size='small' type='number' label="Cyberpsicose" variant="filled" inputMode='numeric' value={cyberValue} onChange={(e) => {
+                                    setCyberValue(Number(e.target.value));
+                                }} />
+                                <button onClick={() => handleHealth('cyberpsicosy', cyberValue ?? 0 ,'add')}>Adicionar</button>
+                            </div>
                         </div>
-                    </div>
+                    }
                 </ContainerHealth>
             </Modal>
             <Modal isOpen={magicModal} handleCloseModal={handleCloseMagics}>

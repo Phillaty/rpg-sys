@@ -413,3 +413,9 @@ export type battleDataType = {
     id: string;
     data: battleType
 }
+
+export type rollModType = {
+    type: 'pericia' | 'atributo' | 'habilidade' | 'item' | 'damage' | 'pers';
+    name: string;
+    roll: number;
+}
