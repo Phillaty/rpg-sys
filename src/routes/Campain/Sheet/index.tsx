@@ -395,7 +395,7 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
 
         if(charcater){
             const attributeMod = getAttrubuteMod(item.base ?? '', charcater?.data);
-            if (attributeMod && attributeMod > 0) {
+            if (attributeMod && attributeMod !== 0) {
                 totalModify.push({
                     type: 'atributo',
                     name: item.base,

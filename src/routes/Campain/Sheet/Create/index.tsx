@@ -452,7 +452,7 @@ const SheetCreation = () => {
                                         <p className='per'>Perícias ganhas pela origem: {originSelected?.data.bonus.skill.map((item) => (<div>{item}</div>))}</p>
                                         <div className='data'>
                                             <p className='info'>Carga máxima: {5 + (attributes.FOR > 0 ? (attributes.FOR) * 5 : 0)}</p>
-                                            <p className='info'>Defesa: {10 + (attributes.AGI > 0 ? attributes.AGI : 0)}</p>
+                                            <p className='info'>Defesa: {8 + (attributes.AGI > 0 ? attributes.AGI : 0)}</p>
                                             <p className='info'>
                                                 Vida máxima: {(classeSelected?.data.life.default ?? 0) + (attributes.VIG > 0 ? attributes.VIG : 0)} | 
                                                 por nível: {(classeSelected?.data.life.perLevel ?? 0) + (attributes.VIG > 0 ? attributes.VIG : 0)}

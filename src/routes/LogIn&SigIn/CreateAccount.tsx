@@ -32,12 +32,11 @@ type inviteType = {
 
     const queryString = location.search;
     const urlParams = new URLSearchParams(queryString);
+    const invite = urlParams.get('invite');
 
     const inviteLocal = localStorage.getItem('invite');
 
     const navigate = useNavigate();
-
-    const invite = urlParams.get('invite');
 
     const [formData, setFormData] = useState<formData>({
         name: '',
