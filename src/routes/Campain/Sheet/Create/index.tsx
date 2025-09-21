@@ -321,12 +321,12 @@ const SheetCreation = () => {
                     max: 100
                 },
                 life: {
-                    actual: (classeSelected?.data.life.default ?? 0) + attributes.VIG,
-                    max: (classeSelected?.data.life.default ?? 0) + attributes.VIG
+                    actual: (classeSelected?.data.life.default ?? 0) + (attributes.VIG > 0 ? attributes.VIG : 0),
+                    max: (classeSelected?.data.life.default ?? 0) + (attributes.VIG > 0 ? attributes.VIG : 0)
                 },
                 pe: {
-                    actual: (classeSelected?.data.pe.default ?? 0) + attributes.PRE,
-                    max: (classeSelected?.data.pe.default ?? 0) + attributes.PRE
+                    actual: (classeSelected?.data.pe.default ?? 0) + (attributes.PRE > 0 ? attributes.PRE : 0),
+                    max: (classeSelected?.data.pe.default ?? 0) + (attributes.PRE > 0 ? attributes.PRE : 0)
                 },
                 sanity: {
                     actual: classeSelected?.data.sanity.default,
@@ -531,8 +531,12 @@ const SheetCreation = () => {
                                                 por nível: {(classeSelected?.data.life.perLevel ?? 0) + (attributes.VIG > 0 ? attributes.VIG : 0)}
                                             </p>
                                             <p className='info'>
-                                                Sanidade máxima: {(classeSelected?.data.sanity.default ?? 0) + (attributes.PRE > 0 ? attributes.PRE : 0)} | 
-                                                por nível: {(classeSelected?.data.sanity.perLevel ?? 0) + (attributes.PRE > 0 ? attributes.PRE : 0)}
+                                                Sanidade máxima: {(classeSelected?.data.sanity.default ?? 0)} | 
+                                                por nível: {(classeSelected?.data.sanity.perLevel ?? 0)}
+                                            </p>
+                                            <p className='info'>
+                                                PE máxima: {(classeSelected?.data.pe.default ?? 0) + (attributes.PRE > 0 ? attributes.PRE : 0)} | 
+                                                por nível: {(classeSelected?.data.pe.perLevel ?? 0) + (attributes.PRE > 0 ? attributes.PRE : 0)}
                                             </p>
                                         </div>
                                         
