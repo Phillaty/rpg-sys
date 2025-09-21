@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Container, ContainerHability, ContainerHealth, ContainerMagics } from './styles';
-import { alertType, avatarDataType, campainType, classeDataType, elementDataType, habilityDataType, itemDataType, magicDataType, rollModType, subclassDataType } from '../../../types';
+import { alertType, avatarDataType, campainType, classeDataType, elementDataType, habilityDataType, habilityTranscendedDataType, itemDataType, magicDataType, rollModType, subclassDataType } from '../../../types';
 import logo from '../../../imgs/profile-user-icon-2048x2048-m41rxkoe.png';
 import { skillFiltr, skillTy } from '..';
 import Roll from '../../../commom/ROLL';
@@ -44,6 +44,7 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
     const [isToCloseSheet, setIsToCloseSheet] = useState<boolean>(false);
 
     const [habilities, setHabilities] = useState<habilityDataType[]>([]);
+    const [habilityTranscended, setHabilityTranscended] = useState<habilityTranscendedDataType[]>([]);
     const [subclasses, setSubclasses] = useState<subclassDataType[]>([]);
     const [magics, setMagics] = useState<magicDataType[]>([]);
     const [magicsFiltered, setMagicsFiltered] = useState<magicDataType[]>([]);
@@ -146,23 +147,89 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
 
     useEffect(() => {
         if(charcater && charcater?.data?.class?.id) {
-            const q = query(
+            const allHabilities = new Map<string, habilityDataType>();
+            let completedQueries = 0;
+            const totalQueries = 2;
+
+            const updateHabilities = () => {
+                completedQueries++;
+                if (completedQueries === totalQueries) {
+                    const habilitiesData = Array.from(allHabilities.values());
+                    setHabilities(habilitiesData);
+                }
+            };
+
+            // Query 1: Habilidades por classe
+            const qClass = query(
                 collection(db, 'hability'),
-                where('classId', '==', charcater?.data.class.id),
+                where('classId', '==', charcater.data.class.id)
             );
 
-            onSnapshot(q, (querySnapshot) => {
-                const habilitiesData = querySnapshot.docs.map(doc => ({
+            const unsubscribeClass = onSnapshot(qClass, (querySnapshot) => {
+                querySnapshot.docs.forEach(doc => {
+                    allHabilities.set(doc.id, {
+                        id: doc.id,
+                        data: doc.data(),
+                    } as habilityDataType);
+                });
+                updateHabilities();
+            });
+
+            // Query 2: Habilidades específicas do personagem (se existirem)
+            let unsubscribeChar: (() => void) | undefined;
+            if (charcater.data.hability && charcater.data.hability.length > 0) {
+                const qChar = query(
+                    collection(db, 'hability'),
+                    where('__name__', 'in', charcater.data.hability)
+                );
+
+                unsubscribeChar = onSnapshot(qChar, (querySnapshot) => {
+                    querySnapshot.docs.forEach(doc => {
+                        allHabilities.set(doc.id, {
+                            id: doc.id,
+                            data: doc.data(),
+                        } as habilityDataType);
+                    });
+                    updateHabilities();
+                });
+            } else {
+                // Se não há habilidades específicas, marca esta query como completa
+                updateHabilities();
+            }
+
+            // Cleanup function
+            return () => {
+                unsubscribeClass();
+                if (unsubscribeChar) unsubscribeChar();
+            };
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [charcater, campain]);
+
+    // Separate useEffect for transcended abilities
+    useEffect(() => {
+        if (campain?.habilityTrans && campain.habilityTrans.length > 0) {
+            const qTrans = query(
+                collection(db, 'habilityTrans'),
+                where('__name__', 'in', campain.habilityTrans),
+            );
+
+            const unsubscribe = onSnapshot(qTrans, (querySnapshot) => {
+                const habilityTranscendedData = querySnapshot.docs.map(doc => ({
                     id: doc.id,
                     data: doc.data(),
-                })) as habilityDataType[];
+                })) as habilityTranscendedDataType[];
                 
-                
-                setHabilities(habilitiesData);
+                setHabilityTranscended(habilityTranscendedData);
             });
+
+            return unsubscribe;
+        } else {
+            setHabilityTranscended([]);
         }
 
-    }, [charcater]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [charcater, campain]);
 
     useEffect(() => {
         if(campain && charcater) {
@@ -353,7 +420,7 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
             totalModify = [{
                 type: 'pericia',
                 name: `${item.name} Nível ${item.expertise}`,
-                roll: item.expertise,
+                roll: item.expertise + item.expertise,
             } as rollModType];
         }
 
@@ -720,6 +787,7 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                     skillsAll={skillsAll} 
                     onClose={handleCloseSheet}
                     habilities={habilities}
+                    habilityTranscended={habilityTranscended}
                     subclasses={subclasses}
                     charSubclass={charSubclass}
                     classChar={classChar}
@@ -855,7 +923,7 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                                             <p className='description'>{i.data.description}</p>
                                         </Typography>
                                         {i.data.upgrades?.map((j, key) => (
-                                            <div className='upgrade'>
+                                            <div className='upgrade' key={key}>
                                                 <div className='titleUpgrade'>{j.title} {j.peCost ? `- Custo adicional +${j.peCost}PE` : ''}</div>
                                                 <div className='descriptionUpgrade'>
                                                     {j.description}

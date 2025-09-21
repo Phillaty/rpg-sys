@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { Container } from './styles';
 import { useLocation } from 'react-router-dom';
 import { collection, doc, onSnapshot, query, updateDoc, where } from 'firebase/firestore';
 import { db } from '../../../firebase/firebase';
-import { alertType, avatarDataType, campainDataType, classeDataType, elementDataType, entityDataType, habilityDataType, magicDataType, originDataType, perkDataType, storeDataType, subclassDataType, userDataTypeData } from '../../../types';
+import { alertType, avatarDataType, campainDataType, classeDataType, elementDataType, entityDataType, habilityDataType, habilityTranscendedDataType, magicDataType, perkDataType, storeDataType, subclassDataType, userDataTypeData } from '../../../types';
 import { ColorRing } from 'react-loader-spinner';
 import Stack from '@mui/material/Stack';
 import Alert from '@mui/material/Alert';
@@ -15,6 +15,7 @@ import Subclasses from './Subclasses';
 import Origens from './Origens';
 import Pericias from './Pericias';
 import Habilidades from './Habilidades';
+import HabilidadesTranscendidas from './HabilidadesTranscendidas';
 import { ToastContainer, toast } from 'react-toastify';
 import { getAlertsCampain } from '../../../utils';
 import { AppBar, Dialog, IconButton, Slide, Toolbar, Typography } from '@mui/material';
@@ -26,9 +27,13 @@ import Stores from './Stores';
 import Discord from './Discord';
 import Invite from './Invite';
 import SheetDetails from '../../Campain/Sheet/SheetDetails';
-import { skillFiltr, skillTy } from '../../Campain';
+import { skillTy } from '../../Campain';
 import MagicPlayers from './MagicPlayers';
 import Entity from './Entity';
+import Info from './Info';
+
+import { useOrigins } from '../../../hooks/useOrigins';
+import { useModalState } from '../../../hooks/useModalState';
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
@@ -59,130 +64,88 @@ const CampainEdit = () => {
 
     const [loading, setLoading] = useState<boolean>(false);
 
-    const [showClassesModal, setShowClassesModal] = useState<boolean>(false);
-    const [showSubclassesModal, setShowSubclassesModal] = useState<boolean>(false);
-    const [showOrigensModal, setShowOrigensModal] = useState<boolean>(false);
-    const [showPericiasModal, setShowPericiasModal] = useState<boolean>(false);
-    const [showHabilidadesModal, setShowHabilidadesModal] = useState<boolean>(false);
-    const [showElementsModal, setShowElementsModal] = useState<boolean>(false);
-    const [showInviteModal, setShowInviteModal] = useState<boolean>(false);
-    const [showMagicPlayerModal, setMagicPlayerModal] = useState<boolean>(false);
-    const [showEntityModal, setEntityModal] = useState<boolean>(false);
+    // Modal state management using custom hook
+    const { modals, openModal, closeModal, closeAllModals } = useModalState();
 
     const [subclasses, setSubclasses] = useState<subclassDataType[]>([]);
-
     const [habilities, setHabilities] = useState<habilityDataType[]>([]);
-
-    const [origins, setOrigins] = useState<originDataType[]>([]);
-
+    const [habilityTranscended, setHabilityTranscended] = useState<habilityTranscendedDataType[]>([]);
+    // Use custom hook for origins with automatic batching
+    const originIds = useMemo(() => 
+        campain?.data?.origins && campain?.data?.origins.length > 0 ? campain?.data?.origins : ['non'], 
+        [campain?.data?.origins]
+    );
+    const { data: origins } = useOrigins({ 
+        originIds, 
+        enabled: Boolean(campain && classes.length > 0) 
+    });
     const [perks, setPerks] = useState<perkDataType[]>([]);
-
-    const [magicPlayer, setMagicPlayer] = useState<magicPlayerDestibution[]>([]);
 
     const [characters, setCharacters] = useState<avatarDataType[]>([]);
     const [characterSelected, setCharactersSelected] = useState<avatarDataType>();
-
     const [stores, setStores] = useState<storeDataType[]>([]);
-
     const [users, setUsers] = useState<userDataTypeData[]>([]);
-
     const [elements, setElements] = useState<elementDataType[]>([]);
-
     const [entitys, setEntitys] = useState<entityDataType[]>([]);
-
     const [alertsList, setAlertsList] = useState<alertType[]>([]);
-
     const [magicFiltered, setMagicFiltered] = useState<magicDataType[]>([]);
     const [magics, setMagics] = useState<magicDataType[]>([]);
 
-    const [openItemModal, setOpenItemModal] = useState<boolean>(false);
-    const [openMagicModal, setOpenMagicModal] = useState<boolean>(false);
-    const [openStoreModal, setOpenStoreModal] = useState<boolean>(false);
-    const [openDiscordModal, setOpenDiscordModal] = useState<boolean>(false);
+    // Memoized computation of skills from perks
+    const skills = useMemo(() => {
+        if (!perks) return undefined;
+        
+        return perks.map(perk => ({
+            id: perk.id,
+            name: perk.data.name,
+            base: perk.data.base,
+        }));
+    }, [perks]);
 
-    const [openSheetModal, setOpenSheetModal] = useState<boolean>(false);
-
-    const [skills, setSkills] = useState<skillTy[]>();
-
-    const [skillsFiltered, setSkillsFiltered] = useState<skillFiltr>({
-        trained: [],
-        notTrained: [],
-    });
-
-
-    useEffect(() => {
-        if (skills) {
-            const notTreined = skills?.filter((i) => !characterSelected?.data.skill.some((j) => j.perk === i.id)) ?? [];
-            const treined = characterSelected?.data.skill.map((i) => {
-                const skillData = skills?.find((j) => j.id === i.perk);
-                return {
-                    name: skillData?.name,
-                    id: i.perk,
-                    expertise: i.expertise,
-                    base: skillData?.base,
-                }
-            }) as skillTy[];
-
-            setSkillsFiltered({
-                trained: treined,
-                notTrained: notTreined,
-            })
+    // Memoized computation of filtered skills
+    const skillsFiltered = useMemo(() => {
+        if (!skills || !characterSelected) {
+            return { trained: [], notTrained: [] };
         }
 
+        const notTrained = skills.filter((skill) => 
+            !characterSelected.data.skill.some((charSkill) => charSkill.perk === skill.id)
+        );
+        
+        const trained = characterSelected.data.skill.map((charSkill) => {
+            const skillData = skills.find((skill) => skill.id === charSkill.perk);
+            return {
+                name: skillData?.name,
+                id: charSkill.perk,
+                expertise: charSkill.expertise,
+                base: skillData?.base,
+            };
+        }) as skillTy[];
 
-    }, [characterSelected, skills]);
-
-    useEffect(() => {
-        if(perks) {
-            const perksArray = [] as skillTy[];
-
-            perks.forEach((i) => {
-                perksArray.push({
-                    id: i.id,
-                    name: i.data.name,
-                    base: i.data.base,
-                });
-            });
-
-            setSkills(perksArray);
-        }
-    }, [perks])
+        return { trained, notTrained };
+    }, [skills, characterSelected]);
 
 
-    const handleClickItemOpen = () => {
-        setOpenItemModal(true);
-    };
+    const handleClickItemOpen = useCallback(() => {
+        openModal('openItemModal');
+    }, [openModal]);
 
-    const handleClickMagicOpen = () => {
-        setOpenMagicModal(true);
-    };
+    const handleClickMagicOpen = useCallback(() => {
+        openModal('openMagicModal');
+    }, [openModal]);
 
-    const handleCloseItem = () => {
-        setOpenItemModal(false);
-    };
+    const handleCloseItem = useCallback(() => {
+        closeModal('openItemModal');
+    }, [closeModal]);
 
-    const handleCloseMagic = () => {
-        setOpenMagicModal(false);
-    };
+    const handleCloseMagic = useCallback(() => {
+        closeModal('openMagicModal');
+    }, [closeModal]);
 
-    const handleCloseSheet = () => {
-        setOpenSheetModal(false);
+    const handleCloseSheet = useCallback(() => {
+        closeModal('openSheetModal');
         setCharactersSelected(undefined);
-    }
-
-    const handleCloseModals = () => {
-        setShowClassesModal(false);
-        setShowSubclassesModal(false);
-        setShowOrigensModal(false);
-        setShowPericiasModal(false);
-        setShowHabilidadesModal(false);
-        setShowElementsModal(false);
-        setOpenStoreModal(false);
-        setOpenDiscordModal(false);
-        setShowInviteModal(false);
-        setMagicPlayerModal(false);
-        setEntityModal(false);
-    }
+    }, [closeModal]);
 
     useEffect(() => {
         if (campainId) {
@@ -251,22 +214,24 @@ const CampainEdit = () => {
         });
     }
 
-    const getOrigins = async () => {
+    const getHabilityTranscended = async () => {
         const p = query(
-            collection(db, 'origin'),
-            where('__name__', 'in', campain?.data?.origins && campain?.data?.origins.length > 0 ? campain?.data?.origins : ['non'])
+            collection(db, 'habilityTrans'),
+            where('__name__', 'in', campain?.data?.habilityTrans && campain?.data?.habilityTrans.length > 0 ? campain?.data?.habilityTrans : ['non'])
         );
 
         onSnapshot(p, (querySnapshot) => {
             const docData = querySnapshot.docs.map(doc => ({
                 id: doc.id,
                 data: doc.data(),
-            })) as originDataType[];
+            })) as habilityTranscendedDataType[];
 
-            const sorted = docData.sort((a, b) => a.data.title.localeCompare(b.data.title));
-            setOrigins(sorted);
+            const sorted = docData.sort((a, b) => a.data.name.localeCompare(b.data.name));
+            setHabilityTranscended(sorted);
         });
     }
+
+
 
     const getPerks = async () => {
         const p = query(
@@ -396,7 +361,7 @@ const CampainEdit = () => {
         if (classes.length > 0) {
             getSubclasses();
             getHabilities();
-            getOrigins();
+            getHabilityTranscended();
             getPerks();
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -414,45 +379,50 @@ const CampainEdit = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [campain])
 
-    useEffect(() => {
-        if(magics && characters) {
+    // Memoized computation of magic player distribution
+    const magicPlayer = useMemo(() => {
+        if (!magics || !characters) return [];
 
-            const separate:magicPlayerDestibution[] = [];
+        const separate: magicPlayerDestibution[] = [];
 
-            magics.forEach((i) => {
-                characters.forEach(j => {
-                    if(j.data.magics?.includes(i.id)){
-                        separate.push({
-                            player: j.data.name,
-                            playerId: j.id,
-                            magic: i.data.name,
-                            magicId: i.id,
-                        } as magicPlayerDestibution);
-                    }
-                })
+        magics.forEach((magic) => {
+            characters.forEach(character => {
+                if (character.data.magics?.includes(magic.id)) {
+                    separate.push({
+                        player: character.data.name,
+                        playerId: character.id,
+                        magic: magic.data.name,
+                        magicId: magic.id,
+                    });
+                }
             });
+        });
 
-            const sorted = separate.sort((a, b) => a.player.localeCompare(b.player));
+        return separate.sort((a, b) => a.player.localeCompare(b.player));
+    }, [characters, magics]);
 
-            setMagicPlayer(sorted);
-        }
-    }, [characters, magics])
-
-    const promoteChar = async (char: avatarDataType) => {
-        if (char) {
-            setLoading(true);
+    // Memoized promote character function
+    const promoteChar = useCallback(async (char: avatarDataType) => {
+        if (!char) return;
+        
+        setLoading(true);
+        try {
             const charDocRef = doc(db, "character", char.id);
-
+            
             await updateDoc(charDocRef, {
                 unlock: {
                     ...char.data.unlock,
                     levelPoint: char.data.unlock.levelPoint + 1
                 },
-            }).then(() => {
-                toast.success("Personagem promovido!");
             });
+            
+            toast.success("Personagem promovido!");
+        } catch (error) {
+            toast.error("Erro ao promover personagem!");
+        } finally {
+            setLoading(false);
         }
-    }
+    }, []);
     return (
         <>
         {campain || loading ? 
@@ -464,11 +434,11 @@ const CampainEdit = () => {
                         <p>Opçãoes</p>
                     </div>
                     <div className='options'>
-                        <button>Editar informações</button>
-                        <button onClick={() => setOpenStoreModal(true)}>Gerenciar Lojas</button>
-                        <button onClick={() => setEntityModal(true)}>Gerenciar entidades</button>
-                        <button onClick={() => setShowInviteModal(true)}>Gerenciar convite</button>
-                        <button onClick={() => setOpenDiscordModal(true)}>Configurar bot Discord</button>
+                        <button onClick={() => openModal('showInfoModal')}>Editar informações</button>
+                        <button onClick={() => openModal('openStoreModal')}>Gerenciar Lojas</button>
+                        <button onClick={() => openModal('showEntityModal')}>Gerenciar entidades</button>
+                        <button onClick={() => openModal('showInviteModal')}>Gerenciar convite</button>
+                        <button onClick={() => openModal('openDiscordModal')}>Configurar bot Discord</button>
                     </div>
                 </div>
                 <div className='center'>
@@ -495,7 +465,7 @@ const CampainEdit = () => {
                                             <p className='quantity'><i className="fa-solid fa-cube"></i> {campain?.data.classes.length}</p>
                                         </div>
                                         <div>
-                                            <button onClick={() => setShowClassesModal(true)}>Editar</button>
+                                            <button onClick={() => openModal('showClassesModal')}>Editar</button>
                                         </div>
                                     </div>
                                     <div className='box'>
@@ -504,7 +474,7 @@ const CampainEdit = () => {
                                             <p className='quantity'><i className="fa-solid fa-cube"></i> {subclasses.length}</p>
                                         </div>
                                         <div>
-                                            <button onClick={() => setShowSubclassesModal(true)}>Editar</button>
+                                            <button onClick={() => openModal('showSubclassesModal')}>Editar</button>
                                         </div>
                                     </div>
                                     <div className='box'>
@@ -513,7 +483,7 @@ const CampainEdit = () => {
                                             <p className='quantity'><i className="fa-solid fa-cube"></i> {campain?.data.origins.length}</p>
                                         </div>
                                         <div>
-                                            <button onClick={() => setShowOrigensModal(true)}>Editar</button>
+                                            <button onClick={() => openModal('showOrigensModal')}>Editar</button>
                                         </div>
                                     </div>
                                 </div>
@@ -530,7 +500,7 @@ const CampainEdit = () => {
                                             <p className='quantity'><i className="fa-solid fa-cube"></i> {campain?.data.skills.length}</p>
                                         </div>
                                         <div>
-                                            <button onClick={() => setShowPericiasModal(true)}>Editar</button>
+                                            <button onClick={() => openModal('showPericiasModal')}>Editar</button>
                                         </div>
                                     </div>
                                     <div className='box'>
@@ -539,7 +509,16 @@ const CampainEdit = () => {
                                             <p className='quantity'><i className="fa-solid fa-cube"></i> {habilities.length}</p>
                                         </div>
                                         <div>
-                                            <button onClick={() => setShowHabilidadesModal(true)}>Editar</button>
+                                            <button onClick={() => openModal('showHabilidadesModal')}>Editar</button>
+                                        </div>
+                                    </div>
+                                    <div className='box'>
+                                        <div>
+                                            <p className='name'>Hab. Transcendidas</p>
+                                            <p className='quantity'><i className="fa-solid fa-cube"></i> {habilityTranscended.length}</p>
+                                        </div>
+                                        <div>
+                                            <button onClick={() => openModal('showHabilidadesTranscendidasModal')}>Editar</button>
                                         </div>
                                     </div>
                                 </div>
@@ -563,7 +542,7 @@ const CampainEdit = () => {
                                             <p className='name'>Elementos</p>
                                         </div>
                                         <div>
-                                            <button onClick={() => setShowElementsModal(true)}>Editar</button>
+                                            <button onClick={() => openModal('showElementsModal')}>Editar</button>
                                         </div>
                                     </div>
                                     <div className='box'>
@@ -582,7 +561,7 @@ const CampainEdit = () => {
                                                 <p className='name'>Magias dos jogadores</p>
                                             </div>
                                             <div>
-                                                <button onClick={() => setMagicPlayerModal(true)}>Editar</button>
+                                                <button onClick={() => openModal('showMagicPlayerModal')}>Editar</button>
                                             </div>
                                         </div>
                                     </div>
@@ -609,7 +588,7 @@ const CampainEdit = () => {
                                     <div className='buttons'>
                                         <button onClick={() => {
                                             setCharactersSelected(char);
-                                            setOpenSheetModal(true);
+                                            openModal('openSheetModal');
                                         }}><i className="fa-solid fa-pen-to-square"></i></button>
                                         <button onClick={() => promoteChar(char)}><i className="fa-solid fa-angles-up"></i> Nível</button>
                                     </div>
@@ -636,22 +615,25 @@ const CampainEdit = () => {
         
         </>}
 
-        <Modal isOpen={showClassesModal} handleCloseModal={handleCloseModals}>
+        <Modal isMinWidth isOpen={modals.showClassesModal} handleCloseModal={closeAllModals}>
             <Classes classes={classes} toast={toast} campain={campain?.data} subclasses={subclasses} habilities={habilities} />
         </Modal>
-        <Modal isOpen={showSubclassesModal} handleCloseModal={handleCloseModals}>
+        <Modal isMinWidth isOpen={modals.showSubclassesModal} handleCloseModal={closeAllModals}>
             <Subclasses classes={classes} subclasses={subclasses} toast={toast} campain={campain?.data} />
         </Modal>
-        <Modal isOpen={showOrigensModal} handleCloseModal={handleCloseModals}>
+        <Modal isMinWidth isOpen={modals.showOrigensModal} handleCloseModal={closeAllModals}>
             <Origens toast={toast} campain={campain?.data} origins={origins} perks={perks} characters={characters} />
         </Modal>
-        <Modal isOpen={showPericiasModal} handleCloseModal={handleCloseModals}>
+        <Modal isMinWidth isOpen={modals.showPericiasModal} handleCloseModal={closeAllModals}>
             <Pericias toast={toast} campain={campain?.data} characters={characters} perks={perks} />
         </Modal>
-        <Modal isOpen={showHabilidadesModal} handleCloseModal={handleCloseModals}>
+        <Modal isMinWidth isOpen={modals.showHabilidadesModal} handleCloseModal={closeAllModals}>
             <Habilidades classes={classes} toast={toast} habilities={habilities} characters={characters} perks={perks} />
         </Modal>
-        <Modal isOpen={showElementsModal} handleCloseModal={handleCloseModals}>
+        <Modal isMinWidth isOpen={modals.showHabilidadesTranscendidasModal} handleCloseModal={closeAllModals}>
+            <HabilidadesTranscendidas toast={toast} campainId={campain?.id} habilityTranscended={habilityTranscended} characters={characters} perks={perks} />
+        </Modal>
+        <Modal isMinWidth isOpen={modals.showElementsModal} handleCloseModal={closeAllModals}>
             <Elements toast={toast} elements={elements} />
         </Modal>
 
@@ -660,7 +642,7 @@ const CampainEdit = () => {
 
         <Dialog
             fullScreen
-            open={openItemModal}
+            open={modals.openItemModal}
             onClose={handleCloseItem}
             TransitionComponent={Transition}
         >
@@ -684,7 +666,7 @@ const CampainEdit = () => {
 
         <Dialog
             fullScreen
-            open={openMagicModal}
+            open={modals.openMagicModal}
             onClose={handleCloseMagic}
             TransitionComponent={Transition}
         >
@@ -707,25 +689,29 @@ const CampainEdit = () => {
         </Dialog>
         
 
-        <Modal isOpen={openStoreModal} handleCloseModal={handleCloseModals}>
+        <Modal isOpen={modals.openStoreModal} handleCloseModal={closeAllModals} isMinWidth>
             <Stores toast={toast} stores={stores} />
         </Modal>
-        <Modal isOpen={openDiscordModal} handleCloseModal={handleCloseModals}>
+        <Modal isOpen={modals.openDiscordModal} handleCloseModal={closeAllModals} isMinWidth>
             <Discord toast={toast} campain={campain} />
         </Modal>
-        <Modal isOpen={showInviteModal} handleCloseModal={handleCloseModals}>
+        <Modal isOpen={modals.showInviteModal} handleCloseModal={closeAllModals} isMinWidth>
             <Invite toast={toast} campain={campain} />
         </Modal>
 
-        <Modal isOpen={showMagicPlayerModal} handleCloseModal={handleCloseModals}>
+        <Modal isOpen={modals.showMagicPlayerModal} handleCloseModal={closeAllModals} isMinWidth>
             <MagicPlayers toast={toast} magic={magics} char={characters} magicPlayer={magicPlayer} />
         </Modal>
 
-        <Modal isOpen={showEntityModal} handleCloseModal={handleCloseModals}>
+        <Modal isOpen={modals.showEntityModal} handleCloseModal={closeAllModals} isMinWidth>
             <Entity toast={toast} entity={entitys} />
         </Modal>
 
-        {openSheetModal && skills && characterSelected && 
+        <Modal isOpen={modals.showInfoModal} handleCloseModal={closeAllModals} isMinWidth>
+            {campain && <Info campain={campain} toast={toast} onClose={closeAllModals} />}
+        </Modal>
+
+        {modals.openSheetModal && skills && characterSelected && 
             <SheetDetails 
                 isToCloseSheet={false} 
                 charcater={characterSelected} 
@@ -734,10 +720,12 @@ const CampainEdit = () => {
                 skillsAll={skills} 
                 onClose={handleCloseSheet}
                 habilities={habilities}
+                habilityTranscended={habilityTranscended}
                 subclasses={subclasses}
                 charSubclass={subclasses.find(i => i.id === characterSelected?.data?.subclass?.id)}
                 classChar={classes.find(i => i.id === characterSelected?.data?.class?.id)}
                 toast={toast}
+                isAdmin={true}
             />
         }
 

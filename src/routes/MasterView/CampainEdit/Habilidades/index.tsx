@@ -9,7 +9,7 @@ import FormControl from '@mui/material/FormControl';
 import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
-import { Box, Tab, Tabs } from '@mui/material';
+import { Box, Tab, Tabs, Chip } from '@mui/material';
 import { a11yProps } from '../../../../utils/components';
 
 type props = {
@@ -26,6 +26,8 @@ const Habilidades = ({toast, characters, habilities, classes, perks}: props) => 
 
     const [isToAdd, setIsToAdd] = useState<boolean>(false);
     const [isToAddType, setIsToAddType] = useState<'import' | 'add'>();
+
+    const [requireToAdd, setRequireToAdd] = useState<string>("");
 
     const [buffModPerkToAdd, setBuffModPerkToAdd] = useState<buffPerkType>({
         perkId: "",
@@ -60,6 +62,7 @@ const Habilidades = ({toast, characters, habilities, classes, perks}: props) => 
             setHabilityForm(habilitySelected.data);
             setIsToAdd(false);
             setIsToAddType(undefined);
+            setRequireToAdd("");
             setBuffModPerkToAdd({
                 perkId: "",
                 perkName: "",
@@ -106,6 +109,7 @@ const Habilidades = ({toast, characters, habilities, classes, perks}: props) => 
                     type: "",
                     verified: true,
                 });
+                setRequireToAdd("");
                 setBuffModPerkToAdd({
                     perkId: "",
                     perkName: "",
@@ -137,6 +141,7 @@ const Habilidades = ({toast, characters, habilities, classes, perks}: props) => 
             type: "",
             verified: true,
         });
+        setRequireToAdd("");
         setBuffModPerkToAdd({
             perkId: "",
             perkName: "",
@@ -269,6 +274,40 @@ const Habilidades = ({toast, characters, habilities, classes, perks}: props) => 
                             </Select>
                         </FormControl>
                     </div>  
+
+                    <div className='infos'>
+                        <div className='infoInput'>
+                            <TextField 
+                                id="standard-basic" 
+                                label="Adicionar requisito" 
+                                variant="filled" 
+                                value={requireToAdd} 
+                                onChange={(e) => setRequireToAdd(e.target.value)} 
+                            />
+                            <button onClick={() => {
+                                if (requireToAdd.trim()) {
+                                    setHabilityForm({
+                                        ...habilityForm,
+                                        require: [...(habilityForm.require || []), requireToAdd.trim()],
+                                    });
+                                    setRequireToAdd("");
+                                }
+                            }}>Adicionar</button>
+                        </div>
+                        <div className='infosList'>
+                            {habilityForm.require?.map((requirement, keyRequirement) => (
+                                <div key={keyRequirement}>
+                                    <Chip label={requirement} variant="outlined" onDelete={() => {
+                                        const newRequirements = habilityForm.require?.filter((r) => r !== requirement);
+                                        setHabilityForm({
+                                            ...habilityForm,
+                                            require: newRequirements || [],
+                                        });
+                                    }} />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
 
                     <div className='buffs'>
                         <Box sx={{ width: '100%' }}>

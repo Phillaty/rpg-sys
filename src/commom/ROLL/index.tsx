@@ -130,10 +130,14 @@ const Roll = ({dice, mod, setdice, setdiceMod, onClose, discord, char}: prop) =>
         <Modal isOpen={isOpen} handleCloseModal={handleClose}>
             <Container>
                 <p>Rolando D{dice.join(", D")}</p>
-                {mod && mod.length > 0 &&
+                {mod && mod.length > 0 ?
                     <p className='mods'>
                         {mod.map((item, key) => (<Chip key={key} label={`${item.name} ${item.roll >= 0 ? `+` : ``}${item.roll}`} size='small' className={item.type} />))}
                             {!result && <Chip label="+" size='small' className='add' onClick={() => setIsToAddPers(!isToAddPers)} />}
+                    </p>
+                : 
+                    <p>
+                        {!result && <Chip label="+" size='small' className='add' onClick={() => setIsToAddPers(!isToAddPers)} />}
                     </p>
                 }
 

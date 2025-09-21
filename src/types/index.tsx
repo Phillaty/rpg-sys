@@ -33,6 +33,7 @@ export type campainType = {
     classes: string[];
     origins: string[];
     elements: string[];
+    habilityTrans: string[];
     skills: string[];
     discord?: discordType;
 }
@@ -68,9 +69,15 @@ export type slotManagementType = {
 
 export type defenseType = {
     normal: number;
-    buuffed: number;
+    buffed: number;
     itemBuffs: string[];
     habilitysBuffs: string[];
+}
+
+export type habilityTranscendedObservationsType = {
+    observations: string;
+    active: boolean;
+    idHabilityTranscended: string;
 }
 
 export type avatarType = {
@@ -92,6 +99,8 @@ export type avatarType = {
     lore: string;
     age: number;
     hability: string[];
+    habilityTranscended: string[];
+    habilityTranscendedObservations?: habilityTranscendedObservationsType[];
     unlock: unlockType;
     img: string;
     slotManagement: slotManagementType;
@@ -141,6 +150,10 @@ export type originType = {
     title: string;
     verified?: boolean;
     description: string;
+    power?: {
+        name: string;
+        description: string;
+    };
 }
 
 export type originDataType = {
@@ -209,6 +222,27 @@ export type habilityType = {
 export type habilityDataType = {
     id: string;
     data: habilityType;
+}
+
+export type habilityTranscendedBuffType = {
+    lifePerLevel?: buffLifeType;
+    lifeTotal?: buffLifeType;
+    modifyRoll?: buffPerkType[];
+    rollVantage?: buffPerkVantageType[];
+}
+
+export type habilityTranscendedType = {
+    description: string;
+    name: string;
+    require?: string[];
+    buff?: habilityTranscendedBuffType;
+    type: string;
+    verified?: boolean;
+}
+
+export type habilityTranscendedDataType = {
+    id: string;
+    data: habilityTranscendedType;
 }
 
 export type subclassHabilitiesType = {

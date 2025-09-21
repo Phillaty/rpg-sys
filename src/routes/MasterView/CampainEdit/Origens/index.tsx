@@ -47,6 +47,10 @@ const Origens = ({toast, campain, origins, perks, characters}: props) => {
             skill: [],
         },
         verified: true,
+        power: {
+            name: "",
+            description: ""
+        },
     });
 
     useEffect(() => {
@@ -75,6 +79,10 @@ const Origens = ({toast, campain, origins, perks, characters}: props) => {
                         skill: [],
                     },
                     verified: true,
+                    power: {
+                        name: "",
+                        description: ""
+                    },
                 });
             });
 
@@ -95,6 +103,10 @@ const Origens = ({toast, campain, origins, perks, characters}: props) => {
                 skill: [],
             },
             verified: true,
+            power: {
+                name: "",
+                description: ""
+            },
         });
         setIsToAdd(true);
         setIsToAddType(undefined);
@@ -173,7 +185,6 @@ const Origens = ({toast, campain, origins, perks, characters}: props) => {
             });
         }
     }
-
     return (
         <>
         <Container>
@@ -253,6 +264,40 @@ const Origens = ({toast, campain, origins, perks, characters}: props) => {
                                 setOriginForm({
                                     ...originForm,
                                     description: e.target.value
+                                });
+                            }}
+                        />
+                    </div>
+                    <div className='power'>
+                        <TextField
+                            id="power-name"
+                            label="Nome do poder"
+                            variant="filled"
+                            value={originForm.power?.name || ""}
+                            onChange={(e) => {
+                                setOriginForm({
+                                    ...originForm,
+                                    power: {
+                                        name: e.target.value,
+                                        description: originForm.power?.description || ""
+                                    }
+                                });
+                            }}
+                        />
+                        <TextField
+                            id="power-description"
+                            label="Descrição do poder"
+                            multiline
+                            rows={3}
+                            value={originForm.power?.description || ""}
+                            variant="filled"
+                            onChange={(e) => {
+                                setOriginForm({
+                                    ...originForm,
+                                    power: {
+                                        name: originForm.power?.name || "",
+                                        description: e.target.value
+                                    }
                                 });
                             }}
                         />

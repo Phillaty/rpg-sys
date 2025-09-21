@@ -105,7 +105,7 @@ const CreateCampain = () => {
             toast.success("Campanha criada! Aguarde...");
 
             setTimeout(() => {
-                navigate('')
+                navigate('/home')
             }, 3000);
         });
         

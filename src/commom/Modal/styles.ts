@@ -37,6 +37,10 @@ export const ModalContainer = styled.div`
 
     animation: 0.2s ${fadeIn} forwards;
 
+    .isMinWidth > div {
+      min-width: 500px;
+    }
+
     > div {
       padding: 0;
       margin: 0;
@@ -64,7 +68,7 @@ export const ModalContainer = styled.div`
       }
       
       > div {
-        height: 90vh;
+        /* height: 90vh; */
         display: flex;
         flex-direction: column;
         

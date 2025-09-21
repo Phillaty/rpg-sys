@@ -18,7 +18,9 @@ const fadeOut = keyframes`
   }
 `
 
-export const Container = styled.div<{isToCloseSheet: boolean}>`
+export const Container = styled.div.withConfig({
+    shouldForwardProp: (prop) => prop !== 'isToCloseSheet',
+})<{isToCloseSheet: boolean}>`
     position: fixed;
     left: 0;
     top: 0;
@@ -302,6 +304,30 @@ export const Container = styled.div<{isToCloseSheet: boolean}>`
                 transition: 0.2s;
             }
 
+            .addTranscend {
+                padding: 12px;
+                border: 1px dashed gray;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                cursor: pointer;
+                background-color: #c523232a;
+                color: black;
+                font-weight: 600;
+
+                height: 70px;
+
+                i {
+                    font-size: 20px;
+                    color: black;
+                }
+
+                &:hover {
+                    background-color: #c500004b;
+                    transition: 0.2s;
+                }
+            }
+
 
             .item {
                 border: 1px solid #c3c3c3;
@@ -374,6 +400,11 @@ export const Container = styled.div<{isToCloseSheet: boolean}>`
             padding: 8px 8px 8px 4px;
             border-radius: 4px;
 
+            > div {
+                display: flex;
+                justify-content: space-between;
+            }
+
             > p {
                 display: flex;
                 justify-content: space-between;
@@ -432,6 +463,13 @@ export const ContainerModal = styled.div`
         span {
             font-weight: 500;
             font-size: 12px;
+        }
+    }
+
+    .detailSub {
+        font-weight: 400 !important;
+        i {
+            font-style: italic !important;
         }
     }
 
