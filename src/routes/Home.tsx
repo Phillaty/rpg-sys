@@ -9,7 +9,7 @@ import { avatarDataType, campainDataType, userDataType } from '../types';
 
 const Home = () => {
     const user = localStorage.getItem('user') ? JSON.parse(decrypt(localStorage.getItem('user') ?? '')) as userDataType : {} as userDataType;
-    const userId = decrypt(user.id);
+    const userId = user.id;
 
     const [campains, setCampains] = useState<campainDataType[]>([]);
     const [campainsWithChar, setCampainsWithChar] = useState<campainDataType[]>([]);

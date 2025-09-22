@@ -101,7 +101,7 @@ type inviteType = {
             localStorage.setItem('user', encrypt(JSON.stringify({
                 name: formData.name,
                 rule: formData.rule,
-                id: encrypt(item.id)
+                id: item.id
             })));
 
             const userDocRef = doc(db, "invites", inviteData?.id ?? '');

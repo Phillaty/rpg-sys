@@ -39,7 +39,7 @@ const SheetCreation = () => {
     const campainId = urlParams.get('camp') ?? '';
 
     const user = localStorage.getItem('user') ? JSON.parse(decrypt(localStorage.getItem('user') ?? '') ?? ' ') as userDataType : {} as userDataType;
-    const userId = decrypt(user.id);
+    const userId = user.id;
 
     const [stage, setStage] = useState<number>(0);
 

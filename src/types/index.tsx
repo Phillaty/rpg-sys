@@ -453,3 +453,18 @@ export type rollModType = {
     name: string;
     roll: number;
 }
+
+export type documentType = {
+    name: string;
+    url: string;
+    importance: 'baixo' | 'médio' | 'alto';
+    difficulty: 'baixo' | 'médio' | 'alto';
+    campainId: string;
+    characterId?: string;
+    location: string;
+}
+
+export type documentDataType = {
+    id: string;
+    data: documentType;
+}

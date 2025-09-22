@@ -6,11 +6,16 @@ import 'react-toastify/dist/ReactToastify.css';
 
 import snip from '../../imgs/ssss.png';
 import { collection, getDocs, query, where } from 'firebase/firestore';
-import { db } from '../../firebase/firebase';
+import { db, auth } from '../../firebase/firebase';
 import { decrypt, encrypt } from '../../crypt';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import { useLoginManager } from '../../hooks/useLoginManager';
+
+import { signInAnonymously } from "firebase/auth";
 
 import logo from '../../imgs/logo.png';
+import { CircularProgress } from '@mui/material';
 
 type formDataLogin = {
     login: string,
@@ -28,6 +33,17 @@ type userType = {
 const Login = () => {
 
     const navigate = useNavigate();
+    const { isAuthenticated, isLoading, userData } = useAuth();
+    const { handleSuccessfulLogin } = useLoginManager();
+
+    const [isLoadingLogin, setIsLoadingLogin] = useState(false);
+
+    // Debug log for Login component
+    console.log('🔑 Login Component State:', { 
+        isAuthenticated, 
+        isLoading, 
+        hasUserData: !!userData 
+    });
 
     const [formData, setFormData] = useState<formDataLogin>({
         login: '',
@@ -35,55 +51,63 @@ const Login = () => {
     });
 
     useEffect(() => {
-        const isLogged = localStorage.getItem('user');
-
-        if(!isLogged) return;
-
-        const hasId = JSON.parse(decrypt(localStorage.getItem('user') ?? '') ?? '');
-
-        if(hasId.id) {
+        if (!isLoading && isAuthenticated) {
             navigate('/home');
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    }, [isAuthenticated, isLoading, navigate]);
 
     const login = async () => {
+        setIsLoadingLogin(true);
         if (formData.login) {
-            const docRef = collection(db, 'user');
+            try {
+                // Primeiro, autenticar anonimamente no Firebase
+                await signInAnonymously(auth);
+                
+                // Após autenticação, consultar o Firestore
+                const docRef = collection(db, 'user');
+                const q = query(docRef, where('login', '==', formData.login));
+                const docSnap = await getDocs(q);
 
-            const q = query(docRef, where('login', '==', formData.login));
+                const data = docSnap.docs.map((doc) => ({
+                    id: doc.id,
+                    ...doc.data(),
+                }));
 
-            const docSnap = await getDocs(q);
+                if (data.length === 0) {
+                    toast.error("Nenhum login encontrado!");
+                    return;
+                }
 
-            const data = docSnap.docs.map((doc) => ({
-                id: doc.id,
-                ...doc.data(),
-            }));
+                const dataLogin = data[0] as userType;
 
-            if (data.length === 0) {
-                toast.error("Nenhum login encontrado!");
-                return;
+                if (formData.password !== decrypt(dataLogin.password)) {
+                    toast.error("Senha incorreta!");
+                    setIsLoadingLogin(false);
+                    return;
+                }
+
+                localStorage.setItem('user', encrypt(JSON.stringify({
+                    name: dataLogin.name,
+                    rule: dataLogin.rule,
+                    id: dataLogin.id,
+                })));
+                
+                toast.success("Logado!");
+
+                setTimeout(async () => {
+                    // Força refresh do contexto após pequeno delay
+                    await handleSuccessfulLogin();
+                }, 1000);
+                
+                
+            } catch (error) {
+                console.error('Erro no login:', error);
+                toast.error("Erro ao fazer login. Tente novamente.");
+                setIsLoadingLogin(false);
             }
-
-            const dataLogin = data[0] as userType;
-
-            if (formData.password !== decrypt(dataLogin.password)) {
-                toast.error("Senha incorreta!");
-                return;
-            }
-
-            localStorage.setItem('user', encrypt(JSON.stringify({
-                name: dataLogin.name,
-                rule: dataLogin.rule,
-                id: encrypt(dataLogin.id),
-            })));
-            
-            toast.success("Logado!");
-
-            setTimeout(() => {
-                navigate('/home');
-            }, 1000);
         }
+
+        
     }
 
     return (
@@ -101,7 +125,7 @@ const Login = () => {
                     <p>Senha</p>
                     <input placeholder='Senha...' type='password' onChange={(e) => setFormData({...formData, password: e.target.value})} />
                 </div>
-                <button className='button' onClick={() => login()}>Entrar</button>
+                <button className='button' onClick={() => login()}>{isLoadingLogin ? <CircularProgress size={16} color="inherit" /> : 'Entrar'}</button>
                 <div className='info'>Seus dados sensiveis são criptografados 😎</div>
             </div>
 
@@ -114,3 +138,4 @@ const Login = () => {
 }
 
 export default Login;
+

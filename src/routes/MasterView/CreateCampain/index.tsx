@@ -91,7 +91,7 @@ const CreateCampain = () => {
             style: formData.style,
             basics: formData.basics,
             img: urlImage,
-            masterId: decrypt(user.id),
+            masterId: user.id,
             characters: [],
             classes: [],
             lore: "",

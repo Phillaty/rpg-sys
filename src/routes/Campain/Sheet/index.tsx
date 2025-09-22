@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Container, ContainerHability, ContainerHealth, ContainerMagics } from './styles';
-import { alertType, avatarDataType, campainType, classeDataType, elementDataType, habilityDataType, habilityTranscendedDataType, itemDataType, magicDataType, rollModType, subclassDataType } from '../../../types';
+import { alertType, avatarDataType, campainType, classeDataType, documentDataType, elementDataType, habilityDataType, habilityTranscendedDataType, itemDataType, magicDataType, rollModType, subclassDataType } from '../../../types';
 import logo from '../../../imgs/profile-user-icon-2048x2048-m41rxkoe.png';
 import { skillFiltr, skillTy } from '..';
 import Roll from '../../../commom/ROLL';
@@ -11,7 +11,7 @@ import { db } from '../../../firebase/firebase';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Modal from '../../../commom/Modal';
 import Backpack from './Backpack';
-import { Accordion, AccordionDetails, AccordionSummary, Alert, Avatar, Chip, Stack, TextField, Typography } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Alert, Avatar, Box, Button, Card, CardActions, CardContent, Chip, Dialog, DialogContent, IconButton, Stack, TextField, Typography } from '@mui/material';
 import { toast, ToastContainer } from 'react-toastify';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
@@ -63,6 +63,15 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
 
     const [habilityModal, setHabilityModal] = useState<boolean>(false);
     const [habilitySelected, setHabilitySelected] = useState<habilityDataType>();
+
+    const [documentsModal, setDocumentsModal] = useState<boolean>(false);
+    const [documentViewModal, setDocumentViewModal] = useState<boolean>(false);
+    const [selectedDocument, setSelectedDocument] = useState<documentDataType | null>(null);
+    const [documents, setDocuments] = useState<documentDataType[]>([]);
+    const [imageZoom, setImageZoom] = useState<number>(1);
+    const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
+    const [isDragging, setIsDragging] = useState<boolean>(false);
+    const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
     const [itemsAll, setItemsALL] = useState<itemDataType[]>([]);
     const [itemsCharInventory, setItemsCharInventory] = useState<itemDataType[]>([]);
@@ -121,6 +130,59 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
 
     const handleCloseMagics = () => {
         setMagicModal(false);
+    }
+
+    const handleCloseDocuments = () => {
+        setDocumentsModal(false);
+    }
+
+    const handleCloseDocumentView = () => {
+        setDocumentViewModal(false);
+        setSelectedDocument(null);
+        setImageZoom(1);
+        setImagePosition({ x: 0, y: 0 });
+        setIsDragging(false);
+    }
+
+    const handleViewDocument = (document: documentDataType) => {
+        setSelectedDocument(document);
+        setDocumentViewModal(true);
+    }
+
+    const handleZoomIn = () => {
+        setImageZoom(prev => Math.min(prev + 0.25, 3));
+    }
+
+    const handleZoomOut = () => {
+        setImageZoom(prev => Math.max(prev - 0.25, 0.5));
+    }
+
+    const handleResetZoom = () => {
+        setImageZoom(1);
+        setImagePosition({ x: 0, y: 0 });
+    }
+
+    const handleMouseDown = (e: React.MouseEvent) => {
+        if (imageZoom > 1) {
+            setIsDragging(true);
+            setDragStart({
+                x: e.clientX - imagePosition.x,
+                y: e.clientY - imagePosition.y
+            });
+        }
+    }
+
+    const handleMouseMove = (e: React.MouseEvent) => {
+        if (isDragging && imageZoom > 1) {
+            setImagePosition({
+                x: e.clientX - dragStart.x,
+                y: e.clientY - dragStart.y
+            });
+        }
+    }
+
+    const handleMouseUp = () => {
+        setIsDragging(false);
     }
 
     useEffect(() => {
@@ -337,12 +399,38 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
         });
     }
 
+    const getDocuments = async () => {
+        if (!charcater?.id) return;
+        
+        const p = query(
+            collection(db, 'documents'),
+            where('characterId', '==', charcater.id)
+        );
+
+        onSnapshot(p, (querySnapshot) => {
+            const docData = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                data: doc.data(),
+            })) as documentDataType[];
+
+            const sorted = docData.sort((a, b) => a.data.name.localeCompare(b.data.name));
+            setDocuments(sorted);
+        });
+    }
+
     useEffect(() => {
         if(charcater && !!charcater?.data.magics?.length) {
             getMagics();
             getElements();
         } 
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [charcater])
+
+    useEffect(() => {
+        if(charcater) {
+            getDocuments();
+        }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [charcater])
 
@@ -720,16 +808,15 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                         </div>
                     </div>
                 }
-                {(!!magics.length || !!itemsCharInventory.length) && 
-                    <div className='buttonsInventory'>
-                        {!!magics.length &&
-                        <button className='magics' onClick={() => {setMagicModal(true)}}><i className="fa-solid fa-wand-magic-sparkles"></i> Magias</button>
-                        }
-                        {!!itemsCharInventory.length &&
-                        <button className='backpack' onClick={() => {setBackpackModal(true)}}><i className="fa-solid fa-list"></i> Mochila {itemsCharInventory.length > 0 ? `(${itemsCharInventory.length})` : ''}</button>
-                        }
-                    </div>
-                }
+                <div className='buttonsInventory'>
+                    {!!magics.length &&
+                    <button className='magics' onClick={() => {setMagicModal(true)}}><i className="fa-solid fa-wand-magic-sparkles"></i> Magias</button>
+                    }
+                    {!!itemsCharInventory.length &&
+                    <button className='backpack' onClick={() => {setBackpackModal(true)}}><i className="fa-solid fa-list"></i> Mochila {itemsCharInventory.length > 0 ? `(${itemsCharInventory.length})` : ''}</button>
+                    }
+                    <button className='documents' onClick={() => {setDocumentsModal(true)}}><i className="fa-solid fa-folder-open"></i> Documentos {documents.length > 0 ? ` (${documents.length})` : ''}</button>
+                </div>
                 {!!habilitiesChar?.length && 
                     <div className='habilities'>
                         <div className='habilityTitle'>Habilidades ativas <small>Clique para ver mais</small></div>
@@ -938,6 +1025,159 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                     </div>
                 </ContainerMagics>
             </Modal>
+
+            {/* Modal de lista de documentos */}
+            <Modal isOpen={documentsModal} handleCloseModal={handleCloseDocuments}>
+                <Box sx={{ 
+                    width: '100%',
+                    maxWidth: { xs: '95vw', sm: 500 },
+                    minWidth: { xs: '95vw', sm: 300 },
+                    maxHeight: '80vh',
+                    overflow: 'auto',
+                    backgroundColor: 'background.paper',
+                    borderRadius: 2,
+                    boxShadow: 24,
+                    p: 2
+                }}>
+                    <Typography variant="h5" component="h2" sx={{ mb: 2, textAlign: 'center', color: 'text.primary' }}>
+                        Documentos
+                    </Typography>
+                    
+                    {documents.length === 0 ? (
+                        <Box sx={{ textAlign: 'center', py: 4 }}>
+                            <Typography variant="body1" color="text.secondary">
+                                Nenhum documento encontrado.
+                            </Typography>
+                        </Box>
+                    ) : (
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            {documents.map((document) => (
+                                <Card key={document.id} sx={{ boxShadow: 2 }}>
+                                    <CardContent sx={{ pb: 1 }}>
+                                        <Typography variant="h6" component="div" gutterBottom>
+                                            {document.data.name}
+                                        </Typography>
+                                    </CardContent>
+                                    <CardActions sx={{ pt: 0 }}>
+                                        <Button 
+                                            size="small" 
+                                            variant="contained"
+                                            onClick={() => handleViewDocument(document)}
+                                            fullWidth
+                                        >
+                                            Visualizar
+                                        </Button>
+                                    </CardActions>
+                                </Card>
+                            ))}
+                        </Box>
+                    )}
+                </Box>
+            </Modal>
+
+            {/* Modal de visualização do documento */}
+            <Dialog
+                open={documentViewModal}
+                onClose={handleCloseDocumentView}
+                maxWidth="md"
+                fullWidth
+                sx={{
+                    zIndex: "999999999999999999999999"
+                }}
+                PaperProps={{
+                    sx: {
+                        maxHeight: '90vh',
+                        m: { xs: 1, sm: 2 },
+                    },
+                }}
+            >
+                <DialogContent sx={{ p: { xs: 1, sm: 2 }}}>
+                    {selectedDocument && (
+                        <Box>
+                            {/* Header com título e controles */}
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                                <Typography variant="h6" component="h3" sx={{ flexGrow: 1, mr: 2 }}>
+                                    {selectedDocument.data.name}
+                                </Typography>
+                                
+                                {/* Controles de zoom */}
+                                <Box sx={{ display: 'flex', gap: 1, mr: 1 }}>
+                                    <IconButton onClick={handleZoomOut} size="small" disabled={imageZoom <= 0.5}>
+                                        <i className="fa-solid fa-magnifying-glass-minus"></i>
+                                    </IconButton>
+                                    <Typography variant="body2" sx={{ 
+                                        alignSelf: 'center', 
+                                        minWidth: '50px', 
+                                        textAlign: 'center',
+                                        fontSize: '0.75rem'
+                                    }}>
+                                        {Math.round(imageZoom * 100)}%
+                                    </Typography>
+                                    <IconButton onClick={handleZoomIn} size="small" disabled={imageZoom >= 3}>
+                                        <i className="fa-solid fa-magnifying-glass-plus"></i>
+                                    </IconButton>
+                                    <IconButton onClick={handleResetZoom} size="small">
+                                        <i className="fa-solid fa-arrows-rotate"></i>
+                                    </IconButton>
+                                </Box>
+                                
+                                <IconButton onClick={handleCloseDocumentView} size="small">
+                                    <i className="fa-solid fa-xmark"></i>
+                                </IconButton>
+                            </Box>
+                            
+                            {/* Container da imagem com zoom */}
+                            <Box sx={{ 
+                                display: 'flex', 
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                maxHeight: { xs: '70vh', sm: '75vh' },
+                                overflow: 'hidden',
+                                border: '1px solid #e0e0e0',
+                                borderRadius: '8px',
+                                position: 'relative',
+                                cursor: imageZoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default'
+                            }}
+                            onMouseDown={handleMouseDown}
+                            onMouseMove={handleMouseMove}
+                            onMouseUp={handleMouseUp}
+                            onMouseLeave={handleMouseUp}
+                            >
+                                <img 
+                                    src={selectedDocument.data.url} 
+                                    alt={selectedDocument.data.name}
+                                    style={{
+                                        transform: `scale(${imageZoom}) translate(${imagePosition.x / imageZoom}px, ${imagePosition.y / imageZoom}px)`,
+                                        maxWidth: imageZoom === 1 ? '100%' : 'none',
+                                        maxHeight: imageZoom === 1 ? '100%' : 'none',
+                                        objectFit: 'contain',
+                                        borderRadius: '8px',
+                                        boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+                                        transition: isDragging ? 'none' : 'transform 0.2s ease',
+                                        userSelect: 'none',
+                                        pointerEvents: 'none'
+                                    }}
+                                    draggable={false}
+                                />
+                            </Box>
+                            
+                            {/* Instruções de uso */}
+                            {imageZoom > 1 && (
+                                <Typography variant="caption" sx={{ 
+                                    display: 'block', 
+                                    textAlign: 'center', 
+                                    mt: 1, 
+                                    color: 'text.secondary',
+                                    fontSize: '0.7rem'
+                                }}>
+                                    Clique e arraste para mover a imagem
+                                </Typography>
+                            )}
+                        </Box>
+                    )}
+                </DialogContent>
+            </Dialog>
+
             <ToastContainer style={{zIndex: 9999999999999999}} />
         </>
     )

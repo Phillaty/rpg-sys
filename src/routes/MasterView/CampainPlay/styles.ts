@@ -54,6 +54,11 @@ export const Container = styled.div`
                 flex-direction: column;
                 display: flex;
                 gap: 4px;
+
+                button.active {
+                    background-color: #5755bd;
+                    font-weight: 600;
+                }
             }
        }
 

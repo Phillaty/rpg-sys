@@ -28,7 +28,7 @@ const Campain = () => {
     const campainId = urlParams.get('camp') ?? '';
 
     const user = localStorage.getItem('user') ? JSON.parse(decrypt(localStorage.getItem('user') ?? '')) as userDataType : {} as userDataType;
-    const userId = decrypt(user.id);
+    const userId = user.id;
 
     const [campain, setCampain] = useState<campainType>();
     const [charcater, setCharcater] = useState<avatarDataType>();

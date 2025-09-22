@@ -37,6 +37,28 @@ export const ModalContainer = styled.div`
 
     animation: 0.2s ${fadeIn} forwards;
 
+    .contentModalCustom {
+        background-color: white;
+        padding: 16px;
+        border-radius: 4px;
+        max-height: 80vh;
+        overflow-y: auto;
+        min-width: 300px;
+        max-width: 90vw;
+        cursor: auto;
+
+        .list {
+
+        }
+
+        .title {
+          color: #333;
+          font-weight: 600;
+          font-size: 18px;
+          margin-bottom: 12px;  
+        }
+    }
+
     .isMinWidth > div {
       min-width: 500px;
     }
