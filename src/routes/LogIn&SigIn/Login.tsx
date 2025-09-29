@@ -33,17 +33,10 @@ type userType = {
 const Login = () => {
 
     const navigate = useNavigate();
-    const { isAuthenticated, isLoading, userData } = useAuth();
+    const { isAuthenticated, isLoading } = useAuth();
     const { handleSuccessfulLogin } = useLoginManager();
 
     const [isLoadingLogin, setIsLoadingLogin] = useState(false);
-
-    // Debug log for Login component
-    console.log('🔑 Login Component State:', { 
-        isAuthenticated, 
-        isLoading, 
-        hasUserData: !!userData 
-    });
 
     const [formData, setFormData] = useState<formDataLogin>({
         login: '',

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Container } from './styles';
-import { avatarDataType, buffPerkType, buffPerkVantageType, habilityTranscendedDataType, habilityTranscendedType, perkDataType } from '../../../../types';
+import { avatarDataType, buffPerkType, buffPerkVantageType, elementDataType, habilityTranscendedDataType, habilityTranscendedType, perkDataType } from '../../../../types';
 import TextField from '@mui/material/TextField';
 import { addDoc, arrayUnion, collection, deleteDoc, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../../../firebase/firebase';
@@ -19,9 +19,10 @@ type props = {
     characters: avatarDataType[];
     perks: perkDataType[];
     campainId?: string;
+    elements: elementDataType[];
 }
 
-const HabilidadesTranscendidas = ({toast, characters, habilityTranscended, perks, campainId}: props) => {
+const HabilidadesTranscendidas = ({toast, characters, habilityTranscended, perks, campainId, elements}: props) => {
 
     const [habilityTranscendedSelected, setHabilityTranscendedSelected] = useState<habilityTranscendedDataType>();
 
@@ -53,6 +54,7 @@ const HabilidadesTranscendidas = ({toast, characters, habilityTranscended, perks
         require: [],
         buff: {},
         type: "",
+        element: { id: "", name: ""},
         verified: true,
     });
 
@@ -90,6 +92,7 @@ const HabilidadesTranscendidas = ({toast, characters, habilityTranscended, perks
                 modifyRoll: isToAddPerkBuff ? habilityTranscendedForm.buff?.modifyRoll : [] as unknown as buffPerkType[] | undefined,
             },
             type: habilityTranscendedForm.type,
+            element: habilityTranscendedForm.element ?? { id: "", name: "" },
             verified: true,
         }
 
@@ -110,6 +113,7 @@ const HabilidadesTranscendidas = ({toast, characters, habilityTranscended, perks
                     require: [],
                     buff: {},
                     type: "",
+                    element: { id: "", name: "" },
                     verified: true,
                 });
                 setRequireToAdd("");
@@ -141,6 +145,7 @@ const HabilidadesTranscendidas = ({toast, characters, habilityTranscended, perks
             require: [],
             buff: {},
             type: "",
+            element: { id: "", name: "" },
             verified: true,
         });
         setRequireToAdd("");
@@ -183,7 +188,7 @@ const HabilidadesTranscendidas = ({toast, characters, habilityTranscended, perks
                     {habilityTranscended.map((i, key) => (
                         <button className={`${habilityTranscendedSelected === i ? 'selected' : ''}`} key={key} onClick={() => setHabilityTranscendedSelected(i)}>
                             <DarkModeIcon style={{fontSize: '16px'}} />
-                            {i.data.name}
+                            {i.data.name} {i.data.element?.name ? `(${i.data.element.name})` : ''}
                         </button>
                     ))}
                     <button className='add' onClick={prepareToAdd}>
@@ -255,6 +260,35 @@ const HabilidadesTranscendidas = ({toast, characters, habilityTranscended, perks
                                     >
                                         <MenuItem value={'active'}>Ativa</MenuItem>
                                         <MenuItem value={'passive'}>Passiva</MenuItem>
+                                    </Select>
+                                </FormControl>
+                            </div>
+
+                            <div className='description'>
+                                <FormControl variant="filled" sx={{ minWidth: 120 }}>
+                                    <InputLabel id="demo-simple-select-filled-label">Elemento</InputLabel>
+                                    <Select
+                                        labelId="demo-simple-select-label"
+                                        id="demo-simple-select"
+                                        value={habilityTranscendedForm.element?.id || ""}
+                                        label="tipo"
+                                        variant="filled"
+                                        onChange={(e) => {
+                                            const selectedElement = elements.find(el => el.id === e.target.value);
+                                            setHabilityTranscendedForm({
+                                                ...habilityTranscendedForm,
+                                                element: {
+                                                    id: e.target.value.toString(),
+                                                    name: selectedElement?.data.name || ""
+                                                }
+                                            });
+                                        }}
+                                    >
+                                        {elements.map((element) => (
+                                            <MenuItem key={element.id} value={element.id}>
+                                                {element.data.name}
+                                            </MenuItem>
+                                        ))}
                                     </Select>
                                 </FormControl>
                             </div>

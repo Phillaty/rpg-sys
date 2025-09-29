@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Container, ContainerHability, ContainerHealth, ContainerMagics } from './styles';
+import { Container, ContainerHability, ContainerHealth, ContainerMagics, ContainerPassives } from './styles';
 import { alertType, avatarDataType, campainType, classeDataType, documentDataType, elementDataType, habilityDataType, habilityTranscendedDataType, itemDataType, magicDataType, rollModType, subclassDataType } from '../../../types';
 import logo from '../../../imgs/profile-user-icon-2048x2048-m41rxkoe.png';
 import { skillFiltr, skillTy } from '..';
@@ -51,7 +51,10 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
     const [elements, setElements] = useState<elementDataType[]>([]);
     const [classChar, setClassChar] = useState<classeDataType>();
 
+    const [passivesModal, setPassivesModal] = useState<boolean>(false);
+
     const [habilitiesChar, setHabilitiesChar] = useState<habilityDataType[]>();
+    const [habilitiesPassiveChar, setHabilitiesPassiveChar] = useState<habilityDataType[]>();
 
     const [charSubclass, setCharSubclass] = useState<subclassDataType>();
 
@@ -68,10 +71,8 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
     const [documentViewModal, setDocumentViewModal] = useState<boolean>(false);
     const [selectedDocument, setSelectedDocument] = useState<documentDataType | null>(null);
     const [documents, setDocuments] = useState<documentDataType[]>([]);
-    const [imageZoom, setImageZoom] = useState<number>(1);
-    const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
-    const [isDragging, setIsDragging] = useState<boolean>(false);
-    const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+    const [isFirstDocumentLoad, setIsFirstDocumentLoad] = useState<boolean>(true);
+    const [qtdDocuments, setQtdDocuments] = useState<number>(0);
 
     const [itemsAll, setItemsALL] = useState<itemDataType[]>([]);
     const [itemsCharInventory, setItemsCharInventory] = useState<itemDataType[]>([]);
@@ -132,6 +133,10 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
         setMagicModal(false);
     }
 
+    const handleClosePassives = () => {
+        setPassivesModal(false);
+    }
+
     const handleCloseDocuments = () => {
         setDocumentsModal(false);
     }
@@ -139,50 +144,23 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
     const handleCloseDocumentView = () => {
         setDocumentViewModal(false);
         setSelectedDocument(null);
-        setImageZoom(1);
-        setImagePosition({ x: 0, y: 0 });
-        setIsDragging(false);
     }
 
-    const handleViewDocument = (document: documentDataType) => {
+    const handleViewDocument = async (document: documentDataType) => {
         setSelectedDocument(document);
         setDocumentViewModal(true);
-    }
 
-    const handleZoomIn = () => {
-        setImageZoom(prev => Math.min(prev + 0.25, 3));
-    }
-
-    const handleZoomOut = () => {
-        setImageZoom(prev => Math.max(prev - 0.25, 0.5));
-    }
-
-    const handleResetZoom = () => {
-        setImageZoom(1);
-        setImagePosition({ x: 0, y: 0 });
-    }
-
-    const handleMouseDown = (e: React.MouseEvent) => {
-        if (imageZoom > 1) {
-            setIsDragging(true);
-            setDragStart({
-                x: e.clientX - imagePosition.x,
-                y: e.clientY - imagePosition.y
-            });
+        // Marca o documento como lido se ainda não foi lido
+        if (!document.data.read) {
+            try {
+                const docRef = doc(db, "documents", document.id);
+                await updateDoc(docRef, {
+                    read: true
+                });
+            } catch (error) {
+                console.error("Erro ao marcar documento como lido:", error);
+            }
         }
-    }
-
-    const handleMouseMove = (e: React.MouseEvent) => {
-        if (isDragging && imageZoom > 1) {
-            setImagePosition({
-                x: e.clientX - dragStart.x,
-                y: e.clientY - dragStart.y
-            });
-        }
-    }
-
-    const handleMouseUp = () => {
-        setIsDragging(false);
     }
 
     useEffect(() => {
@@ -330,9 +308,12 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
 
     useEffect(() => {
         if (charcater && habilities) {
-            const habilitiesFind = habilities.filter((i) => charcater?.data?.hability?.some((j) => j === i.id));
+            const habilitiesFind = habilities.filter((i) => charcater?.data?.hability?.some((j) => j === i.id && i.data.type === "active"));
+            const habilitiesPassiveFind = habilities.filter((i) => charcater?.data?.hability?.some((j) => j === i.id && i.data.type === "passive"));
             const sorted = habilitiesFind.sort((a, b) => a.data.name.localeCompare(b.data.name));
+            const sortedPassive = habilitiesPassiveFind.sort((a, b) => a.data.name.localeCompare(b.data.name));
             setHabilitiesChar(sorted);
+            setHabilitiesPassiveChar(sortedPassive);
         }
     }, [charcater, habilities]);
 
@@ -414,14 +395,33 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
             })) as documentDataType[];
 
             const sorted = docData.sort((a, b) => a.data.name.localeCompare(b.data.name));
+
             setDocuments(sorted);
         });
     }
 
     useEffect(() => {
+        if (isFirstDocumentLoad) {
+            setTimeout(() => {
+                setIsFirstDocumentLoad(false);
+            }, 1000);
+            setQtdDocuments(documents.length);
+            return;
+        }
+
+        const newDocuments = documents.length - qtdDocuments;
+
+        if (newDocuments > 0) {
+            toast.info(`Você recebeu ${newDocuments} novo${newDocuments > 1 ? 's' : ''} documento${newDocuments > 1 ? 's' : ''}!`);
+        }
+
+        setQtdDocuments(documents.length);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [documents]);
+
+    useEffect(() => {
         if(charcater && !!charcater?.data.magics?.length) {
             getMagics();
-            getElements();
         } 
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -430,6 +430,7 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
     useEffect(() => {
         if(charcater) {
             getDocuments();
+            getElements();
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [charcater])
@@ -819,6 +820,7 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                 </div>
                 {!!habilitiesChar?.length && 
                     <div className='habilities'>
+                        <button className='passives' onClick={() => {setPassivesModal(true)}}>Ver passivas</button>
                         <div className='habilityTitle'>Habilidades ativas <small>Clique para ver mais</small></div>
                         <div className='habilityList'>
                             {habilitiesChar?.map((item, key) => (
@@ -878,6 +880,7 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                     subclasses={subclasses}
                     charSubclass={charSubclass}
                     classChar={classChar}
+                    elements={elements}
                     toast={toast}
                 />
             }
@@ -1057,6 +1060,9 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                                         <Typography variant="h6" component="div" gutterBottom>
                                             {document.data.name}
                                         </Typography>
+                                        <Typography variant="body2" color="text.secondary">
+                                            {!document.data.read && <><Chip label="Novo" color="success" size="small" /></>}
+                                        </Typography>
                                     </CardContent>
                                     <CardActions sx={{ pt: 0 }}>
                                         <Button 
@@ -1073,6 +1079,20 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                         </Box>
                     )}
                 </Box>
+            </Modal>
+
+            <Modal isOpen={passivesModal} handleCloseModal={handleClosePassives}>
+                <ContainerPassives>
+                    <div className='habilityTitle'>Habilidades passivas</div>
+                    <div className='habilityList'>
+                        {habilitiesPassiveChar?.map((item, key) => (
+                            <div className='habilityItem' key={key}>
+                                <p className='title'>{item.data.name}</p>
+                                <p className='description'>{item.data.description}</p>
+                            </div>
+                        ))}
+                    </div>
+                </ContainerPassives>
             </Modal>
 
             {/* Modal de visualização do documento */}
@@ -1094,85 +1114,31 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                 <DialogContent sx={{ p: { xs: 1, sm: 2 }}}>
                     {selectedDocument && (
                         <Box>
-                            {/* Header com título e controles */}
                             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                                <Typography variant="h6" component="h3" sx={{ flexGrow: 1, mr: 2 }}>
-                                    {selectedDocument.data.name}
-                                </Typography>
-                                
-                                {/* Controles de zoom */}
-                                <Box sx={{ display: 'flex', gap: 1, mr: 1 }}>
-                                    <IconButton onClick={handleZoomOut} size="small" disabled={imageZoom <= 0.5}>
-                                        <i className="fa-solid fa-magnifying-glass-minus"></i>
-                                    </IconButton>
-                                    <Typography variant="body2" sx={{ 
-                                        alignSelf: 'center', 
-                                        minWidth: '50px', 
-                                        textAlign: 'center',
-                                        fontSize: '0.75rem'
-                                    }}>
-                                        {Math.round(imageZoom * 100)}%
-                                    </Typography>
-                                    <IconButton onClick={handleZoomIn} size="small" disabled={imageZoom >= 3}>
-                                        <i className="fa-solid fa-magnifying-glass-plus"></i>
-                                    </IconButton>
-                                    <IconButton onClick={handleResetZoom} size="small">
-                                        <i className="fa-solid fa-arrows-rotate"></i>
-                                    </IconButton>
-                                </Box>
-                                
+                                <Typography variant="h6" component="h3"></Typography>
                                 <IconButton onClick={handleCloseDocumentView} size="small">
                                     <i className="fa-solid fa-xmark"></i>
                                 </IconButton>
                             </Box>
                             
-                            {/* Container da imagem com zoom */}
                             <Box sx={{ 
                                 display: 'flex', 
                                 justifyContent: 'center',
-                                alignItems: 'center',
                                 maxHeight: { xs: '70vh', sm: '75vh' },
-                                overflow: 'hidden',
-                                border: '1px solid #e0e0e0',
-                                borderRadius: '8px',
-                                position: 'relative',
-                                cursor: imageZoom > 1 ? (isDragging ? 'grabbing' : 'grab') : 'default'
-                            }}
-                            onMouseDown={handleMouseDown}
-                            onMouseMove={handleMouseMove}
-                            onMouseUp={handleMouseUp}
-                            onMouseLeave={handleMouseUp}
-                            >
+                                overflow: 'auto'
+                            }}>
                                 <img 
                                     src={selectedDocument.data.url} 
                                     alt={selectedDocument.data.name}
                                     style={{
-                                        transform: `scale(${imageZoom}) translate(${imagePosition.x / imageZoom}px, ${imagePosition.y / imageZoom}px)`,
-                                        maxWidth: imageZoom === 1 ? '100%' : 'none',
-                                        maxHeight: imageZoom === 1 ? '100%' : 'none',
+                                        maxWidth: '100%',
+                                        maxHeight: '100%',
                                         objectFit: 'contain',
                                         borderRadius: '8px',
-                                        boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-                                        transition: isDragging ? 'none' : 'transform 0.2s ease',
-                                        userSelect: 'none',
-                                        pointerEvents: 'none'
+                                        boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
                                     }}
-                                    draggable={false}
                                 />
                             </Box>
-                            
-                            {/* Instruções de uso */}
-                            {imageZoom > 1 && (
-                                <Typography variant="caption" sx={{ 
-                                    display: 'block', 
-                                    textAlign: 'center', 
-                                    mt: 1, 
-                                    color: 'text.secondary',
-                                    fontSize: '0.7rem'
-                                }}>
-                                    Clique e arraste para mover a imagem
-                                </Typography>
-                            )}
                         </Box>
                     )}
                 </DialogContent>

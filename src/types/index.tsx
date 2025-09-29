@@ -224,6 +224,11 @@ export type habilityDataType = {
     data: habilityType;
 }
 
+export type habilityTranscendedElement = {
+    id: string;
+    name: string;
+}
+
 export type habilityTranscendedBuffType = {
     lifePerLevel?: buffLifeType;
     lifeTotal?: buffLifeType;
@@ -238,6 +243,7 @@ export type habilityTranscendedType = {
     buff?: habilityTranscendedBuffType;
     type: string;
     verified?: boolean;
+    element?: habilityTranscendedElement;
 }
 
 export type habilityTranscendedDataType = {
@@ -462,6 +468,7 @@ export type documentType = {
     campainId: string;
     characterId?: string;
     location: string;
+    read: boolean;
 }
 
 export type documentDataType = {

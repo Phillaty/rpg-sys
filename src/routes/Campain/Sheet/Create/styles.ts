@@ -16,6 +16,12 @@ export const Container = styled.div`
         width: 100%;
     }
 
+    .mainOrigin {
+        > div {
+            margin-top: 0 !important;
+        }
+    }
+
     .mainContainer {
         width: 100%;
         display: flex;
@@ -47,6 +53,11 @@ export const Container = styled.div`
             .description {
                 font-size: 14px;
                 color: gray;
+            }
+
+            .powerDescription {
+                max-height: 120px;
+                overflow: auto;
             }
 
             .buttons {

@@ -8,11 +8,9 @@ export const useLoginManager = () => {
   const { refreshUserData } = useAuth();
 
   const handleSuccessfulLogin = useCallback(async () => {
-    console.log('🎯 Login successful, handling navigation...');
     
     // Force multiple attempts to refresh user data
     const attemptRefresh = async (attempt: number = 1, maxAttempts: number = 5) => {
-      console.log(`🔄 Refresh attempt ${attempt}/${maxAttempts}`);
       
       await refreshUserData();
       
@@ -23,7 +21,6 @@ export const useLoginManager = () => {
           const decryptedData = decrypt(storedUser);
           const parsedUser = JSON.parse(decryptedData || '{}');
           if (parsedUser && parsedUser.id) {
-            console.log('✅ UserData loaded successfully, navigating to home...');
             setTimeout(() => navigate('/home'), 100);
             return true;
           }

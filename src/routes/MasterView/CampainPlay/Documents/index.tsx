@@ -88,6 +88,7 @@ const Documents: React.FC<DocumentsProps> = ({ campainId, characters }) => {
                 campainId: campainId,
                 characterId: formData.characterId || null,
                 location: formData.location,
+                read: false,
             });
 
             toast.success("Documento criado com sucesso!");
@@ -112,7 +113,8 @@ const Documents: React.FC<DocumentsProps> = ({ campainId, characters }) => {
         try {
             const docRef = doc(db, "documents", documentId);
             await updateDoc(docRef, {
-                characterId: newCharacterId || null
+                characterId: newCharacterId || null,
+                read: false
             });
             toast.success("Documento transferido!");
         } catch (error) {

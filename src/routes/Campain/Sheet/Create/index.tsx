@@ -7,7 +7,7 @@ import { db } from '../../../../firebase/firebase';
 import { ColorRing, Hearts } from 'react-loader-spinner';
 import { decrypt } from '../../../../crypt';
 import { toast, ToastContainer } from 'react-toastify';
-import { FormControl, InputLabel, MenuItem, Select, TextField } from '@mui/material';
+import { Divider, FormControl, InputLabel, MenuItem, Select, TextField } from '@mui/material';
 
 type simpleData = {
     name: string;
@@ -434,11 +434,13 @@ const SheetCreation = () => {
                     }
                     {stage === 1 && 
                         <>
-                            <div className='stage-select-origin mainContainer'>
+                            <div className='stage-select-origin mainContainer mainOrigin'>
                                 <div>
                                     <div className='top'>
                                         <p className='title'>Escolha a origem do personagem</p>
-                                        <p className='description'>A origem do personagem é a profissão antes da campanha!<br/> isso impacta nas suas habilidades!</p>
+                                        <p className='description'>A origemm do personagem é a profissão antes da campanha!<br/> isso impacta nas suas habilidades!</p>
+                                        <Divider style={{ margin: '8px 0' }} />
+                                        <p className='description powerDescription'>{originSelected?.data.power?.description}</p>
                                     </div>
                                     <div className='origins'>
                                         {origins?.map((item, key) => (
@@ -511,7 +513,9 @@ const SheetCreation = () => {
                                                 FOR aumenta carga máxima <br/>
                                                 AGI aumenta defesa <br/>
                                                 VIG aumenta vida máxima <br/>
-                                                PRE aumenta sanidade
+                                                PRE aumenta pontos de esforço <br/>
+                                                Perícias ganhas pela origem não gastam pontos de perícia<br/>
+                                                Você pode aumentar os atributos e perícias depois, mas não poderá diminuir!
                                             </p>
                                         </>}
                                     </div>

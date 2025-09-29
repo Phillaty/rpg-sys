@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Container } from './styles';
 import { Avatar, Chip, TextField, Card, CardContent, Typography, Button, Box, Grid, LinearProgress } from '@mui/material';
 import { addDoc, collection, doc, onSnapshot, query, updateDoc, where } from 'firebase/firestore';
@@ -121,9 +121,11 @@ const Battle: React.FC<BattleProps> = ({ campainId, campain, characters, entitys
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [campainId]);
 
-    const updateBattle = async () => {
-        const userDocRef = doc(db, "battle", battleData?.id ?? '');
-        const battleTosave = battle;
+    const updateBattle = useCallback(async () => {
+        if (!battleData?.id) return;
+        
+        const userDocRef = doc(db, "battle", battleData.id);
+        const battleTosave = [...battle];
 
         if(onTurn) battleTosave.push(onTurn)
 
@@ -131,7 +133,18 @@ const Battle: React.FC<BattleProps> = ({ campainId, campain, characters, entitys
             campainId: campainId,
             turns: battleTosave,
         }).then(() => {toast.success("batalha salva!")});
-    }
+    }, [battleData?.id, battle, onTurn, campainId]);
+
+    // Auto-save batalha a cada 5 minutos
+    useEffect(() => {
+        if (battleData?.id && battle.length > 0) {
+            const interval = setInterval(() => {
+                updateBattle();
+            }, 5 * 60 * 1000); // 5 minutos em milissegundos
+
+            return () => clearInterval(interval);
+        }
+    }, [battleData?.id, battle.length, updateBattle]);
 
     const rollIniciativeMonster = (mod: number, id: string) => {
         const dice = Math.floor(Math.random() * 20) + 1;
@@ -891,7 +904,7 @@ const Battle: React.FC<BattleProps> = ({ campainId, campain, characters, entitys
         </Modal>
 
         <Modal handleCloseModal={handleCloseModals} isOpen={modalshowHability}>
-            <Box sx={{ maxWidth: 500, width: '100%', p: 3 }}>
+            <Box sx={{ maxWidth: 500, width: '100%', p: 3, backgroundColor: 'white', borderRadius: 1 }}>
                 <Typography variant="h5" component="h2" sx={{ mb: 2, textAlign: 'center', fontWeight: 'bold', color: 'primary.main' }}>
                     {modalshowHabilityDetails?.title}
                 </Typography>

@@ -38,7 +38,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      console.log('🔥 Firebase Auth State Changed:', firebaseUser ? 'User logged in' : 'User logged out');
       setUser(firebaseUser);
       
       // Check if there's user data in localStorage
@@ -47,7 +46,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         try {
           const decryptedUser = decrypt(storedUser);
           const parsedUser = JSON.parse(decryptedUser || '{}');
-          console.log('👤 Parsed User Data:', parsedUser);
           setUserData(parsedUser);
         } catch (error) {
           console.error('Error parsing stored user data:', error);
@@ -69,13 +67,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Additional effect to check localStorage when user state changes
   useEffect(() => {
     if (user && !userData) {
-      console.log('🔍 User exists but no userData, checking localStorage...');
       const storedUser = localStorage.getItem('user');
       if (storedUser) {
         try {
           const decryptedUser = decrypt(storedUser);
           const parsedUser = JSON.parse(decryptedUser || '{}');
-          console.log('📝 Loading userData from localStorage:', parsedUser);
           setUserData(parsedUser);
         } catch (error) {
           console.error('Error loading userData from localStorage:', error);
@@ -94,7 +90,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       try {
         const decryptedUser = decrypt(storedUser);
         const parsedUser = JSON.parse(decryptedUser || '{}');
-        console.log('🔄 Manually refreshing user data:', parsedUser);
         setUserData(parsedUser);
       } catch (error) {
         console.error('Error manually refreshing user data:', error);
@@ -102,19 +97,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUserData(null);
       }
     } else {
-      console.log('🔄 No stored user data found');
       setUserData(null);
     }
   };
 
-  // Debug log
-  console.log('🔐 Auth Status:', { 
-    hasUser: !!user, 
-    hasUserData: !!userData, 
-    hasUserId: !!userData?.id, 
-    isAuthenticated,
-    isLoading 
-  });
 
   return (
     <AuthContext.Provider 

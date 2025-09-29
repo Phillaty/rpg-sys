@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Container, ContainerLevel, ContainerModal } from './styles';
-import { avatarDataType, basicsCharType, campainType, classeDataType, habilityDataType, habilityTranscendedDataType, skillType, subclassDataType, unlockType } from '../../../../types';
+import { avatarDataType, basicsCharType, campainType, classeDataType, elementDataType, habilityDataType, habilityTranscendedDataType, skillType, subclassDataType, unlockType } from '../../../../types';
 import { skillFiltr, skillTy } from '../..';
 import logo from '../../../../imgs/profile-user-icon-2048x2048-m41rxkoe.png';
 import Modal from '../../../../commom/Modal';
@@ -24,11 +24,12 @@ type prop = {
     subclasses: subclassDataType[];
     charSubclass?: subclassDataType;
     classChar?: classeDataType;
+    elements: elementDataType[];
     toast: any;
     isAdmin?: boolean;
 }
 
-const SheetDetails = ({ charcater, isAdmin, campain, skills, onClose, isToCloseSheet, skillsAll, habilities, habilityTranscended, subclasses, charSubclass, classChar, toast }: prop) => {
+const SheetDetails = ({ charcater, isAdmin, campain, skills, onClose, isToCloseSheet, skillsAll, habilities, habilityTranscended, subclasses, charSubclass, classChar, elements, toast }: prop) => {
 
     const [showHabilityModal, setShowHabilityModal] = useState<boolean>(false);
     const [showHabilityTranscendedModal, setShowHabilityTranscendedModal] = useState<boolean>(false);
@@ -102,7 +103,19 @@ const SheetDetails = ({ charcater, isAdmin, campain, skills, onClose, isToCloseS
             setHabilityTranscendedChar(sortedTranscended);
 
             const habilityTranscendedToAddFind = habilityTranscended?.filter((i) => !charcater?.data?.habilityTranscended?.includes(i?.id));
-            const sortedTranscendedToAdd = habilityTranscendedToAddFind?.sort((a, b) => a?.data?.name?.localeCompare(b?.data?.name));
+            // Ordenar primeiro por elemento, depois por nome
+            const sortedTranscendedToAdd = habilityTranscendedToAddFind?.sort((a, b) => {
+                // Primeiro compara por elemento (se tiver)
+                const elementA = a?.data?.element?.name || "";
+                const elementB = b?.data?.element?.name || "";
+                
+                if (elementA !== elementB) {
+                    return elementA.localeCompare(elementB);
+                }
+                
+                // Se os elementos forem iguais, compara por nome
+                return a?.data?.name?.localeCompare(b?.data?.name) || 0;
+            });
 
             setHabilityTranscendedToAddList(sortedTranscendedToAdd);
         }
@@ -551,7 +564,29 @@ const SheetDetails = ({ charcater, isAdmin, campain, skills, onClose, isToCloseS
                             <div className='itens'>
                                 {habilityTranscendedChar?.map((item, key) => (
                                     <div className='item' key={key}>
-                                        <p className='name'><DarkModeIcon style={{fontSize: '16px', marginRight: '8px'}} />{item.data.name}</p>
+                                        <p className='name'>
+                                            <DarkModeIcon style={{fontSize: '16px', marginRight: '8px'}} />
+                                            {item.data.name} aaaaaaaa
+                                            {item?.data?.element?.name && (() => {
+                                                const elementData = elements.find(el => el.id === item.data.element?.id);
+                                                const elementColors = elementData?.data.colors;
+                                                return (
+                                                    <span 
+                                                        style={{
+                                                            marginLeft: '8px', 
+                                                            fontSize: '0.9em',
+                                                            padding: '2px 6px',
+                                                            borderRadius: '4px',
+                                                            backgroundColor: elementColors?.background || '#43ff81',
+                                                            color: elementColors?.color || '#333',
+                                                            fontWeight: '500'
+                                                        }}
+                                                    >
+                                                        {item.data.element.name}
+                                                    </span>
+                                                );
+                                            })()}
+                                        </p>
                                         <div className='detail' dangerouslySetInnerHTML={{ __html: item?.data?.description ?? "" }} />
                                     </div>
                                 ))}
@@ -647,7 +682,30 @@ const SheetDetails = ({ charcater, isAdmin, campain, skills, onClose, isToCloseS
                         <div className={`item ${habilityTranscendedToAdd === item && 'selected'}`} key={key} onClick={() => {
                             setHabilityTranscendedToAdd(item);
                         }}>
-                            <p className='name'>{item?.data?.name}</p>
+                            <p className='name'>
+                                <DarkModeIcon style={{fontSize: '16px', marginRight: '8px'}} />
+                                {item?.data?.name}
+                                {item?.data?.element?.name && (() => {
+                                    const elementData = elements.find(el => el.id === item.data.element?.id);
+                                    const elementColors = elementData?.data.colors;
+                                    return (
+                                        <span 
+                                            style={{
+                                                marginLeft: '8px', 
+                                                fontSize: '0.9em',
+                                                padding: '2px 6px',
+                                                borderRadius: '4px',
+                                                backgroundColor: elementColors?.background || '#cacaca',
+                                                color: elementColors?.color || '#333',
+                                                fontWeight: '500',
+                                                boxShadow: `0 0 6px ${elementColors?.background || '#cacaca'}`
+                                            }}
+                                        >
+                                            {item.data.element.name}
+                                        </span>
+                                    );
+                                })()}
+                            </p>
                             <div className='detail' dangerouslySetInnerHTML={{ __html: item?.data?.description ?? "" }} />
                             {item?.data?.require && item?.data?.require?.length > 0 && 
                                 <><strong>Pré-requisito:</strong> {item?.data?.require?.join(", ") ?? ""}</>
@@ -708,7 +766,7 @@ const SheetDetails = ({ charcater, isAdmin, campain, skills, onClose, isToCloseS
                 <div className='title'>
                     <p>Selecione suas perícias</p>
                     {(charcater?.data.unlock?.perkPoints ?? 0) > 0 && <>
-                        <span>Você tem {charcater?.data.unlock?.perkPoints} pontos restantes de perícia.</span>
+                        <span>Você tem {(charcater?.data.unlock?.perkPoints ?? 0) - perksToUpgrade.length} pontos restantes de perícia.</span>
                     </>}
                 </div>
                 <div className='perks'>
@@ -769,7 +827,12 @@ const SheetDetails = ({ charcater, isAdmin, campain, skills, onClose, isToCloseS
                 <div className='buttons buttonsperk'>
                     <button className='cancel'>Cancelar</button>
                     <button onClick={() => {
-                        updatePerks();
+                        if(charcater?.data?.unlock?.perkPoints)
+                            if(charcater?.data?.unlock?.perkPoints > perksToUpgrade.length) {
+                                toast.error("Você precisa atribuitr todos os pontos de perícia.");
+                            } else {
+                                updatePerks();
+                            }
                     }}>Salvar</button>
                 </div>
             </ContainerModal>

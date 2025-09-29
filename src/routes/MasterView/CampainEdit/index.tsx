@@ -631,7 +631,7 @@ const CampainEdit = () => {
             <Habilidades classes={classes} toast={toast} habilities={habilities} characters={characters} perks={perks} />
         </Modal>
         <Modal isMinWidth isOpen={modals.showHabilidadesTranscendidasModal} handleCloseModal={closeAllModals}>
-            <HabilidadesTranscendidas toast={toast} campainId={campain?.id} habilityTranscended={habilityTranscended} characters={characters} perks={perks} />
+            <HabilidadesTranscendidas toast={toast} campainId={campain?.id} elements={elements} habilityTranscended={habilityTranscended} characters={characters} perks={perks} />
         </Modal>
         <Modal isMinWidth isOpen={modals.showElementsModal} handleCloseModal={closeAllModals}>
             <Elements toast={toast} elements={elements} />
@@ -726,6 +726,7 @@ const CampainEdit = () => {
                 classChar={classes.find(i => i.id === characterSelected?.data?.class?.id)}
                 toast={toast}
                 isAdmin={true}
+                elements={elements}
             />
         }
 

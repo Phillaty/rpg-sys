@@ -30,7 +30,6 @@ export const uploadImage = async (file: File, path: string): Promise<uploadImage
   
       const downloadURL = await getDownloadURL(snapshot.ref);
   
-      console.log('Upload completo! URL da imagem:', downloadURL);
       return {
         url: downloadURL
       };

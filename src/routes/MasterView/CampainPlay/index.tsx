@@ -8,6 +8,7 @@ import { ToastContainer } from 'react-toastify';
 import Documents from './Documents';
 import Battle from './Battle';
 import Characters from './Characters';
+import Items from './Items';
 
 const CampainPlay = () => {
     const location = useLocation();
@@ -172,9 +173,10 @@ const CampainPlay = () => {
                     )}
                     
                     {activeModule === 'items' && (
-                        <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
-                            <p>Módulo de Itens em desenvolvimento...</p>
-                        </div>
+                        <Items 
+                            campainId={campainId} 
+                            characters={characters} 
+                        />
                     )}
                     
                     {activeModule === 'characters' && (
