@@ -37,7 +37,7 @@ const HomePlayer = (props: prop) => {
                                     </div>
                                     <div className='details'>
                                         <div>
-                                            <span>
+                                            <span> 
                                                 <Chip color="primary" label={`Jogadores: ${item.data.players.length + 1}`} />
                                                 <Chip color="secondary" label={`Personagens: ${item.data.characters.length}`} />
                                             </span>

@@ -186,7 +186,7 @@ const Entity = ({toast, entity}: props) => {
         <Container>
             <div>
                 <div className='left'>
-                    <button className='add' onClick={prepareToAdd}><i className="fa-solid fa-plus"></i> {entity.length <= 0 ? 'Adicionar classe' : ''}</button>
+                    <button className='add' onClick={prepareToAdd}><i className="fa-solid fa-plus"></i> {entity.length <= 0 ? 'Adicionar entidade' : ''}</button>
                     {entity.map((i, key) => (
                         <button className={`${entitySelected?.id === i.id ? 'selected' : ''}`} key={key} onClick={() => {
                             setEntitySelected(i);

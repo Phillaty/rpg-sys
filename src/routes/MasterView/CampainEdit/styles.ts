@@ -69,6 +69,8 @@ export const Container = styled.div`
             padding: 16px;
             width: 55%;
             border-radius: 4px;
+            overflow-y: scroll;
+            max-height: calc(100vh - 155px);
 
             .alerts {
                 margin-bottom: 8px;

@@ -3,20 +3,25 @@ import { Container } from './styles';
 
 import logo from '../../imgs/logo.png';
 import { useNavigate } from 'react-router-dom';
-import { userDataType } from '../../types';
-import { decrypt } from '../../crypt';
+import { useAuth } from '../../contexts/AuthContext';
+import { signOut } from 'firebase/auth';
+import { auth } from '../../firebase/firebase';
 
 const Header = () => {
 
     const navigate = useNavigate();
+    const { userData } = useAuth();
 
-    const user = localStorage.getItem('user') ? JSON.parse(decrypt(localStorage.getItem('user') ?? '')) as userDataType : {} as userDataType;
-
-    const logout = () => {
-
-        localStorage.clear();
-
-        navigate('/login');
+    const logout = async () => {
+        try {
+            await signOut(auth);
+            localStorage.clear();
+            navigate('/login');
+        } catch (error) {
+            console.error('Erro ao fazer logout:', error);
+            localStorage.clear();
+            navigate('/login');
+        }
     }
     
     return (
@@ -24,7 +29,7 @@ const Header = () => {
             <div>
                 <div className='logo'>
                     <img src={logo} alt='' />
-                    <p>Bem-vindo(a) <b>{user.name}</b></p>
+                    <p>Bem-vindo(a) <b>{userData?.name}</b></p>
                 </div>
                 <div className='menu'>
                     <p onClick={() => {navigate('/home');}}>

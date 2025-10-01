@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Container, ContainerHability, ContainerHealth, ContainerMagics } from './styles';
-import { alertType, avatarDataType, campainType, classeDataType, elementDataType, habilityDataType, itemDataType, magicDataType, rollModType, subclassDataType } from '../../../types';
+import { Container, ContainerHability, ContainerHealth, ContainerMagics, ContainerPassives } from './styles';
+import { alertType, avatarDataType, campainType, classeDataType, documentDataType, elementDataType, habilityDataType, habilityTranscendedDataType, itemDataType, magicDataType, rollModType, subclassDataType } from '../../../types';
 import logo from '../../../imgs/profile-user-icon-2048x2048-m41rxkoe.png';
 import { skillFiltr, skillTy } from '..';
 import Roll from '../../../commom/ROLL';
@@ -11,7 +11,7 @@ import { db } from '../../../firebase/firebase';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Modal from '../../../commom/Modal';
 import Backpack from './Backpack';
-import { Accordion, AccordionDetails, AccordionSummary, Alert, Avatar, Chip, Stack, TextField, Typography } from '@mui/material';
+import { Accordion, AccordionDetails, AccordionSummary, Alert, Avatar, Box, Button, Card, CardActions, CardContent, Chip, Dialog, DialogContent, IconButton, Stack, TextField, Typography } from '@mui/material';
 import { toast, ToastContainer } from 'react-toastify';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
@@ -44,13 +44,17 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
     const [isToCloseSheet, setIsToCloseSheet] = useState<boolean>(false);
 
     const [habilities, setHabilities] = useState<habilityDataType[]>([]);
+    const [habilityTranscended, setHabilityTranscended] = useState<habilityTranscendedDataType[]>([]);
     const [subclasses, setSubclasses] = useState<subclassDataType[]>([]);
     const [magics, setMagics] = useState<magicDataType[]>([]);
     const [magicsFiltered, setMagicsFiltered] = useState<magicDataType[]>([]);
     const [elements, setElements] = useState<elementDataType[]>([]);
     const [classChar, setClassChar] = useState<classeDataType>();
 
+    const [passivesModal, setPassivesModal] = useState<boolean>(false);
+
     const [habilitiesChar, setHabilitiesChar] = useState<habilityDataType[]>();
+    const [habilitiesPassiveChar, setHabilitiesPassiveChar] = useState<habilityDataType[]>();
 
     const [charSubclass, setCharSubclass] = useState<subclassDataType>();
 
@@ -62,6 +66,13 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
 
     const [habilityModal, setHabilityModal] = useState<boolean>(false);
     const [habilitySelected, setHabilitySelected] = useState<habilityDataType>();
+
+    const [documentsModal, setDocumentsModal] = useState<boolean>(false);
+    const [documentViewModal, setDocumentViewModal] = useState<boolean>(false);
+    const [selectedDocument, setSelectedDocument] = useState<documentDataType | null>(null);
+    const [documents, setDocuments] = useState<documentDataType[]>([]);
+    const [isFirstDocumentLoad, setIsFirstDocumentLoad] = useState<boolean>(true);
+    const [qtdDocuments, setQtdDocuments] = useState<number>(0);
 
     const [itemsAll, setItemsALL] = useState<itemDataType[]>([]);
     const [itemsCharInventory, setItemsCharInventory] = useState<itemDataType[]>([]);
@@ -122,6 +133,36 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
         setMagicModal(false);
     }
 
+    const handleClosePassives = () => {
+        setPassivesModal(false);
+    }
+
+    const handleCloseDocuments = () => {
+        setDocumentsModal(false);
+    }
+
+    const handleCloseDocumentView = () => {
+        setDocumentViewModal(false);
+        setSelectedDocument(null);
+    }
+
+    const handleViewDocument = async (document: documentDataType) => {
+        setSelectedDocument(document);
+        setDocumentViewModal(true);
+
+        // Marca o documento como lido se ainda não foi lido
+        if (!document.data.read) {
+            try {
+                const docRef = doc(db, "documents", document.id);
+                await updateDoc(docRef, {
+                    read: true
+                });
+            } catch (error) {
+                console.error("Erro ao marcar documento como lido:", error);
+            }
+        }
+    }
+
     useEffect(() => {
         if(habilitySelected) {
             setHabilityModal(true);
@@ -146,23 +187,89 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
 
     useEffect(() => {
         if(charcater && charcater?.data?.class?.id) {
-            const q = query(
+            const allHabilities = new Map<string, habilityDataType>();
+            let completedQueries = 0;
+            const totalQueries = 2;
+
+            const updateHabilities = () => {
+                completedQueries++;
+                if (completedQueries === totalQueries) {
+                    const habilitiesData = Array.from(allHabilities.values());
+                    setHabilities(habilitiesData);
+                }
+            };
+
+            // Query 1: Habilidades por classe
+            const qClass = query(
                 collection(db, 'hability'),
-                where('classId', '==', charcater?.data.class.id),
+                where('classId', '==', charcater.data.class.id)
             );
 
-            onSnapshot(q, (querySnapshot) => {
-                const habilitiesData = querySnapshot.docs.map(doc => ({
+            const unsubscribeClass = onSnapshot(qClass, (querySnapshot) => {
+                querySnapshot.docs.forEach(doc => {
+                    allHabilities.set(doc.id, {
+                        id: doc.id,
+                        data: doc.data(),
+                    } as habilityDataType);
+                });
+                updateHabilities();
+            });
+
+            // Query 2: Habilidades específicas do personagem (se existirem)
+            let unsubscribeChar: (() => void) | undefined;
+            if (charcater.data.hability && charcater.data.hability.length > 0) {
+                const qChar = query(
+                    collection(db, 'hability'),
+                    where('__name__', 'in', charcater.data.hability)
+                );
+
+                unsubscribeChar = onSnapshot(qChar, (querySnapshot) => {
+                    querySnapshot.docs.forEach(doc => {
+                        allHabilities.set(doc.id, {
+                            id: doc.id,
+                            data: doc.data(),
+                        } as habilityDataType);
+                    });
+                    updateHabilities();
+                });
+            } else {
+                // Se não há habilidades específicas, marca esta query como completa
+                updateHabilities();
+            }
+
+            // Cleanup function
+            return () => {
+                unsubscribeClass();
+                if (unsubscribeChar) unsubscribeChar();
+            };
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [charcater, campain]);
+
+    // Separate useEffect for transcended abilities
+    useEffect(() => {
+        if (campain?.habilityTrans && campain.habilityTrans.length > 0) {
+            const qTrans = query(
+                collection(db, 'habilityTrans'),
+                where('__name__', 'in', campain.habilityTrans),
+            );
+
+            const unsubscribe = onSnapshot(qTrans, (querySnapshot) => {
+                const habilityTranscendedData = querySnapshot.docs.map(doc => ({
                     id: doc.id,
                     data: doc.data(),
-                })) as habilityDataType[];
+                })) as habilityTranscendedDataType[];
                 
-                
-                setHabilities(habilitiesData);
+                setHabilityTranscended(habilityTranscendedData);
             });
+
+            return unsubscribe;
+        } else {
+            setHabilityTranscended([]);
         }
 
-    }, [charcater]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [charcater, campain]);
 
     useEffect(() => {
         if(campain && charcater) {
@@ -201,9 +308,12 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
 
     useEffect(() => {
         if (charcater && habilities) {
-            const habilitiesFind = habilities.filter((i) => charcater?.data?.hability?.some((j) => j === i.id));
+            const habilitiesFind = habilities.filter((i) => charcater?.data?.hability?.some((j) => j === i.id && i.data.type === "active"));
+            const habilitiesPassiveFind = habilities.filter((i) => charcater?.data?.hability?.some((j) => j === i.id && i.data.type === "passive"));
             const sorted = habilitiesFind.sort((a, b) => a.data.name.localeCompare(b.data.name));
+            const sortedPassive = habilitiesPassiveFind.sort((a, b) => a.data.name.localeCompare(b.data.name));
             setHabilitiesChar(sorted);
+            setHabilitiesPassiveChar(sortedPassive);
         }
     }, [charcater, habilities]);
 
@@ -270,12 +380,58 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
         });
     }
 
+    const getDocuments = async () => {
+        if (!charcater?.id) return;
+        
+        const p = query(
+            collection(db, 'documents'),
+            where('characterId', '==', charcater.id)
+        );
+
+        onSnapshot(p, (querySnapshot) => {
+            const docData = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                data: doc.data(),
+            })) as documentDataType[];
+
+            const sorted = docData.sort((a, b) => a.data.name.localeCompare(b.data.name));
+
+            setDocuments(sorted);
+        });
+    }
+
+    useEffect(() => {
+        if (isFirstDocumentLoad) {
+            setTimeout(() => {
+                setIsFirstDocumentLoad(false);
+            }, 1000);
+            setQtdDocuments(documents.length);
+            return;
+        }
+
+        const newDocuments = documents.length - qtdDocuments;
+
+        if (newDocuments > 0) {
+            toast.info(`Você recebeu ${newDocuments} novo${newDocuments > 1 ? 's' : ''} documento${newDocuments > 1 ? 's' : ''}!`);
+        }
+
+        setQtdDocuments(documents.length);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [documents]);
+
     useEffect(() => {
         if(charcater && !!charcater?.data.magics?.length) {
             getMagics();
-            getElements();
         } 
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [charcater])
+
+    useEffect(() => {
+        if(charcater) {
+            getDocuments();
+            getElements();
+        }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [charcater])
 
@@ -353,7 +509,7 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
             totalModify = [{
                 type: 'pericia',
                 name: `${item.name} Nível ${item.expertise}`,
-                roll: item.expertise,
+                roll: item.expertise + item.expertise,
             } as rollModType];
         }
 
@@ -653,18 +809,18 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                         </div>
                     </div>
                 }
-                {(!!magics.length || !!itemsCharInventory.length) && 
-                    <div className='buttonsInventory'>
-                        {!!magics.length &&
-                        <button className='magics' onClick={() => {setMagicModal(true)}}><i className="fa-solid fa-wand-magic-sparkles"></i> Magias</button>
-                        }
-                        {!!itemsCharInventory.length &&
-                        <button className='backpack' onClick={() => {setBackpackModal(true)}}><i className="fa-solid fa-list"></i> Mochila {itemsCharInventory.length > 0 ? `(${itemsCharInventory.length})` : ''}</button>
-                        }
-                    </div>
-                }
+                <div className='buttonsInventory'>
+                    {!!magics.length &&
+                    <button className='magics' onClick={() => {setMagicModal(true)}}><i className="fa-solid fa-wand-magic-sparkles"></i> Magias</button>
+                    }
+                    {!!itemsCharInventory.length &&
+                    <button className='backpack' onClick={() => {setBackpackModal(true)}}><i className="fa-solid fa-list"></i> Mochila {itemsCharInventory.length > 0 ? `(${itemsCharInventory.length})` : ''}</button>
+                    }
+                    <button className='documents' onClick={() => {setDocumentsModal(true)}}><i className="fa-solid fa-folder-open"></i> Documentos {documents.length > 0 ? ` (${documents.length})` : ''}</button>
+                </div>
                 {!!habilitiesChar?.length && 
                     <div className='habilities'>
+                        <button className='passives' onClick={() => {setPassivesModal(true)}}>Ver passivas</button>
                         <div className='habilityTitle'>Habilidades ativas <small>Clique para ver mais</small></div>
                         <div className='habilityList'>
                             {habilitiesChar?.map((item, key) => (
@@ -720,9 +876,11 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                     skillsAll={skillsAll} 
                     onClose={handleCloseSheet}
                     habilities={habilities}
+                    habilityTranscended={habilityTranscended}
                     subclasses={subclasses}
                     charSubclass={charSubclass}
                     classChar={classChar}
+                    elements={elements}
                     toast={toast}
                 />
             }
@@ -855,7 +1013,7 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                                             <p className='description'>{i.data.description}</p>
                                         </Typography>
                                         {i.data.upgrades?.map((j, key) => (
-                                            <div className='upgrade'>
+                                            <div className='upgrade' key={key}>
                                                 <div className='titleUpgrade'>{j.title} {j.peCost ? `- Custo adicional +${j.peCost}PE` : ''}</div>
                                                 <div className='descriptionUpgrade'>
                                                     {j.description}
@@ -870,6 +1028,122 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                     </div>
                 </ContainerMagics>
             </Modal>
+
+            {/* Modal de lista de documentos */}
+            <Modal isOpen={documentsModal} handleCloseModal={handleCloseDocuments}>
+                <Box sx={{ 
+                    width: '100%',
+                    maxWidth: { xs: '95vw', sm: 500 },
+                    minWidth: { xs: '95vw', sm: 300 },
+                    maxHeight: '80vh',
+                    overflow: 'auto',
+                    backgroundColor: 'background.paper',
+                    borderRadius: 2,
+                    boxShadow: 24,
+                    p: 2
+                }}>
+                    <Typography variant="h5" component="h2" sx={{ mb: 2, textAlign: 'center', color: 'text.primary' }}>
+                        Documentos
+                    </Typography>
+                    
+                    {documents.length === 0 ? (
+                        <Box sx={{ textAlign: 'center', py: 4 }}>
+                            <Typography variant="body1" color="text.secondary">
+                                Nenhum documento encontrado.
+                            </Typography>
+                        </Box>
+                    ) : (
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            {documents.map((document) => (
+                                <Card key={document.id} sx={{ boxShadow: 2 }}>
+                                    <CardContent sx={{ pb: 1 }}>
+                                        <Typography variant="h6" component="div" gutterBottom>
+                                            {document.data.name}
+                                        </Typography>
+                                        <Typography variant="body2" color="text.secondary">
+                                            {!document.data.read && <><Chip label="Novo" color="success" size="small" /></>}
+                                        </Typography>
+                                    </CardContent>
+                                    <CardActions sx={{ pt: 0 }}>
+                                        <Button 
+                                            size="small" 
+                                            variant="contained"
+                                            onClick={() => handleViewDocument(document)}
+                                            fullWidth
+                                        >
+                                            Visualizar
+                                        </Button>
+                                    </CardActions>
+                                </Card>
+                            ))}
+                        </Box>
+                    )}
+                </Box>
+            </Modal>
+
+            <Modal isOpen={passivesModal} handleCloseModal={handleClosePassives}>
+                <ContainerPassives>
+                    <div className='habilityTitle'>Habilidades passivas</div>
+                    <div className='habilityList'>
+                        {habilitiesPassiveChar?.map((item, key) => (
+                            <div className='habilityItem' key={key}>
+                                <p className='title'>{item.data.name}</p>
+                                <p className='description'>{item.data.description}</p>
+                            </div>
+                        ))}
+                    </div>
+                </ContainerPassives>
+            </Modal>
+
+            {/* Modal de visualização do documento */}
+            <Dialog
+                open={documentViewModal}
+                onClose={handleCloseDocumentView}
+                maxWidth="md"
+                fullWidth
+                sx={{
+                    zIndex: "999999999999999999999999"
+                }}
+                PaperProps={{
+                    sx: {
+                        maxHeight: '90vh',
+                        m: { xs: 1, sm: 2 },
+                    },
+                }}
+            >
+                <DialogContent sx={{ p: { xs: 1, sm: 2 }}}>
+                    {selectedDocument && (
+                        <Box>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                                <Typography variant="h6" component="h3"></Typography>
+                                <IconButton onClick={handleCloseDocumentView} size="small">
+                                    <i className="fa-solid fa-xmark"></i>
+                                </IconButton>
+                            </Box>
+                            
+                            <Box sx={{ 
+                                display: 'flex', 
+                                justifyContent: 'center',
+                                maxHeight: { xs: '70vh', sm: '75vh' },
+                                overflow: 'auto'
+                            }}>
+                                <img 
+                                    src={selectedDocument.data.url} 
+                                    alt={selectedDocument.data.name}
+                                    style={{
+                                        maxWidth: '100%',
+                                        maxHeight: '100%',
+                                        objectFit: 'contain',
+                                        borderRadius: '8px',
+                                        boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+                                    }}
+                                />
+                            </Box>
+                        </Box>
+                    )}
+                </DialogContent>
+            </Dialog>
+
             <ToastContainer style={{zIndex: 9999999999999999}} />
         </>
     )

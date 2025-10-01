@@ -33,6 +33,7 @@ export type campainType = {
     classes: string[];
     origins: string[];
     elements: string[];
+    habilityTrans: string[];
     skills: string[];
     discord?: discordType;
 }
@@ -68,9 +69,15 @@ export type slotManagementType = {
 
 export type defenseType = {
     normal: number;
-    buuffed: number;
+    buffed: number;
     itemBuffs: string[];
     habilitysBuffs: string[];
+}
+
+export type habilityTranscendedObservationsType = {
+    observations: string;
+    active: boolean;
+    idHabilityTranscended: string;
 }
 
 export type avatarType = {
@@ -92,6 +99,8 @@ export type avatarType = {
     lore: string;
     age: number;
     hability: string[];
+    habilityTranscended: string[];
+    habilityTranscendedObservations?: habilityTranscendedObservationsType[];
     unlock: unlockType;
     img: string;
     slotManagement: slotManagementType;
@@ -141,6 +150,10 @@ export type originType = {
     title: string;
     verified?: boolean;
     description: string;
+    power?: {
+        name: string;
+        description: string;
+    };
 }
 
 export type originDataType = {
@@ -209,6 +222,33 @@ export type habilityType = {
 export type habilityDataType = {
     id: string;
     data: habilityType;
+}
+
+export type habilityTranscendedElement = {
+    id: string;
+    name: string;
+}
+
+export type habilityTranscendedBuffType = {
+    lifePerLevel?: buffLifeType;
+    lifeTotal?: buffLifeType;
+    modifyRoll?: buffPerkType[];
+    rollVantage?: buffPerkVantageType[];
+}
+
+export type habilityTranscendedType = {
+    description: string;
+    name: string;
+    require?: string[];
+    buff?: habilityTranscendedBuffType;
+    type: string;
+    verified?: boolean;
+    element?: habilityTranscendedElement;
+}
+
+export type habilityTranscendedDataType = {
+    id: string;
+    data: habilityTranscendedType;
 }
 
 export type subclassHabilitiesType = {
@@ -418,4 +458,20 @@ export type rollModType = {
     type: 'pericia' | 'atributo' | 'habilidade' | 'item' | 'damage' | 'pers';
     name: string;
     roll: number;
+}
+
+export type documentType = {
+    name: string;
+    url: string;
+    importance: 'baixo' | 'médio' | 'alto';
+    difficulty: 'baixo' | 'médio' | 'alto';
+    campainId: string;
+    characterId?: string;
+    location: string;
+    read: boolean;
+}
+
+export type documentDataType = {
+    id: string;
+    data: documentType;
 }

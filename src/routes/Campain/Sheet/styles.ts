@@ -25,9 +25,10 @@ export const Container = styled.div`
 
         button {
             border: 0;
-            padding: 4px 8px;
+            padding: 8px 16px;
             border-radius: 4px;
             cursor: pointer;
+            font-size: 16px;
         }
 
         button:hover {
@@ -287,6 +288,28 @@ export const Container = styled.div`
         padding: 16px;
         margin-top: 14px;
         border-radius: 4px;
+        position: relative;
+
+        .passives {
+            position: absolute;
+            top: 16pxpx;
+            right: 16px;
+            cursor: pointer;
+            border: 1px solid gray;
+            border-radius: 4px;
+            padding: 4px 8px;
+            transition: 0.2s;
+            background-color: transparent;
+            color: white;
+            font-size: 14px;
+
+            &:hover {
+                background-color: white;
+                border-color: white;
+                color: #181a1b;
+                transition: 0.2s;
+            }
+        }
 
         p {
             margin: 0;
@@ -298,6 +321,12 @@ export const Container = styled.div`
             small {
                 font-weight: 500;
                 font-size: 12px;
+            }
+        }
+
+        @media screen and (max-width: 450px) {
+            .habilityTitle {
+                margin-top: 32px;
             }
         }
 
@@ -485,3 +514,54 @@ export const ContainerMagics = styled.div`
         }
     }
 `
+
+export const ContainerPassives = styled.div`
+    background-color: white;
+    padding: 16px;
+    border-radius: 4px;
+    width: 400px;
+    color: black;
+    max-height: 70vh;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    .habilityTitle {
+        font-weight: 600;
+        font-size: 24px;
+        text-align: center; 
+    }
+
+    .habilityList {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 16px;
+    }
+
+    .habilityItem {
+        border: 1px solid gray;
+        border-radius: 4px;
+        padding: 8px;
+        width: 100%;
+
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+
+        .title {
+            font-weight: 600;
+            margin: 0 0 0 0;
+        }
+
+        .description {
+            font-size: 14px;
+            margin: 0 0 0 0;
+        }
+    }
+
+    @media screen and (max-width: 450px) {
+        width: 100%;
+    }
+`;

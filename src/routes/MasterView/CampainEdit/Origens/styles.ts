@@ -66,7 +66,7 @@ export const Container = styled.div`
                 width: 100%;
             }
 
-            .name, .description, .infos, .buttons {
+            .name, .description, .infos, .buttons, .power {
 
                 > div {
                     width: 100%;

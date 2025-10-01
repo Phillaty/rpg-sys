@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Container } from './styles';
 import { addDoc, arrayUnion, collection, doc, getDocs, onSnapshot, query, updateDoc, where } from 'firebase/firestore';
-import { campainType, classeDataType, habilityDataType, originDataType, perkDataType, userDataType } from '../../../../types';
+import { campainType, classeDataType, defenseType, habilityDataType, originDataType, perkDataType, userDataType } from '../../../../types';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { db } from '../../../../firebase/firebase';
 import { ColorRing, Hearts } from 'react-loader-spinner';
 import { decrypt } from '../../../../crypt';
 import { toast, ToastContainer } from 'react-toastify';
-import { FormControl, InputLabel, MenuItem, Select, TextField } from '@mui/material';
+import { Divider, FormControl, InputLabel, MenuItem, Select, TextField } from '@mui/material';
 
 type simpleData = {
     name: string;
@@ -39,7 +39,7 @@ const SheetCreation = () => {
     const campainId = urlParams.get('camp') ?? '';
 
     const user = localStorage.getItem('user') ? JSON.parse(decrypt(localStorage.getItem('user') ?? '') ?? ' ') as userDataType : {} as userDataType;
-    const userId = decrypt(user.id);
+    const userId = user.id;
 
     const [stage, setStage] = useState<number>(0);
 
@@ -47,6 +47,17 @@ const SheetCreation = () => {
     const [origins, setOrigins] = useState<originDataType[]>();
     const [classes, setClasses] = useState<classeDataType[]>();
     const [skills, setSkills] = useState<perkDataType[]>();
+
+    const [seeTips, setSeeTips] = useState<boolean>(false);
+
+    const [defense, setDefense] = useState<defenseType>({
+        normal: 8,
+        buffed: 0,
+        itemBuffs: [],
+        habilitysBuffs: [],
+    });
+
+    
 
     const [habilitys, setHabilitys] = useState<habilityDataType[]>();
     const [hability, setHability] = useState<habilityDataType>();
@@ -83,50 +94,70 @@ const SheetCreation = () => {
 
     const getOrigins = async () => {
         if(campain) {
-           const p = query(
-                collection(db, 'origin'),
-                where('__name__', 'in', campain.origins)
-            );
-
-            const querySnapshot = await getDocs(p);
-
             const originArray = [] as originDataType[];
-            querySnapshot.forEach((doc) => {
-                originArray.push({
-                    data: doc.data(),
-                    id: doc.id,
-                } as originDataType);
-            });
+            
+            const batchSize = 30;
+            const totalBatches = Math.ceil(campain.origins.length / batchSize);
+            
+            for (let i = 0; i < totalBatches; i++) {
+                const start = i * batchSize;
+                const end = Math.min(start + batchSize, campain.origins.length);
+                const batch = campain.origins.slice(start, end);
+                
+                if (batch.length > 0) {
+                    const p = query(
+                        collection(db, 'origin'),
+                        where('__name__', 'in', batch)
+                    );
+
+                    const querySnapshot = await getDocs(p);
+                    
+                    querySnapshot.forEach((doc) => {
+                        originArray.push({
+                            data: doc.data(),
+                            id: doc.id,
+                        } as originDataType);
+                    });
+                }
+            }
 
             const sorted = originArray.sort((a, b) => a.data.title.localeCompare(b.data.title));
-
             setOrigins(sorted); 
         }
-        
     }
 
     const getClasses = async () => {
         if(campain) {
-           const p = query(
-                collection(db, 'classes'),
-                where('__name__', 'in', campain.classes)
-            );
-
-            const querySnapshot = await getDocs(p);
-
             const classeArray = [] as classeDataType[];
-            querySnapshot.forEach((doc) => {
-                classeArray.push({
-                    id: doc.id,
-                    data: doc.data(),
-                } as classeDataType);
-            });
+            
+            const batchSize = 30;
+            const totalBatches = Math.ceil(campain.classes.length / batchSize);
+            
+            for (let i = 0; i < totalBatches; i++) {
+                const start = i * batchSize;
+                const end = Math.min(start + batchSize, campain.classes.length);
+                const batch = campain.classes.slice(start, end);
+                
+                if (batch.length > 0) {
+                    const p = query(
+                        collection(db, 'classes'),
+                        where('__name__', 'in', batch)
+                    );
+
+                    const querySnapshot = await getDocs(p);
+                    
+                    querySnapshot.forEach((doc) => {
+                        classeArray.push({
+                            id: doc.id,
+                            data: doc.data(),
+                        } as classeDataType);
+                    });
+                }
+            }
 
             const sorted = classeArray.sort((a, b) => a.data.name.localeCompare(b.data.name));
-
             setClasses(sorted); 
         }
-        
     }
 
     const getHabilities = async () => {
@@ -134,24 +165,34 @@ const SheetCreation = () => {
             const classesIds = classes.map((i) => i.id);
 
             if(!!classesIds.length) {
-                const p = query(
-                    collection(db, 'hability'),
-                    where('classId', 'in', classesIds),
-                );
-    
-                const querySnapshot = await getDocs(p);
-        
                 const habilityArray = [] as habilityDataType[];
-                querySnapshot.forEach((doc) => {
-                    habilityArray.push({
-                        id: doc.id,
-                        data: doc.data()
-                    } as habilityDataType);
-                });
-    
-               
-                setHabilitys(habilityArray);
                 
+                const batchSize = 30;
+                const totalBatches = Math.ceil(classesIds.length / batchSize);
+                
+                for (let i = 0; i < totalBatches; i++) {
+                    const start = i * batchSize;
+                    const end = Math.min(start + batchSize, classesIds.length);
+                    const batch = classesIds.slice(start, end);
+                    
+                    if (batch.length > 0) {
+                        const p = query(
+                            collection(db, 'hability'),
+                            where('classId', 'in', batch),
+                        );
+            
+                        const querySnapshot = await getDocs(p);
+                
+                        querySnapshot.forEach((doc) => {
+                            habilityArray.push({
+                                id: doc.id,
+                                data: doc.data()
+                            } as habilityDataType);
+                        });
+                    }
+                }
+                
+                setHabilitys(habilityArray);
             }
         }
     }
@@ -178,27 +219,37 @@ const SheetCreation = () => {
 
     const getSkills = async () => {
         if(campain) {
-           const p = query(
-                collection(db, 'skills'),
-                where('__name__', 'in', campain.skills)
-            );
-
-            const querySnapshot = await getDocs(p);
-
             const classeArray = [] as perkDataType[];
-            querySnapshot.forEach((doc) => {
-                const data = {
-                    id: doc.id,
-                    data: doc.data(),
-                } as perkDataType;
-                classeArray.push(data);
-            });
+            
+            const batchSize = 30;
+            const totalBatches = Math.ceil(campain.skills.length / batchSize);
+            
+            for (let i = 0; i < totalBatches; i++) {
+                const start = i * batchSize;
+                const end = Math.min(start + batchSize, campain.skills.length);
+                const batch = campain.skills.slice(start, end);
+                
+                if (batch.length > 0) {
+                    const p = query(
+                        collection(db, 'skills'),
+                        where('__name__', 'in', batch)
+                    );
+
+                    const querySnapshot = await getDocs(p);
+                    
+                    querySnapshot.forEach((doc) => {
+                        const data = {
+                            id: doc.id,
+                            data: doc.data(),
+                        } as perkDataType;
+                        classeArray.push(data);
+                    });
+                }
+            }
 
             const sorted = classeArray.sort((a, b) => a.data.name.localeCompare(b.data.name));
-
             setSkills(sorted); 
         }
-        
     }
 
     useEffect(() => {
@@ -249,6 +300,7 @@ const SheetCreation = () => {
             playerId: userId,
             level: 1,
             hability: hability ? [hability.id] : [],
+            defense: defense,
             skill: persk?.map((item) => {
                 return {
                     expertise: 1,
@@ -269,12 +321,12 @@ const SheetCreation = () => {
                     max: 100
                 },
                 life: {
-                    actual: (classeSelected?.data.life.default ?? 0) + attributes.VIG,
-                    max: (classeSelected?.data.life.default ?? 0) + attributes.VIG
+                    actual: (classeSelected?.data.life.default ?? 0) + (attributes.VIG > 0 ? attributes.VIG : 0),
+                    max: (classeSelected?.data.life.default ?? 0) + (attributes.VIG > 0 ? attributes.VIG : 0)
                 },
                 pe: {
-                    actual: (classeSelected?.data.pe.default ?? 0) + attributes.PRE,
-                    max: (classeSelected?.data.pe.default ?? 0) + attributes.PRE
+                    actual: (classeSelected?.data.pe.default ?? 0) + (attributes.PRE > 0 ? attributes.PRE : 0),
+                    max: (classeSelected?.data.pe.default ?? 0) + (attributes.PRE > 0 ? attributes.PRE : 0)
                 },
                 sanity: {
                     actual: classeSelected?.data.sanity.default,
@@ -307,6 +359,15 @@ const SheetCreation = () => {
             navigate(`/campain?camp=${campainId}&wentFromCreate=true`);
         }, 1000);
     }
+
+    useEffect(() => {
+        setDefense({
+            normal: 8 + (attributes.AGI > 0 ? attributes.AGI : 0),
+            buffed: 0,
+            itemBuffs: [],
+            habilitysBuffs: [],
+        });
+    }, [attributes.AGI])
 
     return (
         <>
@@ -373,11 +434,13 @@ const SheetCreation = () => {
                     }
                     {stage === 1 && 
                         <>
-                            <div className='stage-select-origin mainContainer'>
+                            <div className='stage-select-origin mainContainer mainOrigin'>
                                 <div>
                                     <div className='top'>
                                         <p className='title'>Escolha a origem do personagem</p>
-                                        <p className='description'>A origem do personagem é a profissão antes da campanha!<br/> isso impacta nas suas habilidades!</p>
+                                        <p className='description'>A origemm do personagem é a profissão antes da campanha!<br/> isso impacta nas suas habilidades!</p>
+                                        <Divider style={{ margin: '8px 0' }} />
+                                        <p className='description powerDescription'>{originSelected?.data.power?.description}</p>
                                     </div>
                                     <div className='origins'>
                                         {origins?.map((item, key) => (
@@ -408,7 +471,7 @@ const SheetCreation = () => {
                                             <div className='titleHab'>Você irá receber esta habilidade com essa classe!</div>
                                             <div className='item'>
                                                 <p className='name'>{hability?.data.name}</p>
-                                                <p className='description' dangerouslySetInnerHTML={{ __html: hability?.data.description.replace(/\n/g, '<br />') }} />
+                                                <div className='description' dangerouslySetInnerHTML={{ __html: hability?.data.description.replace(/\n/g, '<br />') }} />
                                             </div>
                                         </div>
                                     }
@@ -416,8 +479,12 @@ const SheetCreation = () => {
                                         {classes?.map((item, key) => (
                                             <div className={`classItem ${item.id === classeSelected?.id && 'selected'}`} key={key} onClick={() => setClasseSelected(item)}>
                                                 {item.data.name}
-                                                <p dangerouslySetInnerHTML={{ __html: item.data.description.replace(/\n/g, '<br />') }} />
-                                                <span>{item.data.infos.map((i, index) => (<div key={index}>- {i}</div>))}</span>
+                                                <div className='p' dangerouslySetInnerHTML={{ __html: item.data.description.replace(/\n/g, '<br />') }} />
+                                                <div>
+                                                    {item.data.infos.map((i, index) => (
+                                                        <div className='span' key={index}>- {i}</div>
+                                                    ))}
+                                                </div>
                                             </div>
                                         ))}
                                     </div>
@@ -435,31 +502,45 @@ const SheetCreation = () => {
                                 <div>
                                     <div className='top'>
                                         <p className='title'>Atributos e perícias!</p>
-                                        <p className='description'>
-                                            Os atributos e as perícias são a base do seu personagem <br /> 
-                                            Atenção que cada perícia utiliza um atributo como base! <br/>
-                                            <u>Dicas</u> <br/> 
-                                            Minimo é -1 e o máximo é 5 de atributo<br/> 
-                                            INT aumenta pontos de perícia <br/> 
-                                            FOR aumenta carga máxima <br/>
-                                            AGI aumenta defesa <br/>
-                                            VIG aumenta vida máxima <br/>
-                                            PRE aumenta sanidade
-                                        </p>
+                                        <button className='buttonTips' onClick={() => setSeeTips(!seeTips)}>Ver dicas</button>
+                                        {seeTips && <>
+                                            <p className='description'>
+                                                Os atributos e as perícias são a base do seu personagem <br /> 
+                                                Atenção que cada perícia utiliza um atributo como base! <br/>
+                                                <u>Dicas</u> <br/> 
+                                                Minimo é -1 e o máximo é 5 de atributo<br/> 
+                                                INT aumenta pontos de perícia <br/> 
+                                                FOR aumenta carga máxima <br/>
+                                                AGI aumenta defesa <br/>
+                                                VIG aumenta vida máxima <br/>
+                                                PRE aumenta pontos de esforço <br/>
+                                                Perícias ganhas pela origem não gastam pontos de perícia<br/>
+                                                Você pode aumentar os atributos e perícias depois, mas não poderá diminuir!
+                                            </p>
+                                        </>}
                                     </div>
                                     <div className='attributesDetail'>
                                         <p>Pontos de atributos restantes: {attributePoints}</p>
-                                        <p className='per'>Perícias ganhas pela origem: {originSelected?.data.bonus.skill.map((item) => (<div>{item}</div>))}</p>
+                                        <div className='per'>
+                                            <span>Perícias ganhas pela origem: </span>
+                                            {originSelected?.data.bonus.skill.map((item, index) => (
+                                                <span key={index}>{item}{index < originSelected.data.bonus.skill.length - 1 ? ', ' : ''}</span>
+                                            ))}
+                                        </div>
                                         <div className='data'>
                                             <p className='info'>Carga máxima: {5 + (attributes.FOR > 0 ? (attributes.FOR) * 5 : 0)}</p>
-                                            <p className='info'>Defesa: {8 + (attributes.AGI > 0 ? attributes.AGI : 0)}</p>
+                                            <p className='info'>Defesa: {defense.normal}</p>
                                             <p className='info'>
                                                 Vida máxima: {(classeSelected?.data.life.default ?? 0) + (attributes.VIG > 0 ? attributes.VIG : 0)} | 
                                                 por nível: {(classeSelected?.data.life.perLevel ?? 0) + (attributes.VIG > 0 ? attributes.VIG : 0)}
                                             </p>
                                             <p className='info'>
-                                                Sanidade máxima: {(classeSelected?.data.sanity.default ?? 0) + (attributes.PRE > 0 ? attributes.PRE : 0)} | 
-                                                por nível: {(classeSelected?.data.sanity.perLevel ?? 0) + (attributes.PRE > 0 ? attributes.PRE : 0)}
+                                                Sanidade máxima: {(classeSelected?.data.sanity.default ?? 0)} | 
+                                                por nível: {(classeSelected?.data.sanity.perLevel ?? 0)}
+                                            </p>
+                                            <p className='info'>
+                                                PE máxima: {(classeSelected?.data.pe.default ?? 0) + (attributes.PRE > 0 ? attributes.PRE : 0)} | 
+                                                por nível: {(classeSelected?.data.pe.perLevel ?? 0) + (attributes.PRE > 0 ? attributes.PRE : 0)}
                                             </p>
                                         </div>
                                         

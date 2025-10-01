@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Container, ContainerLevel, ContainerModal } from './styles';
-import { avatarDataType, basicsCharType, campainType, classeDataType, habilityDataType, skillType, subclassDataType, unlockType } from '../../../../types';
+import { avatarDataType, basicsCharType, campainType, classeDataType, elementDataType, habilityDataType, habilityTranscendedDataType, skillType, subclassDataType, unlockType } from '../../../../types';
 import { skillFiltr, skillTy } from '../..';
 import logo from '../../../../imgs/profile-user-icon-2048x2048-m41rxkoe.png';
 import Modal from '../../../../commom/Modal';
@@ -9,7 +9,8 @@ import { arrayUnion, doc, updateDoc } from 'firebase/firestore';
 import { ColorRing, Vortex } from 'react-loader-spinner';
 import { levelUp, uploadImage } from '../../../../utils';
 import EditInfo from './ModalEditInfo';
-import { Avatar } from '@mui/material';
+import { Avatar, Divider } from '@mui/material';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
 
 type prop = {
     charcater?: avatarDataType;
@@ -19,25 +20,32 @@ type prop = {
     isToCloseSheet: boolean;
     skillsAll: skillTy[];
     habilities: habilityDataType[];
+    habilityTranscended: habilityTranscendedDataType[];
     subclasses: subclassDataType[];
     charSubclass?: subclassDataType;
     classChar?: classeDataType;
+    elements: elementDataType[];
     toast: any;
+    isAdmin?: boolean;
 }
 
-const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, skillsAll, habilities, subclasses, charSubclass, classChar, toast }: prop) => {
+const SheetDetails = ({ charcater, isAdmin, campain, skills, onClose, isToCloseSheet, skillsAll, habilities, habilityTranscended, subclasses, charSubclass, classChar, elements, toast }: prop) => {
 
     const [showHabilityModal, setShowHabilityModal] = useState<boolean>(false);
+    const [showHabilityTranscendedModal, setShowHabilityTranscendedModal] = useState<boolean>(false);
     const [showSubclassModal, setShowSubclassModal] = useState<boolean>(false);
     const [showPerksModal, setShowPerksModal] = useState<boolean>(false);
     const [loadingAtt, setLoadingAtt] = useState<boolean>(false);
     const [editInfo, setEditInfo] = useState<boolean>(false);
 
     const [habilityToAdd, setHabilityToAdd] = useState<habilityDataType>();
+    const [habilityTranscendedToAdd, setHabilityTranscendedToAdd] = useState<habilityTranscendedDataType>();
     const [subclassToAdd, setSubclassToAdd] = useState<subclassDataType>();
 
     const [habilitiesChar, setHabilitiesChar] = useState<habilityDataType[]>();
     const [habilitiesToAdd, setHabilitiesToAdd] = useState<habilityDataType[]>();
+    const [habilityTranscendedChar, setHabilityTranscendedChar] = useState<habilityTranscendedDataType[]>();
+    const [habilityTranscendedToAddList, setHabilityTranscendedToAddList] = useState<habilityTranscendedDataType[]>();
 
     const [perksToUpgrade, setPerksToUpgrade] = useState<skillTy[]>([]);
 
@@ -74,17 +82,94 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
         }
     }, [skillsAll, skills]);
 
+    const investigateSkillRequirement = (hability: habilityDataType): boolean => {
+        if(!hability.data.require) return false;
+        if (!hability.data.require.some((i) => i.toUpperCase().includes("TREINADO"))) return true;
+
+        const isOr = hability.data.require?.some((j) => j.toUpperCase().includes(" OU "));
+
+        const isAllValid = skillsAll?.filter((i) => {
+            const str = i.name.toUpperCase();
+            return hability.data.require?.some((j) => j.toUpperCase().includes(str));
+        });
+
+        if(isOr) {
+            return isAllValid.some((i) => skills.trained?.some((j) => j.name === i.name));
+        } else {
+            return isAllValid.every((i) => skills.trained?.some((j) => j.name === i.name));
+        }
+    }
+
+    const investigateRequirementAtribute = (hability: habilityDataType): boolean => {
+
+        if(!hability.data.require) return true;
+
+        const hasAtribute = hability?.data?.require?.some((i) => {
+            const str = i.toUpperCase();
+
+            if (str.includes('AGI') || str.includes('INT') || str.includes('VIG') || str.includes('PRE') || str.includes('FOR')) {
+                return true;
+            }
+
+            return false;
+        });
+
+        if (!hasAtribute) return true;
+
+        type AttributeKey = 'AGI' | 'INT' | 'VIG' | 'PRE' | 'FOR';
+
+        for (const req of hability.data.require) {
+            const match = req.match(/(AGI|INT|VIG|PRE|FOR)\s*(\d+)/i);
+            if (match) {
+                const attr = match[1].toUpperCase() as AttributeKey;
+                const value = parseInt(match[2], 10);
+                const atribute = charcater?.data[attr];
+                if ((atribute ?? 0) < value) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
     useEffect(() => {
         if (charcater && habilities) {
             const habilitiesFind = habilities?.filter((i) => charcater?.data?.hability?.some((j) => j === i?.id));
             const sorted = habilitiesFind?.sort((a, b) => a?.data?.name?.localeCompare(b?.data?.name));
             setHabilitiesChar(sorted);
 
-            const habilitiesToAddFind = habilities?.filter((i) => !charcater?.data?.hability?.includes(i?.id));
+            const habilitiesToAddFind = isAdmin ? habilities : habilities?.filter((i) => !charcater?.data?.hability?.includes(i?.id));
             const sortedToAdd = habilitiesToAddFind?.sort((a, b) => a?.data?.name?.localeCompare(b?.data?.name));
+
             setHabilitiesToAdd(sortedToAdd);
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [charcater, habilities]);
+
+    useEffect(() => {
+        if (charcater && habilityTranscended) {
+            const habilityTranscendedFind = habilityTranscended?.filter((i) => charcater?.data?.habilityTranscended?.some((j) => j === i?.id));
+            const sortedTranscended = habilityTranscendedFind?.sort((a, b) => a?.data?.name?.localeCompare(b?.data?.name));
+            setHabilityTranscendedChar(sortedTranscended);
+
+            const habilityTranscendedToAddFind = habilityTranscended?.filter((i) => !charcater?.data?.habilityTranscended?.includes(i?.id));
+            // Ordenar primeiro por elemento, depois por nome
+            const sortedTranscendedToAdd = habilityTranscendedToAddFind?.sort((a, b) => {
+                // Primeiro compara por elemento (se tiver)
+                const elementA = a?.data?.element?.name || "";
+                const elementB = b?.data?.element?.name || "";
+                
+                if (elementA !== elementB) {
+                    return elementA.localeCompare(elementB);
+                }
+                
+                // Se os elementos forem iguais, compara por nome
+                return a?.data?.name?.localeCompare(b?.data?.name) || 0;
+            });
+
+            setHabilityTranscendedToAddList(sortedTranscendedToAdd);
+        }
+    }, [charcater, habilityTranscended]);
 
     const handleCloseHabilityModal = () => {
         setShowHabilityModal(false);
@@ -92,11 +177,14 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
         setShowPerksModal(false);
     }
 
+    const handleCloseHabilityTranscendedModal = () => {
+        setShowHabilityTranscendedModal(false);
+    }
+
     const addHability = async () => {
         if (habilityToAdd) {
             handleCloseHabilityModal();
             const userDocRef = doc(db, "character", charcater?.id ?? '');
-
             await updateDoc(userDocRef, {
                 hability: arrayUnion(habilityToAdd.id),
                 unlock: {
@@ -106,6 +194,32 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
             }).then(() => {
                 toast.success("Habilidade adicionada!");
                 setHabilityToAdd(undefined);
+            });
+        }
+        
+    }
+
+    const addHabilityTranscended = async () => {
+        if (habilityTranscendedToAdd) {
+            handleCloseHabilityTranscendedModal();
+            const userDocRef = doc(db, "character", charcater?.id ?? '');
+
+            await updateDoc(userDocRef, {
+                habilityTranscended: arrayUnion(habilityTranscendedToAdd.id),
+                basics: {
+                    ...charcater?.data.basics,
+                    sanity: {
+                        max: charcater?.data.basics.sanity.max ? charcater?.data.basics.sanity.max - (classChar?.data.sanity.perLevel ?? 0) : charcater?.data.basics.sanity.max,
+                        actual: charcater?.data.basics.sanity.actual ? charcater?.data.basics.sanity.actual - (classChar?.data.sanity.perLevel ?? 0) : charcater?.data.basics.sanity.actual,
+                    }
+                },
+                unlock: {
+                    ...charcater?.data.unlock,
+                    habilityPoints: (charcater?.data?.unlock?.habilityPoints ?? 0) - 1
+                }
+            }).then(() => {
+                toast.success("Habilidade transcendida adicionada!");
+                setHabilityTranscendedToAdd(undefined);
             });
         }
         
@@ -474,24 +588,72 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
                         </div>
                         <div className='itens'>
                             {(charcater?.data.unlock.habilityPoints ?? 0) > 0 && 
-                                <div className='add' onClick={() => {setShowHabilityModal(true)}}>
-                                    <i className="fa-regular fa-square-plus"></i>
-                                    <p>Adicionar habilidade</p>
-                                </div>
+                                <>
+                                    <div className='add' onClick={() => {setShowHabilityModal(true)}}>
+                                        <i className="fa-regular fa-square-plus"></i>
+                                        <p>Adicionar habilidade</p>
+                                    </div>
+                                    <Divider>Ou</Divider>
+                                    <div className='addTranscend' onClick={() => {setShowHabilityTranscendedModal(true)}}>
+                                        <DarkModeIcon />
+                                        <p>Transcender</p>
+                                    </div>
+                                    <Divider style={{margin: "12px 0"}} />
+                                </>
                             }
                             {habilitiesChar?.map((item, key) => (
                                 <div className='item' key={key}>
                                     <p className='name'>{item.data.name}</p>
-                                    <p className='detail' dangerouslySetInnerHTML={{ __html: item?.data?.description ?? "" }} />
+                                    <div className='detail' dangerouslySetInnerHTML={{ __html: item?.data?.description ?? "" }} />
                                 </div>
                             ))}
                             {!habilitiesChar?.length && <small>Nenhuma habilidade ainda, jogue mais! :D</small>}
                         </div>
                     </div>
+                    
+                    {/* Seção de Habilidades Transcendidas */}
+                    {habilityTranscendedChar && habilityTranscendedChar.length > 0 && (
+                        <div className='habilityTranscended'>
+                            <div className='title'>
+                                <p>Habilidades Transcendidas</p>
+                            </div>
+                            <div className='itens'>
+                                {habilityTranscendedChar?.map((item, key) => (
+                                    <div className='item' key={key}>
+                                        <p className='name'>
+                                            <DarkModeIcon style={{fontSize: '16px', marginRight: '8px'}} />
+                                            {item.data.name}
+                                            {item?.data?.element?.name && (() => {
+                                                const elementData = elements.find(el => el.id === item.data.element?.id);
+                                                const elementColors = elementData?.data.colors;
+                                                return (
+                                                    <span 
+                                                        style={{
+                                                            marginLeft: '8px', 
+                                                            fontSize: '0.9em',
+                                                            padding: '2px 6px',
+                                                            borderRadius: '4px',
+                                                            backgroundColor: elementColors?.background || '#43ff81',
+                                                            color: elementColors?.color || '#333',
+                                                            fontWeight: '500'
+                                                        }}
+                                                    >
+                                                        {item.data.element.name}
+                                                    </span>
+                                                );
+                                            })()}
+                                        </p>
+                                        <div className='detail' dangerouslySetInnerHTML={{ __html: item?.data?.description ?? "" }} />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                    
                     {(charcater?.data.level ?? 0) >= 2 && <>
                         <div className='subclass'>
                             <div className='title'>
-                                <p>Subclasse - <small>{charSubclass?.data.name}</small></p>
+                                <p>Subclasse {charSubclass?.data.name && ' - '} <small>{charSubclass?.data.name}</small></p>
                             </div>
                             <div className='itens'>
                                 {!charSubclass ? 
@@ -507,7 +669,7 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
                                         return (
                                             <div className='item' key={key}>
                                                 <p className='name'>{item.name}</p>
-                                                <p className='detail' dangerouslySetInnerHTML={{ __html: item.description ?? "" }} />
+                                                <div className='detail' dangerouslySetInnerHTML={{ __html: item.description ?? "" }} />
                                             </div>
                                         );
                                     }
@@ -527,13 +689,13 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
                     <div className='itens'>
                         {skillsAll.map((item, key) => (
                             <div key={key} className='item'>
-                                <p>
-                                    {item.name}
+                                <div>
+                                    <p>{item.name}</p>
                                     <div className='detailsSkills'>
                                         {item.expertise && <span className='expertise'>Nivel {item.expertise}</span> }
                                         <span className='base'>{item.base}</span>
                                     </div>
-                                </p>
+                                </div>
                             </div>
                         ))}
                     </div>
@@ -551,14 +713,73 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
                             setHabilityToAdd(item);
                         }}>
                             <p className='name'>{item?.data?.name}</p>
-                            <p className='detail' dangerouslySetInnerHTML={{ __html: item?.data?.description ?? "" }} />
+                            <div className='detail' dangerouslySetInnerHTML={{ __html: item?.data?.description ?? "" }} />
+                            {item?.data?.require && item?.data?.require?.length > 0 && 
+                                <><strong>Pré-requisito:</strong> {item?.data?.require?.join(", ") ?? ""}</>
+                            }
                         </div>
                     ))}
                 </div>
                 <div className='buttons'>
                     <button className={`${!habilityToAdd && 'disabled'}`} onClick={() => {
-                        addHability();
+
+                        if(habilityToAdd && investigateRequirementAtribute(habilityToAdd) && investigateSkillRequirement(habilityToAdd)) {
+                            toast.success("Habilidade adicionada com sucesso!");
+                            addHability();
+                        } else {
+                            toast.error("Você não preenche os requisitos para essa habilidade.");
+                        }
+                        
                     }}>Adicionar</button>
+                </div>
+            </ContainerModal>
+        </Modal>
+
+        <Modal isOpen={showHabilityTranscendedModal} handleCloseModal={handleCloseHabilityTranscendedModal} >
+            <ContainerModal>
+                <div className='title'>
+                    <p>Transcender habilidade</p>
+                </div>
+                <div className='itens'>
+                    {habilityTranscendedToAddList?.map((item, key) => (
+                        <div className={`item ${habilityTranscendedToAdd === item && 'selected'}`} key={key} onClick={() => {
+                            setHabilityTranscendedToAdd(item);
+                        }}>
+                            <p className='name'>
+                                <DarkModeIcon style={{fontSize: '16px', marginRight: '8px'}} />
+                                {item?.data?.name}
+                                {item?.data?.element?.name && (() => {
+                                    const elementData = elements.find(el => el.id === item.data.element?.id);
+                                    const elementColors = elementData?.data.colors;
+                                    return (
+                                        <span 
+                                            style={{
+                                                marginLeft: '8px', 
+                                                fontSize: '0.9em',
+                                                padding: '2px 6px',
+                                                borderRadius: '4px',
+                                                backgroundColor: elementColors?.background || '#cacaca',
+                                                color: elementColors?.color || '#333',
+                                                fontWeight: '500',
+                                                boxShadow: `0 0 6px ${elementColors?.background || '#cacaca'}`
+                                            }}
+                                        >
+                                            {item.data.element.name}
+                                        </span>
+                                    );
+                                })()}
+                            </p>
+                            <div className='detail' dangerouslySetInnerHTML={{ __html: item?.data?.description ?? "" }} />
+                            {item?.data?.require && item?.data?.require?.length > 0 && 
+                                <><strong>Pré-requisito:</strong> {item?.data?.require?.join(", ") ?? ""}</>
+                            }
+                        </div>
+                    ))}
+                </div>
+                <div className='buttons'>
+                    <button className={`${!habilityTranscendedToAdd && 'disabled'}`} onClick={() => {
+                        addHabilityTranscended();
+                    }}>Transcender</button>
                 </div>
             </ContainerModal>
         </Modal>
@@ -582,12 +803,12 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
                     {subclassToAdd && 
                         <div className='subclassItensDetails'>
                             <div className='subclassTitle'>{subclassToAdd?.data.name}</div>
-                            <div className='subclassDescription'>{subclassToAdd?.data.description}</div>
+                            <div className='subclassDescription' dangerouslySetInnerHTML={{ __html: subclassToAdd?.data.description ?? "" }} />
                             <div className='subclassskills'>
                                 {subclassToAdd?.data.habilities.map((i, keyI) => (
                                     <div className='subclassskillsItens' key={keyI}>
                                         <p>Nível {i.level} - {i.name}</p>
-                                        {i.description}
+                                        <div className='detailSub' dangerouslySetInnerHTML={{ __html: i.description ?? "" }} />
                                     </div>
                                 ))}
                             </div>
@@ -597,7 +818,7 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
                 <div className='buttons'>
                     <button className={`${!subclassToAdd && 'disabled'}`} onClick={() => {
                         addSubclass();
-                    }}>Adicionar</button>
+                    }}>Selecionar</button>
                 </div>
             </ContainerModal>
         </Modal>
@@ -608,7 +829,7 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
                 <div className='title'>
                     <p>Selecione suas perícias</p>
                     {(charcater?.data.unlock?.perkPoints ?? 0) > 0 && <>
-                        <span>Você tem {charcater?.data.unlock?.perkPoints} pontos restantes de perícia.</span>
+                        <span>Você tem {(charcater?.data.unlock?.perkPoints ?? 0) - perksToUpgrade.length} pontos restantes de perícia.</span>
                     </>}
                 </div>
                 <div className='perks'>
@@ -669,7 +890,12 @@ const SheetDetails = ({ charcater, campain, skills, onClose, isToCloseSheet, ski
                 <div className='buttons buttonsperk'>
                     <button className='cancel'>Cancelar</button>
                     <button onClick={() => {
-                        updatePerks();
+                        if(charcater?.data?.unlock?.perkPoints)
+                            if(charcater?.data?.unlock?.perkPoints > perksToUpgrade.length) {
+                                toast.error("Você precisa atribuitr todos os pontos de perícia.");
+                            } else {
+                                updatePerks();
+                            }
                     }}>Salvar</button>
                 </div>
             </ContainerModal>

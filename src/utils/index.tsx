@@ -30,7 +30,6 @@ export const uploadImage = async (file: File, path: string): Promise<uploadImage
   
       const downloadURL = await getDownloadURL(snapshot.ref);
   
-      console.log('Upload completo! URL da imagem:', downloadURL);
       return {
         url: downloadURL
       };
@@ -143,16 +142,16 @@ export const uploadImage = async (file: File, path: string): Promise<uploadImage
     const beforeBasic = character.data.basics;
 
     const newLife = {
-      max: character.data.basics.life.max + (classe.data.life.perLevel + (character.data.VIG * 2)),
-      actual: character.data.basics.life.actual + (classe.data.life.perLevel + (character.data.VIG * 2))
+      max: character.data.basics.life.max + (classe.data.life.perLevel + ((character.data.VIG > 0 ? character.data.VIG : 0) * 2)),
+      actual: character.data.basics.life.actual + (classe.data.life.perLevel + (character.data.VIG > 0 ? character.data.VIG : 0) * 2)
     }
     const newSanity = {
       max: character.data.basics.sanity.max + classe.data.sanity.perLevel,
       actual: character.data.basics.sanity.actual + classe.data.sanity.perLevel
     }
     const newPE = {
-      max: character.data.basics.pe.max + (classe.data.pe.perLevel + (character.data.PRE * 3)),
-      actual: character.data.basics.pe.actual + (classe.data.pe.perLevel + (character.data.PRE * 3))
+      max: character.data.basics.pe.max + (classe.data.pe.perLevel + ((character.data.PRE > 0 ? character.data.PRE : 0) * 3)),
+      actual: character.data.basics.pe.actual + (classe.data.pe.perLevel + (character.data.PRE > 0 ? character.data.PRE : 0) * 3)
     }
 
     const basicsNew = {
@@ -209,6 +208,10 @@ export const uploadImage = async (file: File, path: string): Promise<uploadImage
       break;
       case 4:
         //ataque especial
+        messages.push({
+          title: "Habilidade de classe",
+          description: "Sua habilidade especial de classe agora tem uma melhora, leia a descrição para mais informações!",
+        });
       break;
       case 5:
         //poder combatente
@@ -239,14 +242,18 @@ export const uploadImage = async (file: File, path: string): Promise<uploadImage
       break;
       case 9:
         //aumento de atributo, versalidade
-        newUnlock = getUnlockNew(character.data.unlock, ["attributePoints"], 1);
+        newUnlock = getUnlockNew(character.data.unlock, ["attributePoints"], 2);
         messages.push({
           title: "Ponto de atributo",
-          description: "Você pode atribuir mais um ponto entre os atrubutos!",
+          description: "Você pode atribuir mais dois pontos entre os atributos!",
         });
       break;
       case 10:
         //ataque especial
+        messages.push({
+          title: "Habilidade de classe",
+          description: "Sua habilidade especial de classe agora tem uma melhora, leia a descrição para mais informações!",
+        });
       break;
       case 11:
         //poder combatente
@@ -277,14 +284,18 @@ export const uploadImage = async (file: File, path: string): Promise<uploadImage
       break;
       case 15:
         //aumento de atributo
-        newUnlock = getUnlockNew(character.data.unlock, ["attributePoints"], 1);
+        newUnlock = getUnlockNew(character.data.unlock, ["attributePoints"], 2);
         messages.push({
           title: "Ponto de atributo",
-          description: "Você pode atribuir mais um ponto entre os atrubutos!",
+          description: "Você pode atribuir mais dois pontos entre os atrubutos!",
         });
       break;
       case 16:
         //ataque especial
+        messages.push({
+          title: "Habilidade de classe",
+          description: "Sua habilidade especial de classe agora tem uma melhora, leia a descrição para mais informações!",
+        });
       break;
       case 17:
         //poder combatente

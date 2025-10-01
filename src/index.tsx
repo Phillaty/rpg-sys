@@ -5,6 +5,8 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 
 import Home from './routes/Home';
 import Login from './routes/LogIn&SigIn/Login';
@@ -23,23 +25,29 @@ const root = ReactDOM.createRoot(
 
 root.render(
   <React.StrictMode>
-    <HashRouter>
-      <Routes>
-        <Route path="/" element={<Navigate to="/login" />} />
-        <Route path="/" element={<App />}>
-          <Route path="home" element={<Home />} />
-          <Route path="myAccount" element={<MyAccount />} />
-          <Route path="campain" element={<Campain />} />
-          <Route path="campain/sheet/create" element={<SheetCreation />} />
-          <Route path="master/campain/create" element={<CreateCampain />} />
-          <Route path="master/campain/edit" element={<CampainEdit />} />
-          <Route path="master/campain/play" element={<CampainPlay />} />
-          <Route path="help" element={<Help />} />
-        </Route>
-        <Route path="/login" element={<Login />} />
-        <Route path="/cadastro" element={<CreateAccount />} />
-      </Routes>
-    </HashRouter>
+    <AuthProvider>
+      <HashRouter>
+        <Routes>
+          <Route path="/" element={<Navigate to="/login" />} />
+          <Route path="/" element={
+            <ProtectedRoute>
+              <App />
+            </ProtectedRoute>
+          }>
+            <Route path="home" element={<Home />} />
+            <Route path="myAccount" element={<MyAccount />} />
+            <Route path="campain" element={<Campain />} />
+            <Route path="campain/sheet/create" element={<SheetCreation />} />
+            <Route path="master/campain/create" element={<CreateCampain />} />
+            <Route path="master/campain/edit" element={<CampainEdit />} />
+            <Route path="master/campain/play" element={<CampainPlay />} />
+            <Route path="help" element={<Help />} />
+          </Route>
+          <Route path="/login" element={<Login />} />
+          <Route path="/cadastro" element={<CreateAccount />} />
+        </Routes>
+      </HashRouter>
+    </AuthProvider>
   </React.StrictMode>
 );
 

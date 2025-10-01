@@ -16,6 +16,12 @@ export const Container = styled.div`
         width: 100%;
     }
 
+    .mainOrigin {
+        > div {
+            margin-top: 0 !important;
+        }
+    }
+
     .mainContainer {
         width: 100%;
         display: flex;
@@ -37,7 +43,7 @@ export const Container = styled.div`
 
             .top {
                 text-align: center;
-                margin-bottom: 16px;
+                margin-bottom: 8px;
             }
 
             .title {
@@ -47,6 +53,11 @@ export const Container = styled.div`
             .description {
                 font-size: 14px;
                 color: gray;
+            }
+
+            .powerDescription {
+                max-height: 120px;
+                overflow: auto;
             }
 
             .buttons {
@@ -187,13 +198,13 @@ export const Container = styled.div`
                 width: 32.9%;
                 font-weight: 600;
 
-                p {
+                .p {
                     font-size: 14px;
                     font-weight: 400;
                     margin-bottom: 4px;
                 }
 
-                span {
+                .span {
                     font-weight: 500;
                     font-size: 12px;
                     color: gray;
@@ -266,9 +277,27 @@ export const Container = styled.div`
             }
         }
 
+        .buttonTips {
+            background-color: transparent;
+            border: 1px solid gray;
+            color: gray;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 8px;
+            margin-bottom: 8px;
+
+            &:hover {
+                background-color: #737ad3;
+                color: white;
+            }
+        }
+
         .skillsDetail {
             text-align: center;
             margin: 16px 0 16px 0;
+            font-size: 18px;
+            font-weight: 600;
         }
 
         .attributes {
@@ -276,11 +305,12 @@ export const Container = styled.div`
             flex-wrap: wrap;
             justify-content: center;
             gap: 16px;
-
             .item {
                 border: 1px solid #00000030;
                 padding: 8px;
                 border-radius: 8px;
+                background: #343493;
+                color: white;
                 p {
                     text-align: center;
                 }
@@ -294,8 +324,16 @@ export const Container = styled.div`
 
                 .plus, .minus {
                     padding: 4px;
-                    font-size: 18px;
+                    font-size: 24px;
                     cursor: pointer;
+                }
+
+                .minus {
+                    color: #4caf50;
+                }
+
+                .plus {
+                    color: #f44336;
                 }
 
                 .num {

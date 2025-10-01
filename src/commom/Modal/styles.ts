@@ -37,6 +37,32 @@ export const ModalContainer = styled.div`
 
     animation: 0.2s ${fadeIn} forwards;
 
+    .contentModalCustom {
+        background-color: white;
+        padding: 16px;
+        border-radius: 4px;
+        max-height: 80vh;
+        overflow-y: auto;
+        min-width: 300px;
+        max-width: 90vw;
+        cursor: auto;
+
+        .list {
+
+        }
+
+        .title {
+          color: #333;
+          font-weight: 600;
+          font-size: 18px;
+          margin-bottom: 12px;  
+        }
+    }
+
+    .isMinWidth > div {
+      min-width: 500px;
+    }
+
     > div {
       padding: 0;
       margin: 0;
@@ -45,6 +71,11 @@ export const ModalContainer = styled.div`
       cursor: auto;
 
       animation: 0.2s ${fadeInScale} forwards;
+
+      > div {
+        max-height: 100vh;
+        overflow: auto;
+      }
     }
 
     .close {
@@ -64,7 +95,7 @@ export const ModalContainer = styled.div`
       }
       
       > div {
-        height: 90vh;
+        /* height: 90vh; */
         display: flex;
         flex-direction: column;
         

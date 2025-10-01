@@ -185,7 +185,7 @@ export const Container = styled.div`
     @media screen and (max-width: 800px){
         flex-direction: column;
         width: 99vw;
-        height: 100%;
+        height: 90vh;
         overflow: scroll;
         overflow-x: hidden;
         
@@ -232,5 +232,12 @@ export const ContainerLore = styled.div`
 
     .lore {
         
+    }
+
+    @media screen and (max-width: 800px){
+        width: 99vw;
+        height: 90vh;
+        overflow: scroll;
+        overflow-x: hidden;
     }
 `

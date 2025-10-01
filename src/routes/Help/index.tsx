@@ -32,7 +32,7 @@ const Help = () => {
                     </h3>
                     <h3>
                         - As pericias podem ser treinadas até 3 vezes, se tornando <u>treinado</u>, <u>experiente</u> e <u>veterano</u>, 
-                        cada nivel você recebe +1 como modificador adicional na rolagem da perícia.
+                        cada nivel você recebe +2 {'|'} +4 {'|'} +6 como modificador adicional na rolagem da perícia.
                     </h3>
                     <h3>
                         - Os classicos críticos são automáticos, o 1 no dado é erro critico e algo negativo acontece, o 20 no dado é sucesso crítico se o que está tentando fazer for 
