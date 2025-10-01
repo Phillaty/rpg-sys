@@ -71,6 +71,11 @@ export const ModalContainer = styled.div`
       cursor: auto;
 
       animation: 0.2s ${fadeInScale} forwards;
+
+      > div {
+        max-height: 100vh;
+        overflow: auto;
+      }
     }
 
     .close {

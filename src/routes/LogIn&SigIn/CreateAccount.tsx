@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import {db} from '../../firebase/firebase';
+import {auth, db} from '../../firebase/firebase';
 
 import { collection, addDoc, doc, getDoc, query, getDocs, where, updateDoc, arrayUnion } from 'firebase/firestore';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -9,6 +9,7 @@ import { toast, ToastContainer } from 'react-toastify';
 
 import snip from '../../imgs/ssss.png';
 import { encrypt } from '../../crypt';
+import { signInAnonymously } from 'firebase/auth';
 
 type formData = {
     login: string,
@@ -98,6 +99,9 @@ type inviteType = {
             password: encryptedPassword
         }).then(async (item) => {
             toast.success("Conta criada! aguarde...")
+
+            await signInAnonymously(auth);
+            
             localStorage.setItem('user', encrypt(JSON.stringify({
                 name: formData.name,
                 rule: formData.rule,

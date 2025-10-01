@@ -82,6 +82,56 @@ const SheetDetails = ({ charcater, isAdmin, campain, skills, onClose, isToCloseS
         }
     }, [skillsAll, skills]);
 
+    const investigateSkillRequirement = (hability: habilityDataType): boolean => {
+        if(!hability.data.require) return false;
+        if (!hability.data.require.some((i) => i.toUpperCase().includes("TREINADO"))) return true;
+
+        const isOr = hability.data.require?.some((j) => j.toUpperCase().includes(" OU "));
+
+        const isAllValid = skillsAll?.filter((i) => {
+            const str = i.name.toUpperCase();
+            return hability.data.require?.some((j) => j.toUpperCase().includes(str));
+        });
+
+        if(isOr) {
+            return isAllValid.some((i) => skills.trained?.some((j) => j.name === i.name));
+        } else {
+            return isAllValid.every((i) => skills.trained?.some((j) => j.name === i.name));
+        }
+    }
+
+    const investigateRequirementAtribute = (hability: habilityDataType): boolean => {
+
+        if(!hability.data.require) return true;
+
+        const hasAtribute = hability?.data?.require?.some((i) => {
+            const str = i.toUpperCase();
+
+            if (str.includes('AGI') || str.includes('INT') || str.includes('VIG') || str.includes('PRE') || str.includes('FOR')) {
+                return true;
+            }
+
+            return false;
+        });
+
+        if (!hasAtribute) return true;
+
+        type AttributeKey = 'AGI' | 'INT' | 'VIG' | 'PRE' | 'FOR';
+
+        for (const req of hability.data.require) {
+            const match = req.match(/(AGI|INT|VIG|PRE|FOR)\s*(\d+)/i);
+            if (match) {
+                const attr = match[1].toUpperCase() as AttributeKey;
+                const value = parseInt(match[2], 10);
+                const atribute = charcater?.data[attr];
+                if ((atribute ?? 0) < value) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
     useEffect(() => {
         if (charcater && habilities) {
             const habilitiesFind = habilities?.filter((i) => charcater?.data?.hability?.some((j) => j === i?.id));
@@ -135,7 +185,6 @@ const SheetDetails = ({ charcater, isAdmin, campain, skills, onClose, isToCloseS
         if (habilityToAdd) {
             handleCloseHabilityModal();
             const userDocRef = doc(db, "character", charcater?.id ?? '');
-
             await updateDoc(userDocRef, {
                 hability: arrayUnion(habilityToAdd.id),
                 unlock: {
@@ -157,6 +206,13 @@ const SheetDetails = ({ charcater, isAdmin, campain, skills, onClose, isToCloseS
 
             await updateDoc(userDocRef, {
                 habilityTranscended: arrayUnion(habilityTranscendedToAdd.id),
+                basics: {
+                    ...charcater?.data.basics,
+                    sanity: {
+                        max: charcater?.data.basics.sanity.max ? charcater?.data.basics.sanity.max - (classChar?.data.sanity.perLevel ?? 0) : charcater?.data.basics.sanity.max,
+                        actual: charcater?.data.basics.sanity.actual ? charcater?.data.basics.sanity.actual - (classChar?.data.sanity.perLevel ?? 0) : charcater?.data.basics.sanity.actual,
+                    }
+                },
                 unlock: {
                     ...charcater?.data.unlock,
                     habilityPoints: (charcater?.data?.unlock?.habilityPoints ?? 0) - 1
@@ -566,7 +622,7 @@ const SheetDetails = ({ charcater, isAdmin, campain, skills, onClose, isToCloseS
                                     <div className='item' key={key}>
                                         <p className='name'>
                                             <DarkModeIcon style={{fontSize: '16px', marginRight: '8px'}} />
-                                            {item.data.name} aaaaaaaa
+                                            {item.data.name}
                                             {item?.data?.element?.name && (() => {
                                                 const elementData = elements.find(el => el.id === item.data.element?.id);
                                                 const elementColors = elementData?.data.colors;
@@ -666,7 +722,14 @@ const SheetDetails = ({ charcater, isAdmin, campain, skills, onClose, isToCloseS
                 </div>
                 <div className='buttons'>
                     <button className={`${!habilityToAdd && 'disabled'}`} onClick={() => {
-                        addHability();
+
+                        if(habilityToAdd && investigateRequirementAtribute(habilityToAdd) && investigateSkillRequirement(habilityToAdd)) {
+                            toast.success("Habilidade adicionada com sucesso!");
+                            addHability();
+                        } else {
+                            toast.error("Você não preenche os requisitos para essa habilidade.");
+                        }
+                        
                     }}>Adicionar</button>
                 </div>
             </ContainerModal>

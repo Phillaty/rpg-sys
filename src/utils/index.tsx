@@ -208,6 +208,10 @@ export const uploadImage = async (file: File, path: string): Promise<uploadImage
       break;
       case 4:
         //ataque especial
+        messages.push({
+          title: "Habilidade de classe",
+          description: "Sua habilidade especial de classe agora tem uma melhora, leia a descrição para mais informações!",
+        });
       break;
       case 5:
         //poder combatente
@@ -238,14 +242,18 @@ export const uploadImage = async (file: File, path: string): Promise<uploadImage
       break;
       case 9:
         //aumento de atributo, versalidade
-        newUnlock = getUnlockNew(character.data.unlock, ["attributePoints"], 1);
+        newUnlock = getUnlockNew(character.data.unlock, ["attributePoints"], 2);
         messages.push({
           title: "Ponto de atributo",
-          description: "Você pode atribuir mais um ponto entre os atrubutos!",
+          description: "Você pode atribuir mais dois pontos entre os atributos!",
         });
       break;
       case 10:
         //ataque especial
+        messages.push({
+          title: "Habilidade de classe",
+          description: "Sua habilidade especial de classe agora tem uma melhora, leia a descrição para mais informações!",
+        });
       break;
       case 11:
         //poder combatente
@@ -276,14 +284,18 @@ export const uploadImage = async (file: File, path: string): Promise<uploadImage
       break;
       case 15:
         //aumento de atributo
-        newUnlock = getUnlockNew(character.data.unlock, ["attributePoints"], 1);
+        newUnlock = getUnlockNew(character.data.unlock, ["attributePoints"], 2);
         messages.push({
           title: "Ponto de atributo",
-          description: "Você pode atribuir mais um ponto entre os atrubutos!",
+          description: "Você pode atribuir mais dois pontos entre os atrubutos!",
         });
       break;
       case 16:
         //ataque especial
+        messages.push({
+          title: "Habilidade de classe",
+          description: "Sua habilidade especial de classe agora tem uma melhora, leia a descrição para mais informações!",
+        });
       break;
       case 17:
         //poder combatente
