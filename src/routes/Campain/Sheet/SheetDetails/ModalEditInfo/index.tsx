@@ -42,7 +42,7 @@ const EditInfo = ({charcater, toast}: prop) => {
         }
 
         const dataToUp = {
-            img: urlImage,
+            img: urlImage ?? "",
             name: form.name,
             age: form.age ?? 0,
             lore: form.lore,
@@ -118,7 +118,7 @@ const EditInfo = ({charcater, toast}: prop) => {
                         }} />
                     </div>
                     <div className='input'>
-                        <TextField id="standard-basic" size='small' type='number' label="Nome" variant="filled" inputMode='numeric' value={form.age} onChange={(e) => {
+                        <TextField id="standard-basic" size='small' type='number' label="Idade" variant="filled" inputMode='numeric' value={form.age} onChange={(e) => {
                             setForm({
                                 ...form,
                                 age: Number(e.target.value ?? ""),

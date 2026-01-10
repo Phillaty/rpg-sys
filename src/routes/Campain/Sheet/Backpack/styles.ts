@@ -17,6 +17,15 @@ export const Container = styled.div`
         }
     }
 
+    .overweight {
+        color: red;
+        font-weight: 600;
+
+        i {
+            color: darkred;
+        }
+    }
+
     .TabContainer {
         max-width: 400px;
         display: flex;

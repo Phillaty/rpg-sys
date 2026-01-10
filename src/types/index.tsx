@@ -229,6 +229,17 @@ export type habilityTranscendedElement = {
     name: string;
 }
 
+export type habilityCharUniqueType = {
+    title: string;
+    description: string;
+    characterId: string;
+}
+
+export type habilityCharUniqueDataType = {
+    id: string;
+    data: habilityCharUniqueType;
+}
+
 export type habilityTranscendedBuffType = {
     lifePerLevel?: buffLifeType;
     lifeTotal?: buffLifeType;

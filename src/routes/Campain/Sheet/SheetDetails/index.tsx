@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Container, ContainerLevel, ContainerModal } from './styles';
-import { avatarDataType, basicsCharType, campainType, classeDataType, elementDataType, habilityDataType, habilityTranscendedDataType, skillType, subclassDataType, unlockType } from '../../../../types';
+import { avatarDataType, basicsCharType, campainType, classeDataType, elementDataType, habilityCharUniqueDataType, habilityDataType, habilityTranscendedDataType, itemDataType, originDataType, skillType, subclassDataType, unlockType } from '../../../../types';
 import { skillFiltr, skillTy } from '../..';
 import logo from '../../../../imgs/profile-user-icon-2048x2048-m41rxkoe.png';
 import Modal from '../../../../commom/Modal';
@@ -27,9 +27,30 @@ type prop = {
     elements: elementDataType[];
     toast: any;
     isAdmin?: boolean;
+    originChar?: originDataType;
+    habilityUnique?: habilityCharUniqueDataType[];
+    itemsCharInventory?: itemDataType[];
 }
 
-const SheetDetails = ({ charcater, isAdmin, campain, skills, onClose, isToCloseSheet, skillsAll, habilities, habilityTranscended, subclasses, charSubclass, classChar, elements, toast }: prop) => {
+const SheetDetails = ({ 
+        charcater, 
+        isAdmin, 
+        campain, 
+        skills, 
+        onClose, 
+        isToCloseSheet, 
+        skillsAll, 
+        habilities, 
+        habilityTranscended, 
+        subclasses, 
+        charSubclass, 
+        classChar, 
+        elements, 
+        toast, 
+        originChar, 
+        habilityUnique, 
+        itemsCharInventory 
+    }: prop) => {
 
     const [showHabilityModal, setShowHabilityModal] = useState<boolean>(false);
     const [showHabilityTranscendedModal, setShowHabilityTranscendedModal] = useState<boolean>(false);
@@ -42,10 +63,13 @@ const SheetDetails = ({ charcater, isAdmin, campain, skills, onClose, isToCloseS
     const [habilityTranscendedToAdd, setHabilityTranscendedToAdd] = useState<habilityTranscendedDataType>();
     const [subclassToAdd, setSubclassToAdd] = useState<subclassDataType>();
 
+    
     const [habilitiesChar, setHabilitiesChar] = useState<habilityDataType[]>();
     const [habilitiesToAdd, setHabilitiesToAdd] = useState<habilityDataType[]>();
     const [habilityTranscendedChar, setHabilityTranscendedChar] = useState<habilityTranscendedDataType[]>();
     const [habilityTranscendedToAddList, setHabilityTranscendedToAddList] = useState<habilityTranscendedDataType[]>();
+
+    const [calcDefense, setCalcDefense] = useState<number>(0);
 
     const [perksToUpgrade, setPerksToUpgrade] = useState<skillTy[]>([]);
 
@@ -357,6 +381,24 @@ const SheetDetails = ({ charcater, isAdmin, campain, skills, onClose, isToCloseS
         }
     }
 
+    
+
+    useEffect(() => {
+        const armadures = itemsCharInventory?.filter((i) => i.data.type === 'armadure');
+
+        if (charcater) {
+            let baseDefense = charcater?.data.defense?.normal ?? 0;
+
+            if(armadures && armadures.length > 0) {
+                const armorBonus = armadures.reduce((acc, item) => acc + (item.data.name === 'Leve' ? 3 : 8), 0);
+                baseDefense += armorBonus;
+            }
+
+            setCalcDefense(baseDefense);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [charcater, itemsCharInventory])
+
     return (
         <>
         <Container isToCloseSheet={isToCloseSheet}>
@@ -415,16 +457,16 @@ const SheetDetails = ({ charcater, isAdmin, campain, skills, onClose, isToCloseS
                                 <p className='info'>{charcater?.data?.level}</p>
                             </div>
                             <div>
-                                <p className='label'>Idade</p>
-                                <p className='info'>{!!charcater?.data?.age ? charcater?.data.age : '-'}</p>
-                            </div>
-                            <div>
                                 <p className='label'>Classe</p>
                                 <p className='info'>{charcater?.data?.class?.title ?? ""}</p>
                             </div>
                             <div>
-                                <p className='label'>Lore</p>
-                                <p className='info'>{charcater?.data?.lore}</p>
+                                <p className='label'>Origem</p>
+                                <p className='info'>{originChar?.data.title ?? "-"}</p>
+                            </div>
+                            <div>
+                                <p className='label'>Defesa</p>
+                                <p className='info'>{calcDefense ?? "-"}</p>
                             </div>
                         </div>
                         <div className='button'>
@@ -610,7 +652,36 @@ const SheetDetails = ({ charcater, isAdmin, campain, skills, onClose, isToCloseS
                             {!habilitiesChar?.length && <small>Nenhuma habilidade ainda, jogue mais! :D</small>}
                         </div>
                     </div>
-                    
+                    {originChar && originChar?.data && <>
+                        <div className='hability'>
+                            <div className='title'>
+                                <p>Origem - {originChar.data.title}</p>
+                            </div>
+                            <div className='itens'>
+                                <div className='item'>
+                                    <p className='name'>Habilidade - {originChar.data.power?.name}</p>
+                                    <div className='detail'>{originChar.data.power?.description}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </>}
+
+                    {habilityUnique && habilityUnique.length > 0 && (
+                        <div className='hability'>
+                            <div className='title'>
+                                <p>Habilidades Únicas</p>
+                            </div>
+                            <div className='itens'>
+                                {habilityUnique?.map((item, key) => (
+                                    <div className='item' key={key}>
+                                        <p className='name'>{item.data.title}</p>
+                                        <div className='detail' dangerouslySetInnerHTML={{ __html: item?.data?.description ?? "" }} />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
                     {/* Seção de Habilidades Transcendidas */}
                     {habilityTranscendedChar && habilityTranscendedChar.length > 0 && (
                         <div className='habilityTranscended'>

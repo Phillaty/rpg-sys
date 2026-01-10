@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Container, ContainerHability, ContainerHealth, ContainerMagics, ContainerPassives } from './styles';
-import { alertType, avatarDataType, campainType, classeDataType, documentDataType, elementDataType, habilityDataType, habilityTranscendedDataType, itemDataType, magicDataType, rollModType, subclassDataType } from '../../../types';
+import { alertType, avatarDataType, campainType, classeDataType, documentDataType, elementDataType, habilityCharUniqueDataType, habilityDataType, habilityTranscendedDataType, itemDataType, magicDataType, originDataType, rollModType, subclassDataType } from '../../../types';
 import logo from '../../../imgs/profile-user-icon-2048x2048-m41rxkoe.png';
 import { skillFiltr, skillTy } from '..';
 import Roll from '../../../commom/ROLL';
@@ -65,7 +65,7 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
     const [magicModal, setMagicModal] = useState<boolean>(false);
 
     const [habilityModal, setHabilityModal] = useState<boolean>(false);
-    const [habilitySelected, setHabilitySelected] = useState<habilityDataType>();
+    const [habilitySelected, setHabilitySelected] = useState<habilityDataType | {data: {name: string; description: string;}}>();
 
     const [documentsModal, setDocumentsModal] = useState<boolean>(false);
     const [documentViewModal, setDocumentViewModal] = useState<boolean>(false);
@@ -91,6 +91,9 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
     const [alertsList, setAlertsList] = useState<alertType[]>([]);
 
     const [expanded, setExpanded] = React.useState<string | false>(false);
+
+    const [habilityUnique, setHabilitiesUnique] = useState<habilityCharUniqueDataType[]>([]);
+    const [originChar, setOriginChar] = useState<originDataType>();
 
     const handleChangeTagMagic =
         (panel: string) => (event: React.SyntheticEvent, isExpanded: boolean) => {
@@ -334,6 +337,32 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
         });
     }
 
+    const getOrigin = async () => {
+        const docRef = doc(db, 'origin', charcater?.data?.originId ?? "");
+    
+        onSnapshot(docRef, (querySnapshot) => {
+            const docData = {
+                id: querySnapshot.id,
+                data: querySnapshot.data(),
+            } as originDataType;
+            setOriginChar(docData);
+        });
+    }
+
+    const getHabilitiesUnique = async () => {
+        const p = query(collection(db, 'habilityCharUnique'), where("characterId", "==", charcater?.id ?? ""));
+
+        onSnapshot(p, (querySnapshot) => {
+            const docData = querySnapshot.docs.map(doc => ({
+                id: doc.id,
+                data: doc.data(),
+            })) as habilityCharUniqueDataType[];
+
+            const sorted = docData.sort((a, b) => a.data.title.localeCompare(b.data.title));
+            setHabilitiesUnique(sorted);
+        });
+    };
+
     const getMagics = async () => {
         const p = query(
             collection(db, 'magics'),
@@ -422,7 +451,15 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
     useEffect(() => {
         if(charcater && !!charcater?.data.magics?.length) {
             getMagics();
-        } 
+        }
+
+        if(charcater && charcater?.data?.originId) {
+            getOrigin();
+        }
+
+        if(charcater) {
+            getHabilitiesUnique();
+        }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [charcater])
@@ -821,8 +858,15 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                 {!!habilitiesChar?.length && 
                     <div className='habilities'>
                         <button className='passives' onClick={() => {setPassivesModal(true)}}>Ver passivas</button>
-                        <div className='habilityTitle'>Habilidades ativas <small>Clique para ver mais</small></div>
+                        <div className='habilityTitle'>Habilidades <small>Clique para ver mais</small></div>
                         <div className='habilityList'>
+                            {charcater?.data.originId && originChar?.data.power &&
+                                <div 
+                                    className='habilityItem' 
+                                    onClick={() => setHabilitySelected({data: {name: `${originChar.data.power?.name} - Origem`, description: originChar.data.power?.description ?? ''}})}>
+                                        {originChar?.data.power?.name}
+                                </div>
+                            }
                             {habilitiesChar?.map((item, key) => (
                                 <div className='habilityItem' key={key} onClick={() => setHabilitySelected(item)}>{item.data.name}</div>
                             ))}
@@ -882,6 +926,9 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                     classChar={classChar}
                     elements={elements}
                     toast={toast}
+                    originChar={originChar}
+                    habilityUnique={habilityUnique}
+                    itemsCharInventory={itemsCharInventory}
                 />
             }
             
@@ -901,7 +948,7 @@ const Sheet = ({ charcater, campain, skills, skillsAll }: prop) => {
                         <p>Descrição</p>
                         <span dangerouslySetInnerHTML={{ __html: habilitySelected.data.description.replace(/\n/g, '<br />') }} />
                     </div>
-                    {!!habilitySelected.data.buff?.modifyRoll?.length && 
+                    {'buff' in habilitySelected.data && !!habilitySelected.data.buff?.modifyRoll?.length && 
                         <div className='data'>
                             <p>Modificador de pericia ganho</p>
                             <span>

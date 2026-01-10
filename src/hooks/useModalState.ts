@@ -7,6 +7,7 @@ export interface ModalState {
   showPericiasModal: boolean;
   showHabilidadesModal: boolean;
   showHabilidadesTranscendidasModal: boolean;
+  showHabilidadesUnicasModal: boolean;
   showElementsModal: boolean;
   showInviteModal: boolean;
   showMagicPlayerModal: boolean;
@@ -29,6 +30,7 @@ export function useModalState() {
     showPericiasModal: false,
     showHabilidadesModal: false,
     showHabilidadesTranscendidasModal: false,
+    showHabilidadesUnicasModal: false,
     showElementsModal: false,
     showInviteModal: false,
     showMagicPlayerModal: false,
@@ -57,6 +59,7 @@ export function useModalState() {
       showPericiasModal: false,
       showHabilidadesModal: false,
       showHabilidadesTranscendidasModal: false,
+      showHabilidadesUnicasModal: false,
       showElementsModal: false,
       showInviteModal: false,
       showMagicPlayerModal: false,

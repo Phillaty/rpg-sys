@@ -50,7 +50,7 @@ const Backpack = ({itens, itensGeral, itensWeapon, itensArmadure, handleRollBack
         <>
         <Container>
             <div>
-            <p className='weight'><i className="fa-solid fa-weight-hanging"></i> Peso: {actualWheigh}/{wheight ?? 0}</p>
+            <p className={`weight ${actualWheigh > (wheight ?? 0) ? 'overweight' : ''}`}><i className="fa-solid fa-weight-hanging"></i> Peso: {actualWheigh}/{wheight ?? 0}</p>
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                 <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
                     <Tab label="Itens Gerais" {...a11yProps(0)} />

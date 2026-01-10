@@ -16,6 +16,7 @@ import Origens from './Origens';
 import Pericias from './Pericias';
 import Habilidades from './Habilidades';
 import HabilidadesTranscendidas from './HabilidadesTranscendidas';
+import HabilidadesUnicasPersonagem from './HabilidadesUnicasPersonagem';
 import { ToastContainer, toast } from 'react-toastify';
 import { getAlertsCampain } from '../../../utils';
 import { AppBar, Dialog, IconButton, Slide, Toolbar, Typography } from '@mui/material';
@@ -514,11 +515,20 @@ const CampainEdit = () => {
                                     </div>
                                     <div className='box'>
                                         <div>
-                                            <p className='name'>Hab. Transcendidas</p>
+                                            <p className='name'>Hab. Transc.</p>
                                             <p className='quantity'><i className="fa-solid fa-cube"></i> {habilityTranscended.length}</p>
                                         </div>
                                         <div>
                                             <button onClick={() => openModal('showHabilidadesTranscendidasModal')}>Editar</button>
+                                        </div>
+                                    </div>
+                                    <div className='box'>
+                                        <div>
+                                            <p className='name'>Hab. Únicas</p>
+                                            <p className='quantity'><i className="fa-solid fa-star"></i></p>
+                                        </div>
+                                        <div>
+                                            <button onClick={() => openModal('showHabilidadesUnicasModal')}>Editar</button>
                                         </div>
                                     </div>
                                 </div>
@@ -632,6 +642,9 @@ const CampainEdit = () => {
         </Modal>
         <Modal isMinWidth isOpen={modals.showHabilidadesTranscendidasModal} handleCloseModal={closeAllModals}>
             <HabilidadesTranscendidas toast={toast} campainId={campain?.id} elements={elements} habilityTranscended={habilityTranscended} characters={characters} perks={perks} />
+        </Modal>
+        <Modal isMinWidth isOpen={modals.showHabilidadesUnicasModal} handleCloseModal={closeAllModals}>
+            <HabilidadesUnicasPersonagem toast={toast} characters={characters} />
         </Modal>
         <Modal isMinWidth isOpen={modals.showElementsModal} handleCloseModal={closeAllModals}>
             <Elements toast={toast} elements={elements} />

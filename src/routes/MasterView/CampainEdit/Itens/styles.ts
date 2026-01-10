@@ -23,6 +23,10 @@ export const Container = styled.div`
         background-color: #d37373;
     }
 
+    .duplicate {
+        background-color: #28a745;
+    }
+
 
     .actions {
         display: flex;

@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { Container } from './styles';
 import { Chip, styled, Table, TableBody, TableCell, tableCellClasses, TableContainer, TableHead, TableRow, TextField } from '@mui/material';
 import Paper from '@mui/material/Paper';
-import { collection, onSnapshot, query, where } from 'firebase/firestore';
+import { addDoc, collection, deleteDoc, doc, onSnapshot, query, where } from 'firebase/firestore';
 import { db } from '../../../../firebase/firebase';
-import { avatarDataType, itemDataType, perkDataType, storeDataType } from '../../../../types';
+import { avatarDataType, itemDataType, itemType, perkDataType, storeDataType } from '../../../../types';
 import { useLocation } from 'react-router-dom';
 import ItemModal from './CreateUpdate';
 import Modal from '../../../../commom/Modal';
@@ -140,6 +140,47 @@ const Itens = ({toast, stores, perks, characters}: prop) => {
         setFilterPlayer([]);
     }
 
+    const handleDuplicateItem = async (item: itemDataType) => {
+        try {
+            // Criar uma cópia do item removendo o ID
+            const duplicatedItem: itemType = {
+                ...item.data,
+                name: `${item.data.name} (Cópia)`,
+                // Resetar posição para 'masterHold' para evitar conflitos
+                position: {
+                    type: 'masterHold',
+                    idGetter: ''
+                }
+            };
+
+            await addDoc(collection(db, 'item'), duplicatedItem);
+            toast.success('Item duplicado com sucesso!');
+        } catch (error) {
+            toast.error('Erro ao duplicar item!');
+            console.error('Error duplicating item:', error);
+        }
+    };
+
+    const handleDeleteItem = async (item: itemDataType) => {
+        // Confirmar exclusão com o usuário
+        const confirmDelete = window.confirm(
+            `Tem certeza que deseja excluir o item "${item.data.name}"?\n\nEsta ação não pode ser desfeita.`
+        );
+
+        if (!confirmDelete) {
+            return;
+        }
+
+        try {
+            // Excluir o documento do Firestore
+            await deleteDoc(doc(db, 'item', item.id));
+            toast.success('Item excluído com sucesso!');
+        } catch (error) {
+            toast.error('Erro ao excluir item!');
+            console.error('Error deleting item:', error);
+        }
+    };
+
     return (
         <>
         <Container>
@@ -231,11 +272,29 @@ const Itens = ({toast, stores, perks, characters}: prop) => {
                                 <StyledTableCell align="right">{row.data.category}</StyledTableCell>
                                 <StyledTableCell align="right">{row.data.weight}</StyledTableCell>
                                 <StyledTableCell align="right" className='actions'>
-                                    <button className='remove'>Excluir</button>
-                                    <button onClick={() => {
-                                        setSelectIten(row);
-                                        setOpenModalItem(true);
-                                    }}>Editar</button>
+                                    <button 
+                                        className='remove'
+                                        onClick={() => handleDeleteItem(row)}
+                                        title="Excluir item"
+                                    >
+                                        <i className="fa-solid fa-trash"></i> Excluir
+                                    </button>
+                                    <button 
+                                        onClick={() => {
+                                            setSelectIten(row);
+                                            setOpenModalItem(true);
+                                        }}
+                                        title="Editar item"
+                                    >
+                                        <i className="fa-solid fa-pen-to-square"></i> Editar
+                                    </button>
+                                    <button 
+                                        className='duplicate'
+                                        onClick={() => handleDuplicateItem(row)}
+                                        title="Duplicar item"
+                                    >
+                                        <i className="fa-solid fa-copy"></i> Duplicar
+                                    </button>
                                 </StyledTableCell>
                             </StyledTableRow>
                         ))}
